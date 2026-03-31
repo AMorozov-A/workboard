@@ -1,0 +1,288 @@
+{
+  "common": {
+    "notSpecified": "Not specified",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "resetFilters": "Reset filters",
+    "you": "You",
+    "languages": {
+      "ru": "RU",
+      "en": "EN"
+    }
+  },
+  "layout": {
+    "brand": "Freelance CRM",
+    "workspace": "Workspace",
+    "language": "Language",
+    "languageSelectLabel": "Choose app language",
+    "logout": "Log out",
+    "changePassword": "Change password",
+    "menu": {
+      "projects": "Projects"
+    }
+  },
+  "auth": {
+    "page": {
+      "titleLogin": "Sign in",
+      "titleRegister": "Create account",
+      "subtitle": "Sign in or create an account to access your projects.",
+      "tabLogin": "Sign in",
+      "tabRegister": "Register",
+      "modeSegmentAria": "Mode: sign in or register",
+      "switchToRegisterPrompt": "No account yet?",
+      "switchToLoginPrompt": "Already have an account?",
+      "goRegister": "Register",
+      "goLogin": "Sign in"
+    },
+    "form": {
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••",
+      "submit": "Sign in"
+    },
+    "registerForm": {
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "name": "Name (optional)",
+      "namePlaceholder": "e.g. Alex",
+      "password": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "passwordConfirmation": "Confirm password",
+      "passwordConfirmationPlaceholder": "Repeat your password",
+      "submit": "Create account"
+    },
+    "session": {
+      "checking": "Checking your session…"
+    },
+    "changePassword": {
+      "title": "Change password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "newPasswordConfirm": "Confirm new password",
+      "submit": "Save",
+      "successTitle": "Password updated",
+      "successDescription": "Use your new password the next time you sign in.",
+      "errors": {
+        "title": "Could not change password",
+        "wrongCurrent": "Current password is incorrect",
+        "validation": "Check your input: password must be at least 8 characters and fields must be filled in.",
+        "network": "Could not reach the server. Make sure the backend is running."
+      }
+    },
+    "validation": {
+      "email": "Enter a valid email",
+      "passwordMin": "Minimum 6 characters",
+      "passwordMin8": "At least 8 characters",
+      "passwordRequired": "Enter your password",
+      "passwordConfirmationRequired": "Confirm your password",
+      "passwordMismatch": "Passwords do not match",
+      "invalidCredentials": "Invalid email or password"
+    },
+    "errors": {
+      "loginFailed": "Sign-in failed",
+      "registerFailed": "Registration failed",
+      "emailTaken": "This email is already registered",
+      "network": "Cannot reach the server. Make sure the backend is running and the API URL is correct.",
+      "projectsLoadFailed": "Could not load projects",
+      "projectsLoadFailedDescription": "Try again or check your connection to the server."
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "description": "Keep all client projects, current statuses, and upcoming deadlines at hand.",
+    "actions": {
+      "create": "Create project"
+    },
+    "modal": {
+      "title": "New project",
+      "submit": "Create"
+    },
+    "form": {
+      "name": "Project name",
+      "namePlaceholder": "For example: CRM for an agency",
+      "keyPrefix": "Key prefix",
+      "keyPrefixPlaceholder": "e.g. proj or crm",
+      "keyPrefixHint": "Generates keys like prefix-1, prefix-2 (unique among your projects). Default: proj.",
+      "client": "Client",
+      "clientPlaceholder": "For example: Bright Agency",
+      "status": "Status",
+      "budget": "Budget",
+      "budgetPlaceholder": "For example: 120000",
+      "deadline": "Deadline",
+      "deadlinePlaceholder": "Select a date",
+      "description": "Short description",
+      "descriptionPlaceholder": "Briefly describe the project goal, context, and expected outcome"
+    },
+    "validation": {
+      "nameRequired": "Enter a project name",
+      "keyPrefix": "2–30 characters: lowercase Latin letters, digits, hyphen; must start with a letter",
+      "clientRequired": "Enter a client name",
+      "budgetNonNegative": "Budget cannot be negative"
+    },
+    "notifications": {
+      "createSoon": "Project creation is coming next.",
+      "createdTitle": "Project created",
+      "createdDescription": "The new project already appears in the list and in the workspace menu.",
+      "createErrorTitle": "Failed to create project",
+      "createErrorDescription": "Please try again. The form data is still there."
+    },
+    "loading": {
+      "title": "Loading projects",
+      "description": "Preparing the project list and the latest data."
+    },
+    "error": {
+      "title": "Failed to load the project list",
+      "description": "Check your connection and try again. If the error persists, refresh the page later."
+    },
+    "empty": {
+      "title": "There are no projects yet",
+      "description": "Once the first project appears, you will be able to quickly jump to its details, tasks, and deadlines."
+    },
+    "table": {
+      "empty": "No projects found",
+      "columns": {
+        "key": "Key",
+        "project": "Project",
+        "client": "Client",
+        "status": "Status",
+        "deadline": "Deadline"
+      },
+      "descriptionFallback": "Project description will appear soon."
+    },
+    "status": {
+      "active": "In progress",
+      "paused": "Paused",
+      "done": "Completed",
+      "empty": "No status"
+    }
+  },
+  "projectDetails": {
+    "loadingTitle": "Loading project",
+    "loadingDescription": "Fetching project data from the server.",
+    "notFoundTitle": "Project not found",
+    "notFoundDescription": "There is no project with this id or it is not available.",
+    "fields": {
+      "key": "Key",
+      "client": "Client",
+      "status": "Status",
+      "budget": "Budget",
+      "deadline": "Deadline"
+    },
+    "tabs": {
+      "tasks": "Tasks",
+      "timeline": "Project timeline"
+    },
+    "timeline": {
+      "emptyTitle": "No project events yet",
+      "emptyDescription": "Important milestones and agreements will appear here as the work evolves."
+    },
+    "tasksSection": {
+      "title": "Project tasks",
+      "description": "Manage tasks, deadlines, and priorities in one place.",
+      "allStatuses": "All statuses",
+      "allPriorities": "All priorities",
+      "loadingTitle": "Loading project tasks",
+      "loadingDescription": "Preparing the task list, statuses, and upcoming deadlines.",
+      "errorTitle": "Failed to load tasks",
+      "errorDescription": "Try refreshing the data again. If the error persists, come back to the project later.",
+      "emptyTitle": "This project has no tasks yet",
+      "emptyDescription": "Create the first task to capture the next step and keep the work under control.",
+      "filteredEmptyTitle": "No tasks match the selected filters",
+      "filteredEmptyDescription": "Reset the filters or choose different parameters to see the project tasks again.",
+      "descriptionFallback": "Task description has not been added yet.",
+      "columns": {
+        "key": "Key",
+        "task": "Task",
+        "status": "Status",
+        "priority": "Priority",
+        "deadline": "Deadline"
+      }
+    }
+  },
+  "tasks": {
+    "actions": {
+      "create": "Create task",
+      "addComment": "Add comment"
+    },
+    "status": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "review": "In review",
+      "done": "Done"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "labels": {
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "design": "Design"
+    },
+    "form": {
+      "title": "Task title",
+      "description": "Description",
+      "status": "Status",
+      "priority": "Priority",
+      "deadline": "Deadline",
+      "labels": "Labels",
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "titlePlaceholder": "For example: Prepare screen structure",
+      "descriptionPlaceholder": "Add context, agreements, and important details",
+      "deadlinePlaceholder": "Select a date",
+      "labelsPlaceholder": "Choose one or more labels",
+      "descriptionEmpty": "Add a description",
+      "titleEmpty": "Untitled"
+    },
+    "modal": {
+      "title": "New task",
+      "submit": "Create task"
+    },
+    "drawer": {
+      "title": "Task card",
+      "descriptionSection": "Description",
+      "detailsSection": "Details",
+      "tabs": {
+        "comments": "Comments",
+        "history": "History"
+      },
+      "commentsEmpty": "No comments yet",
+      "commentsEmptyTitle": "This task has no comments yet",
+      "commentsEmptyDescription": "Add the first comment to capture an agreement, client request, or a note for yourself.",
+      "commentsEmptyAction": "Add the first comment",
+      "commentPlaceholder": "Write a comment to capture a decision or agreement",
+      "timelineCreated": "Task created",
+      "timelineStatus": "Current status",
+      "timelineUpdated": "Last updated",
+      "historyEmptyTitle": "Task history is empty",
+      "historyEmptyDescription": "Visible task updates and milestones will appear here once the work starts moving.",
+      "historyEmptyAction": "Add the first comment",
+      "emptyTitle": "No task selected",
+      "emptyDescription": "Select a task from the project list to open the card and edit its details."
+    },
+    "historyEvent": {
+      "commentAddedTitle": "Comment added",
+      "commentAddedDescription": "A new agreement or note was saved in the activity feed.",
+      "statusChangedTitle": "Task status updated",
+      "deadlineChangedTitle": "Deadline updated"
+    },
+    "notifications": {
+      "createdTitle": "Task created",
+      "createdDescription": "Open it from the list and add details if needed.",
+      "createErrorTitle": "Failed to create task",
+      "createErrorDescription": "Please try again.",
+      "updatedTitle": "Changes saved",
+      "updatedDescription": "The task card has been updated.",
+      "updateErrorTitle": "Failed to save task",
+      "updateErrorDescription": "Check your connection and try again."
+    },
+    "validation": {
+      "titleRequired": "Enter a title"
+    }
+  }
+}

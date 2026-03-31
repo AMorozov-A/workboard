@@ -1,0 +1,49 @@
+# Зависимости (в каждом пакете свой node_modules)
+node_modules/
+**/node_modules/
+
+# Сборка
+dist/
+**/dist/
+
+# Локальные секреты (шаблоны .env.example остаются в git)
+.env
+.env.local
+.env.*.local
+
+# Vite (кэш в корне при некоторых настройках)
+.vite/
+
+# Покрытие и отчёты тестов
+coverage/
+**/coverage/
+.nyc_output/
+
+# Playwright (корень и пакет e2e/)
+playwright-report/
+test-results/
+blob-report/
+e2e/test-results/
+e2e/playwright-report/
+
+# SQLite — дев-файлы БД (см. также backend/.gitignore)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# IDE / ОС
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Cursor: не коммитим планы и локальные настройки; правила в .cursor/rules/ — в репозитории
+.cursor/plans/
+.cursor/settings.json
+
+# Логи
+*.log
+npm-debug.log*
+pnpm-debug.log*

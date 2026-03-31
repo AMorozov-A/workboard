@@ -1,0 +1,288 @@
+{
+  "common": {
+    "notSpecified": "Не указан",
+    "close": "Закрыть",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "retry": "Повторить",
+    "resetFilters": "Сбросить фильтры",
+    "you": "Вы",
+    "languages": {
+      "ru": "RU",
+      "en": "EN"
+    }
+  },
+  "layout": {
+    "brand": "Freelance CRM",
+    "workspace": "Рабочая область",
+    "language": "Язык",
+    "languageSelectLabel": "Выбор языка интерфейса",
+    "logout": "Выйти",
+    "changePassword": "Сменить пароль",
+    "menu": {
+      "projects": "Проекты"
+    }
+  },
+  "auth": {
+    "page": {
+      "titleLogin": "Вход",
+      "titleRegister": "Регистрация",
+      "subtitle": "Войдите или создайте учётную запись для доступа к проектам.",
+      "tabLogin": "Войти",
+      "tabRegister": "Зарегистрироваться",
+      "modeSegmentAria": "Режим: вход или регистрация",
+      "switchToRegisterPrompt": "Ещё нет аккаунта?",
+      "switchToLoginPrompt": "Уже есть аккаунт?",
+      "goRegister": "Зарегистрироваться",
+      "goLogin": "Войти"
+    },
+    "form": {
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Пароль",
+      "passwordPlaceholder": "••••••",
+      "submit": "Войти"
+    },
+    "registerForm": {
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "name": "Имя (необязательно)",
+      "namePlaceholder": "Например: Алексей",
+      "password": "Пароль",
+      "passwordPlaceholder": "Не менее 8 символов",
+      "passwordConfirmation": "Повтор пароля",
+      "passwordConfirmationPlaceholder": "Повторите пароль",
+      "submit": "Создать аккаунт"
+    },
+    "session": {
+      "checking": "Проверяем сессию…"
+    },
+    "changePassword": {
+      "title": "Смена пароля",
+      "currentPassword": "Текущий пароль",
+      "newPassword": "Новый пароль",
+      "newPasswordConfirm": "Подтвердите новый пароль",
+      "submit": "Сохранить",
+      "successTitle": "Пароль обновлён",
+      "successDescription": "Используйте новый пароль при следующем входе.",
+      "errors": {
+        "title": "Не удалось сменить пароль",
+        "wrongCurrent": "Неверный текущий пароль",
+        "validation": "Проверьте ввод: пароль не короче 8 символов, поля заполнены.",
+        "network": "Нет соединения с сервером. Проверьте, что backend запущен."
+      }
+    },
+    "validation": {
+      "email": "Введите корректный email",
+      "passwordMin": "Минимум 6 символов",
+      "passwordMin8": "Минимум 8 символов",
+      "passwordRequired": "Введите пароль",
+      "passwordConfirmationRequired": "Подтвердите пароль",
+      "passwordMismatch": "Пароли не совпадают",
+      "invalidCredentials": "Неверный email или пароль"
+    },
+    "errors": {
+      "loginFailed": "Не удалось войти",
+      "registerFailed": "Не удалось зарегистрироваться",
+      "emailTaken": "Этот email уже зарегистрирован",
+      "network": "Нет соединения с сервером. Проверьте, что backend запущен и адрес API указан верно.",
+      "projectsLoadFailed": "Не удалось загрузить проекты",
+      "projectsLoadFailedDescription": "Повторите попытку или проверьте соединение с сервером."
+    }
+  },
+  "projects": {
+    "title": "Проекты",
+    "description": "Держите под рукой все клиентские проекты, текущие статусы и ближайшие сроки.",
+    "actions": {
+      "create": "Создать проект"
+    },
+    "modal": {
+      "title": "Новый проект",
+      "submit": "Создать"
+    },
+    "form": {
+      "name": "Название проекта",
+      "namePlaceholder": "Например: CRM для агентства",
+      "keyPrefix": "Префикс ключа",
+      "keyPrefixPlaceholder": "например: proj или crm",
+      "keyPrefixHint": "Будет сгенерирован ключ вида префикс-1, префикс-2 (уникально среди ваших проектов). По умолчанию: proj.",
+      "client": "Клиент",
+      "clientPlaceholder": "Например: Bright Agency",
+      "status": "Статус",
+      "budget": "Бюджет",
+      "budgetPlaceholder": "Например: 120000",
+      "deadline": "Дедлайн",
+      "deadlinePlaceholder": "Выберите дату",
+      "description": "Краткое описание",
+      "descriptionPlaceholder": "Коротко опишите цель проекта, контекст и ожидаемый результат"
+    },
+    "validation": {
+      "nameRequired": "Введите название проекта",
+      "keyPrefix": "2–30 символов: латиница в нижнем регистре, цифры и дефис, начинается с буквы",
+      "clientRequired": "Введите название клиента",
+      "budgetNonNegative": "Бюджет не может быть отрицательным"
+    },
+    "notifications": {
+      "createSoon": "Создание проекта появится на следующем шаге.",
+      "createdTitle": "Проект создан",
+      "createdDescription": "Новый проект уже появился в списке и доступен в рабочем меню.",
+      "createErrorTitle": "Не удалось создать проект",
+      "createErrorDescription": "Попробуйте ещё раз. Данные формы сохранены."
+    },
+    "loading": {
+      "title": "Загружаем проекты",
+      "description": "Подготавливаем список проектов и актуальные данные по ним."
+    },
+    "error": {
+      "title": "Не удалось загрузить список проектов",
+      "description": "Проверьте подключение и повторите попытку. Если ошибка сохранится, обновите страницу позже."
+    },
+    "empty": {
+      "title": "Пока нет ни одного проекта",
+      "description": "Когда появится первый проект, здесь можно будет быстро перейти к деталям, задачам и срокам."
+    },
+    "table": {
+      "empty": "Проекты не найдены",
+      "columns": {
+        "key": "Ключ",
+        "project": "Проект",
+        "client": "Клиент",
+        "status": "Статус",
+        "deadline": "Дедлайн"
+      },
+      "descriptionFallback": "Описание проекта скоро появится."
+    },
+    "status": {
+      "active": "В работе",
+      "paused": "На паузе",
+      "done": "Завершён",
+      "empty": "Без статуса"
+    }
+  },
+  "projectDetails": {
+    "loadingTitle": "Загружаем проект",
+    "loadingDescription": "Получаем данные проекта с сервера.",
+    "notFoundTitle": "Проект не найден",
+    "notFoundDescription": "Проект с таким идентификатором отсутствует или недоступен.",
+    "fields": {
+      "key": "Ключ",
+      "client": "Клиент",
+      "status": "Статус",
+      "budget": "Бюджет",
+      "deadline": "Дедлайн"
+    },
+    "tabs": {
+      "tasks": "Задачи",
+      "timeline": "Хронология проекта"
+    },
+    "timeline": {
+      "emptyTitle": "Событий проекта пока нет",
+      "emptyDescription": "Когда появятся важные этапы и договорённости, они будут собраны здесь."
+    },
+    "tasksSection": {
+      "title": "Задачи проекта",
+      "description": "Управляйте текущими задачами, сроками и приоритетами в одном рабочем списке.",
+      "allStatuses": "Все статусы",
+      "allPriorities": "Все приоритеты",
+      "loadingTitle": "Загружаем задачи проекта",
+      "loadingDescription": "Подготавливаем список задач, статусы и ближайшие дедлайны.",
+      "errorTitle": "Не удалось загрузить задачи",
+      "errorDescription": "Попробуйте обновить данные ещё раз. Если ошибка повторится, вернитесь к проекту позже.",
+      "emptyTitle": "У этого проекта пока нет задач",
+      "emptyDescription": "Создайте первую задачу, чтобы зафиксировать следующий шаг и держать работу под контролем.",
+      "filteredEmptyTitle": "По выбранным фильтрам задач не найдено",
+      "filteredEmptyDescription": "Сбросьте фильтры или выберите другие параметры, чтобы снова увидеть задачи проекта.",
+      "descriptionFallback": "Описание задачи пока не добавлено.",
+      "columns": {
+        "key": "Ключ",
+        "task": "Задача",
+        "status": "Статус",
+        "priority": "Приоритет",
+        "deadline": "Дедлайн"
+      }
+    }
+  },
+  "tasks": {
+    "actions": {
+      "create": "Создать задачу",
+      "addComment": "Добавить комментарий"
+    },
+    "status": {
+      "todo": "К выполнению",
+      "in_progress": "В работе",
+      "review": "На проверке",
+      "done": "Готово"
+    },
+    "priority": {
+      "low": "Низкий",
+      "medium": "Средний",
+      "high": "Высокий"
+    },
+    "labels": {
+      "frontend": "Фронтенд",
+      "backend": "Бэкенд",
+      "design": "Дизайн"
+    },
+    "form": {
+      "title": "Название задачи",
+      "description": "Описание",
+      "status": "Статус",
+      "priority": "Приоритет",
+      "deadline": "Дедлайн",
+      "labels": "Метки",
+      "createdAt": "Создана",
+      "updatedAt": "Обновлена",
+      "titlePlaceholder": "Например: Подготовить структуру экрана",
+      "descriptionPlaceholder": "Добавьте контекст, договорённости и важные детали",
+      "deadlinePlaceholder": "Выберите дату",
+      "labelsPlaceholder": "Выберите одну или несколько меток",
+      "descriptionEmpty": "Добавьте описание",
+      "titleEmpty": "Без названия"
+    },
+    "modal": {
+      "title": "Новая задача",
+      "submit": "Создать задачу"
+    },
+    "drawer": {
+      "title": "Карточка задачи",
+      "descriptionSection": "Описание",
+      "detailsSection": "Детали",
+      "tabs": {
+        "comments": "Комментарии",
+        "history": "История"
+      },
+      "commentsEmpty": "Комментариев пока нет",
+      "commentsEmptyTitle": "У задачи пока нет комментариев",
+      "commentsEmptyDescription": "Добавьте первый комментарий, чтобы зафиксировать договорённость, вопрос клиента или заметку для себя.",
+      "commentsEmptyAction": "Добавить первый комментарий",
+      "commentPlaceholder": "Напишите комментарий, чтобы зафиксировать решение или договорённость",
+      "timelineCreated": "Задача создана",
+      "timelineStatus": "Текущий статус",
+      "timelineUpdated": "Последнее обновление",
+      "historyEmptyTitle": "История задачи пока пуста",
+      "historyEmptyDescription": "Когда по задаче появятся заметные изменения, они отобразятся в этой ленте.",
+      "historyEmptyAction": "Добавить первый комментарий",
+      "emptyTitle": "Задача не выбрана",
+      "emptyDescription": "Выберите задачу из списка проекта, чтобы открыть карточку и отредактировать детали."
+    },
+    "historyEvent": {
+      "commentAddedTitle": "Добавлен комментарий",
+      "commentAddedDescription": "В ленте сохранена новая договорённость или заметка.",
+      "statusChangedTitle": "Обновлён статус задачи",
+      "deadlineChangedTitle": "Обновлён дедлайн"
+    },
+    "notifications": {
+      "createdTitle": "Задача создана",
+      "createdDescription": "Откройте её из списка и при необходимости дополните деталями.",
+      "createErrorTitle": "Не удалось создать задачу",
+      "createErrorDescription": "Попробуйте ещё раз.",
+      "updatedTitle": "Изменения сохранены",
+      "updatedDescription": "Карточка задачи обновлена.",
+      "updateErrorTitle": "Не удалось сохранить задачу",
+      "updateErrorDescription": "Проверьте подключение и попробуйте снова."
+    },
+    "validation": {
+      "titleRequired": "Введите название"
+    }
+  }
+}

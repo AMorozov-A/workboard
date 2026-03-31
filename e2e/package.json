@@ -1,0 +1,14 @@
+{
+  "name": "freelance-crm-e2e",
+  "private": true,
+  "description": "Playwright E2E — отдельный пакет, зависимости только в e2e/node_modules",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.0",
+    "@types/node": "^22.19.15"
+  }
+}
