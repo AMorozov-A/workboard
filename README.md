@@ -1,29 +1,31 @@
 # Freelance CRM
 
-Демо-приложение для портфолио: **логин** → рабочая область → **проекты** → **задачи** и комментарии (частично). Монорепозиторий без общего `node_modules`: у каждой части свой `package.json` и свои зависимости.
+A portfolio-grade demo of a small **freelance project workspace**: sign in, browse **projects**, open a **project**, manage **tasks** in a table and drawer, with optional local-only **comments** in the UI. This is a **monorepo without a root `node_modules`**: each package (`frontend/`, `backend/`, `e2e/`) has its own `package.json` and dependencies.
 
-| Часть | Стек (кратко) | Подробнее |
-|--------|----------------|-----------|
-| [frontend/](frontend/) | React, TypeScript, Vite, Ant Design, TanStack Query, Redux Toolkit, FSD | **[frontend/README.md](frontend/README.md)** |
-| [backend/](backend/) | Node.js, Express, Prisma, SQLite, JWT | **[backend/README.md](backend/README.md)** |
-| [e2e/](e2e/) | Playwright (Chromium), отдельный npm-пакет | раздел [E2E](#e2e-playwright) ниже |
+The goal is a clean, interactive showcase (React + Express + Prisma) with automated tests—not a production SaaS.
 
----
+## Stack
 
-## Требования
+| Area | Technologies |
+|------|----------------|
+| **Frontend** | React 19, TypeScript, Vite, Ant Design, TanStack Query, Redux Toolkit, React Router, i18next (en/ru), React Hook Form + Zod, MSW (unit tests) |
+| **Backend** | Node.js, Express, Prisma, SQLite, JWT (bcryptjs) |
+| **Tests** | Vitest (backend + frontend), Playwright (e2e, Chromium) |
 
-- **Node.js** — см. [frontend/.nvmrc](frontend/.nvmrc) (в проекте задано ≥ 20.19 для фронта).
+Details: **[frontend/README.md](frontend/README.md)** · **[backend/README.md](backend/README.md)**
 
----
+## Requirements
 
-## Быстрый старт
+- **Node.js** — see [frontend/.nvmrc](frontend/.nvmrc) (≥ 20.19 for the frontend package).
+
+## Run locally
 
 ### Backend
 
 ```bash
 cd backend
 npm install
-cp .env.example .env   # при первом клонировании
+cp .env.example .env   # first clone only
 npx prisma migrate dev
 npm run dev
 ```
@@ -31,10 +33,9 @@ npm run dev
 | | |
 |--|--|
 | API (dev) | `http://localhost:3001/api/v1` |
-| Health | [GET `/api/v1/ping`](http://localhost:3001/api/v1/ping) |
+| Health | `GET /api/v1/ping` |
 | Prisma Studio | `cd backend && npx prisma studio` → [http://localhost:5555](http://localhost:5555) |
-| SQLite (dev) | обычно [`backend/prisma/dev.db`](backend/prisma/dev.db) при `DATABASE_URL` из [backend/.env.example](backend/.env.example) |
-| Схема БД | [`backend/prisma/schema.prisma`](backend/prisma/schema.prisma) |
+| Env template | [backend/.env.example](backend/.env.example) |
 
 ### Frontend
 
@@ -46,124 +47,95 @@ npm run dev
 
 | | |
 |--|--|
-| Приложение | [http://localhost:5173](http://localhost:5173) |
-| Прокси `/api` → backend | [`frontend/vite.config.ts`](frontend/vite.config.ts) |
+| App | [http://localhost:5173](http://localhost:5173) |
+| API proxy | [frontend/vite.config.ts](frontend/vite.config.ts) proxies `/api` → backend |
 
-Подробности по экранам, FSD и ограничениям UI — **[frontend/README.md](frontend/README.md)**.
+Run the backend in another terminal when you need auth and CRUD.
 
----
+### E2E (Playwright)
 
-## База данных (Prisma + SQLite)
-
-| Файл / тема | Ссылка |
-|-------------|--------|
-| Схема и модели | [`backend/prisma/schema.prisma`](backend/prisma/schema.prisma) |
-| Миграции | [`backend/prisma/migrations/`](backend/prisma/migrations/) |
-| Переменные (`DATABASE_URL` и др.) | [`backend/.env.example`](backend/.env.example) |
-| Команды Prisma (migrate, studio) | **[backend/README.md](backend/README.md)** (разделы Prisma и «Где лежит SQLite») |
-
-**Тестовая БД (Vitest, backend):** см. [backend/README.md](backend/README.md) и [`backend/vitest.config.ts`](backend/vitest.config.ts).
-
-**E2E:** отдельный файл SQLite в системном temp — логика пути в [`e2e/e2e-database.ts`](e2e/e2e-database.ts); перед прогоном e2e миграции накатываются в команде старта API (см. [`e2e/playwright.config.ts`](e2e/playwright.config.ts)).
-
----
-
-## Тесты
-
-### Backend — Vitest (+ Supertest)
+From the **repository root**:
 
 ```bash
-cd backend
-npm test              # однократно
-npm run test:watch
-npm run test:coverage
+cd e2e && npm install && npx playwright install chromium   # first time
+cd .. && npm run test:e2e
 ```
 
-| | |
-|--|--|
-| Конфиг | [`backend/vitest.config.ts`](backend/vitest.config.ts) |
-| Setup | [`backend/tests/setup.ts`](backend/tests/setup.ts) |
-| Тесты | `backend/tests/**/*.test.ts` |
+Config: [e2e/playwright.config.ts](e2e/playwright.config.ts) (starts API + Vite).
 
-### Frontend — Vitest (+ Testing Library)
-
-```bash
-cd frontend
-npm test
-npm run test:watch
-npm run test:coverage
-```
-
-| | |
-|--|--|
-| Конфиг (секция `test`) | [`frontend/vite.config.ts`](frontend/vite.config.ts) |
-| Setup | [`frontend/tests/setup.ts`](frontend/tests/setup.ts) |
-| Тесты | `frontend/src/**/*.test.ts`, `*.test.tsx` |
-
-### E2E — Playwright
-
-Из **корня** репозитория (скрипты делегируют в пакет [`e2e/package.json`](e2e/package.json)):
-
-```bash
-npm run test:e2e          # headless
-npm run test:e2e:ui       # Playwright UI
-npm run test:e2e:headed   # видимый браузер
-```
-
-Или из каталога `e2e/`:
-
-```bash
-cd e2e
-npm install               # первый раз / после клона
-npx playwright install chromium
-npm test
-```
-
-| | |
-|--|--|
-| Конфиг | [`e2e/playwright.config.ts`](e2e/playwright.config.ts) |
-| Спеки | [`e2e/*.spec.ts`](e2e/) (например [`e2e/auth.spec.ts`](e2e/auth.spec.ts)) |
-| Хелперы | [`e2e/helpers/auth.ts`](e2e/helpers/auth.ts) |
-| Заготовка фикстур | [`e2e/fixtures/index.ts`](e2e/fixtures/index.ts) |
-
-Playwright поднимает **оба** сервера (backend `:3001`, frontend `:5173`). Отчёты и артефакты — в `playwright-report/`, `test-results/` (см. [.gitignore](.gitignore)).
-
-### Все тесты подряд
+### All tests
 
 ```bash
 npm run test:all
 ```
 
-(запускает backend → frontend unit-тесты → e2e.)
+Runs **backend** Vitest → **frontend** Vitest → **e2e** Playwright.
+
+Individual packages:
+
+```bash
+cd backend && npm test
+cd frontend && npm test
+npm run test:e2e    # from repo root
+```
+
+## Repo layout (top level)
+
+```
+.
+├── backend/          # Express API, Prisma schema & migrations
+├── e2e/              # Playwright tests (separate package)
+├── frontend/         # Vite + React app (FSD)
+├── package.json      # root scripts only (test:e2e, test:all)
+└── README.md         # this file
+```
+
+## What is covered by tests
+
+| Suite | Files | Tests / scenarios |
+|-------|-------|-------------------|
+| Backend (Vitest) | 8 test files | **79** tests (**78** passed, **1** skipped — rate-limit placeholder) |
+| Frontend (Vitest) | 13 test files | **95** tests |
+| E2E (Playwright) | 2 spec files | **15** scenarios (auth + projects/tasks flows) |
+
+## Known limitations
+
+- **Comments**: API exposes `GET /api/v1/comments/task/:taskId` but returns an **empty stub**; no POST/PATCH/DELETE. The task drawer keeps **session-only** comment state in React (not persisted). The `useTaskCommentsQuery` hook exists but is not wired into the drawer.
+- **Backend Tasks API**: full CRUD is implemented; there are **no dedicated HTTP integration tests** for `/tasks` (unlike projects).
+- **Task inline edit** (`TaskTitleInlineEdit`, `TaskDescriptionInlineEdit`): covered indirectly; **no dedicated component test suite** like for delete/create modals.
+- **i18n in e2e**: scenarios use **Russian** UI strings for stability.
+- **Portfolio scope**: no production hardening (rate limiting optional, single-user demo data patterns).
 
 ---
+
+## Environment variables
+
+- **Backend:** copy [backend/.env.example](backend/.env.example) → `backend/.env`.
+- **Frontend:** optional `VITE_API_BASE_URL`; in dev, `/api` via Vite proxy is typical — see [frontend/README.md](frontend/README.md).
+
+## Database (Prisma + SQLite)
+
+| Topic | Location |
+|-------|----------|
+| Schema | [backend/prisma/schema.prisma](backend/prisma/schema.prisma) |
+| Migrations | [backend/prisma/migrations/](backend/prisma/migrations/) |
+
+E2E uses a temporary SQLite file under the system temp directory (see [e2e/e2e-database.ts](e2e/e2e-database.ts)); local `*.db` files are gitignored.
 
 ## API
 
-Полное описание маршрутов, тел запросов и ошибок — **[backend/README.md](backend/README.md)** (раздел **API**). Базовый префикс: `/api/v1`.
+Full route list: **[backend/README.md](backend/README.md)** (all paths under `/api/v1`).
 
----
+## Conventions
 
-## Переменные окружения
+- Frontend follows **Feature-Sliced Design** — see [frontend/README.md](frontend/README.md).
 
-- **Backend:** [`backend/.env.example`](backend/.env.example) → скопировать в `backend/.env`.
-- **Frontend:** опционально `VITE_API_BASE_URL`; в dev обычно `/api` через Vite proxy — см. [frontend/README.md](frontend/README.md).
+## Misc
 
----
+| Task | Command |
+|------|---------|
+| Lint frontend | `cd frontend && npm run lint` |
+| Build frontend | `cd frontend && npm run build` |
+| Build backend | `cd backend && npm run build` |
 
-## Архитектура и соглашения
-
-- **Фронт:** Feature-Sliced Design — см. дерево в [frontend/README.md](frontend/README.md).
-- **Правила для Cursor / агентов:** [`.cursor/rules/`](.cursor/rules/) (в т.ч. TDD workflow, если используете).
-
----
-
-## Прочее
-
-| Тема | Куда смотреть |
-|------|----------------|
-| Линт фронта | `cd frontend && npm run lint` |
-| Сборка фронта | `cd frontend && npm run build` |
-| Сборка бэкенда | `cd backend && npm run build` |
-
-Старая закладка на «панель разработчика»: [DEVELOPER_DASHBOARD.md](DEVELOPER_DASHBOARD.md) (переход сюда).
+Legacy note: [DEVELOPER_DASHBOARD.md](DEVELOPER_DASHBOARD.md).

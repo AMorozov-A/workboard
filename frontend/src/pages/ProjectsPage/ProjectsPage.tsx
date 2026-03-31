@@ -1,4 +1,4 @@
-import { useCreateProjectMutation, useProjectsQuery } from '@entities/project/api'
+import { useCreateProjectMutation, useProjectsQuery, useUpdateProjectMutation } from '@entities/project/api'
 import { getProjectStatusTag } from '@entities/project/lib/presentation'
 import type { Project } from '@entities/project/types'
 import {
@@ -6,10 +6,13 @@ import {
   CreateProjectModal,
   useCreateProjectModal,
 } from '@features/project/create'
+import { DeleteProjectButton } from '@features/project/delete'
+import { EditProjectModal, useEditProjectModal } from '@features/project/edit'
 import { routes } from '@shared/config/routes'
 import { formatLocaleDate } from '@shared/lib/i18n'
 import { ContentState } from '@shared/ui'
-import { Button, Card, Skeleton, Space, Table, Typography } from 'antd'
+import { EditOutlined } from '@ant-design/icons'
+import { Button, Card, Skeleton, Space, Table, Tooltip, Typography } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
@@ -18,10 +21,21 @@ export const ProjectsPage = () => {
   const navigate = useNavigate()
   const { data = [], isLoading, isError, refetch } = useProjectsQuery()
   const { mutateAsync: createProject } = useCreateProjectMutation()
+  const { mutateAsync: updateProject } = useUpdateProjectMutation()
   const { isOpen, openModal, closeModal } = useCreateProjectModal()
+  const {
+    projectToEdit,
+    isOpen: isEditOpen,
+    openModal: openEditModal,
+    closeModal: closeEditModal,
+  } = useEditProjectModal()
 
   const handleCreateProject = async (project: Project) => {
     await createProject(project)
+  }
+
+  const handleUpdateProject = async (project: Project) => {
+    await updateProject({ projectId: project.id, project })
   }
 
   const renderContent = () => {
@@ -73,6 +87,7 @@ export const ProjectsPage = () => {
         dataSource={data}
         pagination={false}
         size="middle"
+        scroll={{ x: 'max-content' }}
         locale={{ emptyText: t('projects.table.empty') }}
         onRow={(record) => ({
           onClick: () => navigate(routes.project(record.key)),
@@ -116,13 +131,34 @@ export const ProjectsPage = () => {
             dataIndex: 'deadline',
             render: (value?: string) => formatLocaleDate(value),
           },
+          {
+            title: t('projects.table.columns.actions'),
+            key: 'actions',
+            width: 120,
+            fixed: 'right',
+            render: (_, record) => (
+              <Space onClick={(e) => e.stopPropagation()}>
+                <Tooltip title={t('projects.actions.edit')}>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<EditOutlined />}
+                    aria-label={t('projects.actions.edit')}
+                    data-testid={`edit-project-${record.id}`}
+                    onClick={() => openEditModal(record)}
+                  />
+                </Tooltip>
+                <DeleteProjectButton project={record} />
+              </Space>
+            ),
+          },
         ]}
       />
     )
   }
 
   return (
-    <Card>
+    <Card data-testid="projects-page-root">
       <Space direction="vertical" size={24} style={{ display: 'flex' }}>
         <div
           style={{
@@ -148,6 +184,12 @@ export const ProjectsPage = () => {
           open={isOpen}
           onClose={closeModal}
           onCreate={handleCreateProject}
+        />
+        <EditProjectModal
+          project={projectToEdit}
+          open={isEditOpen}
+          onClose={closeEditModal}
+          onUpdate={handleUpdateProject}
         />
       </Space>
     </Card>

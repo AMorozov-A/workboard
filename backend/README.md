@@ -1,184 +1,172 @@
-# Freelance CRM — backend
+# Freelance CRM — Backend
 
-REST API для демо-приложения Freelance CRM. Все маршруты API смонтированы под префиксом **`/api/v1`** (см. `src/app.ts`).
+REST API for the Freelance CRM demo. All routes are mounted under **`/api/v1`** (see `src/app.ts`).
 
-## Стек
+## Stack
 
-| Компонент | Технология |
-|-----------|------------|
+| Layer | Technology |
+|-------|------------|
 | Runtime | Node.js |
-| Язык | TypeScript |
+| Language | TypeScript |
 | HTTP | Express |
-| БД | SQLite (файл на диске) |
+| Database | SQLite (file) |
 | ORM | Prisma |
-| Пароли | bcryptjs |
-| Аутентификация | JWT (`jsonwebtoken`) |
-| Dev-сервер | `tsx watch` |
+| Passwords | bcryptjs |
+| Auth | JWT (`jsonwebtoken`) |
+| Dev server | `tsx watch` |
 
-Зависимости и скрипты: см. `package.json`.
+Scripts and dependencies: `package.json`.
 
-## Структура каталогов
+## Layout
 
-| Путь | Назначение |
-|------|------------|
-| `src/server.ts` | Точка входа: подключение Prisma, `listen`, graceful shutdown |
-| `src/app.ts` | Express: `json`, лог запросов, роутер `/api/v1`, 404, обработчик ошибок |
-| `src/config/env.ts` | Порт, `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN` |
-| `src/db/client.ts` | Экземпляр `PrismaClient` |
-| `src/routes/v1/index.ts` | Монтирование модулей: `ping`, `auth`, `projects`, `tasks`, `comments` |
-| `src/modules/auth/` | Регистрация, логин, `/me`, JWT, `requireAuth` |
-| `src/modules/projects/` | CRUD проектов (только владелец) |
-| `src/modules/tasks/` | CRUD задач в рамках проекта пользователя |
-| `src/modules/comments/` | Пока только GET-заглушка списка комментариев |
-| `src/middleware/` | Логирование запросов, глобальный `errorHandler` |
-| `src/shared/http-error.ts` | `HttpError` с полем `statusCode` |
-| `src/types/express.d.ts` | Расширение `Express.Request` (`user` после JWT) |
-| `prisma/schema.prisma` | Схема данных |
-| `prisma/migrations/` | SQL-миграции |
+| Path | Purpose |
+|------|---------|
+| `src/server.ts` | Entry: Prisma, `listen`, graceful shutdown |
+| `src/app.ts` | Express: `json`, logging, `/api/v1` router, 404, error handler |
+| `src/config/env.ts` | `PORT`, `DATABASE_URL`, `JWT_*` |
+| `src/db/client.ts` | `PrismaClient` |
+| `src/routes/v1/index.ts` | `ping`, `auth`, `projects`, `tasks`, `comments` |
+| `src/modules/auth/` | Register, login, `/me`, logout, change password, JWT, `requireAuth` |
+| `src/modules/projects/` | Project CRUD (owner-only) |
+| `src/modules/tasks/` | Task CRUD (within user’s projects) |
+| `src/modules/comments/` | **Stub**: list endpoint returns `[]` |
+| `prisma/schema.prisma` | Data model |
+| `prisma/migrations/` | SQL migrations (committed to git) |
 
-## Переменные окружения
+## Environment
 
-Скопируйте `.env.example` в `.env` и при необходимости измените значения. Секреты в репозиторий не коммитить.
+Copy **`.env.example`** → **`.env`**. Do not commit real secrets.
 
-| Переменная | Описание |
-|------------|----------|
-| `PORT` | Порт HTTP (по умолчанию в коде: `3001`, если не задан) |
-| `DATABASE_URL` | Строка подключения SQLite, например `file:./dev.db` (путь относительно каталога `prisma/`) |
-| `JWT_SECRET` | Секрет подписи JWT; в production — длинная случайная строка |
-| `JWT_EXPIRES_IN` | Срок жизни токена (например `7d`); по умолчанию в коде — `7d` |
+| Variable | Description |
+|----------|-------------|
+| `PORT` | HTTP port (default `3001` in code if unset) |
+| `DATABASE_URL` | SQLite URL, e.g. `file:./dev.db` (path relative to `prisma/`) |
+| `JWT_SECRET` | JWT signing secret (use a long random string in production) |
+| `JWT_EXPIRES_IN` | Token lifetime (e.g. `7d`) |
 
-## Команды
+Template: [.env.example](.env.example)
+
+## Commands
 
 ```bash
 cd backend
 npm install
-npm run dev          # разработка: tsx watch
+npm run dev          # tsx watch
 npm run build        # prisma generate + tsc → dist/
-npm start            # node dist/server.js (после build)
+npm start            # node dist/server.js (after build)
 ```
 
 ### Prisma
 
 ```bash
-npx prisma migrate dev      # создать/применить миграции в разработке
-npx prisma migrate deploy   # применить миграции (CI/прод)
-npx prisma studio           # GUI для просмотра данных
-npx prisma generate         # сгенерировать клиент (обычно уже в npm run build)
+npx prisma migrate dev      # develop / create migrations
+npx prisma migrate deploy   # CI / production
+npx prisma studio           # browse data
+npx prisma generate         # client (also part of npm run build)
 ```
 
-### Где лежит файл SQLite
+### SQLite file
 
-При `DATABASE_URL="file:./dev.db"` файл создаётся рядом со схемой Prisma, обычно это:
+With `DATABASE_URL="file:./dev.db"`, the file is usually:
 
 `backend/prisma/dev.db`
 
-## Модель данных
+---
 
-Иерархия связей:
+## Data model (short)
 
-```mermaid
-flowchart TD
-  User --> Project
-  Project --> Task
-  Task --> Comment
-```
+- **User** → **Project** → **Task** → **Comment** (Comment exists in schema; API for comments is not fully implemented.)
 
-### User
-
-- `id` (uuid), `email` (unique), `passwordHash`, `name?`, `createdAt`, `updatedAt`
-
-### Project
-
-- `id`, `title`, `description?`, `client?`
-- `status`: enum `ProjectStatus` — `active` | `paused` | `done`
-- `budget?`, `deadline?`
-- `userId` → User
-- `createdAt`, `updatedAt`
-
-### Task
-
-- `id`, `title`, `description?`
-- `status`: enum `TaskStatus` — `todo` | `in_progress` | `review` | `done`
-- `priority`: enum `TaskPriority` — `low` | `medium` | `high`
-- `dueDate?`, `labels?` (JSON, массив строк)
-- `projectId` → Project
-- `createdAt`, `updatedAt`
-
-### Comment
-
-- `id`, `body`, `taskId` → Task, `createdAt`
-
-Подробности полей: `prisma/schema.prisma`.
-
-## API
-
-Базовый URL в примерах: `http://localhost:3001`. Все пути ниже — относительно **`/api/v1`**.
-
-### Публичные эндпоинты (без JWT)
-
-| Метод | Путь | Описание |
-|-------|------|----------|
-| GET | `/ping` | Health-check: `{ ok: true, message: "pong" }` |
-| POST | `/auth/register` | Тело: `{ email, password, name? }` → 201, пользователь + JWT |
-| POST | `/auth/login` | Тело: `{ email, password }` → 200, пользователь + JWT |
-
-### Auth (JWT)
-
-Заголовок: `Authorization: Bearer <accessToken>`.
-
-| Метод | Путь | Описание |
-|-------|------|----------|
-| GET | `/auth/me` | Текущий пользователь: `{ ok: true, user }` |
-
-### Projects (только с JWT, только свои проекты)
-
-| Метод | Путь | Описание |
-|-------|------|----------|
-| GET | `/projects` | Список проектов пользователя |
-| POST | `/projects` | Создание: тело с `title` (обяз.), опционально `description`, `client`, `status`, `budget`, `deadline` (ISO) |
-| GET | `/projects/:id` | Один проект (404, если не ваш или не найден) |
-| PATCH | `/projects/:id` | Частичное обновление |
-| DELETE | `/projects/:id` | Удаление (ответ **204** без тела) |
-
-### Tasks (только с JWT, задачи только внутри своих проектов)
-
-| Метод | Путь | Описание |
-|-------|------|----------|
-| POST | `/tasks` | Тело: `projectId`, `title`, опционально `description`, `status`, `priority`, `dueDate`, `labels` |
-| GET | `/tasks/project/:projectId` | Список задач проекта |
-| PATCH | `/tasks/:id` | Частичное обновление задачи |
-| DELETE | `/tasks/:id` | Удаление (ответ **204** без тела) |
-
-### Comments (заглушка)
-
-| Метод | Путь | Описание |
-|-------|------|----------|
-| GET | `/comments/task/:taskId` | Пока возвращает пустой список; **JWT в роуте не используется** — см. roadmap |
-
-## Аутентификация
-
-- Успешные **register** / **login** возвращают JSON вида: `ok`, `user` (без `passwordHash`), `accessToken`, `tokenType` (обычно `Bearer`), `expiresIn`.
-- Защищённые маршруты ожидают заголовок `Authorization: Bearer <accessToken>`.
-
-## Ошибки
-
-- Бросается `HttpError` (`src/shared/http-error.ts`) с полем `statusCode`.
-- Глобальный обработчик: `src/middleware/errorHandler.ts` — JSON `{ ok: false, message }`.
-- Типичные коды: **400** (валидация), **401** (нет/невалидный токен, неверный логин), **404** (не найдено), **409** (например, занятый email при регистрации).
-
-## Связь с фронтендом
-
-Фронтенд лежит в каталоге **`../frontend`**. Базовый URL для запросов к API задаётся на фронте (например `VITE_API_BASE_URL`, по умолчанию часто `/api` при прокси Vite). Подробности интеграции — в корневом `README.md` репозитория.
-
-## Следующие шаги (roadmap)
-
-1. **Комментарии** — полноценный CRUD для `Comment`: создание/чтение/обновление/удаление с проверкой прав (цепочка `comment → task → project → user`).
-2. **Безопасность комментариев** — при необходимости включить `requireAuth` на `GET /comments/...` и проверять доступ к задаче.
-3. **CORS** — если фронт открывается с другого origin, настроить `cors` в Express.
-4. **Валидация** — опционально единая схема тел запросов (например Zod) вместо ручных проверок в сервисах.
-5. **Тесты** — unit-тесты сервисов и/или e2e по HTTP.
-6. **Production** — надёжный `JWT_SECRET`, `prisma migrate deploy`, структурированные логи вместо только `console`.
+Full fields: `prisma/schema.prisma`.
 
 ---
 
-Документ стоит обновлять при изменении маршрутов в `src/routes/v1` и схемы в `prisma/schema.prisma`.
+## API
+
+Base URL in examples: `http://localhost:3001`. Paths are relative to **`/api/v1`**.
+
+### Public (no JWT)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/ping` | Health: `{ ok: true, message: "pong" }` |
+| POST | `/auth/register` | Body: `{ email, password, name? }` → 201 + user + JWT |
+| POST | `/auth/login` | Body: `{ email, password }` → 200 + user + JWT |
+
+### Auth (JWT: `Authorization: Bearer <token>`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/auth/me` | Current user `{ ok: true, user }` |
+| POST | `/auth/logout` | 204 — stateless JWT; client drops token |
+| PATCH | `/auth/password` | Body: `{ currentPassword, newPassword }` |
+
+### Projects (JWT, own projects only)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/projects` | List projects for the user |
+| POST | `/projects` | Create (`title` required; optional `description`, `client`, `status`, `budget`, `deadline`, …) |
+| GET | `/projects/:id` | One project (404 if missing or not owned) |
+| PATCH | `/projects/:id` | Partial update |
+| DELETE | `/projects/:id` | Delete (**204** empty body) |
+
+### Tasks (JWT, tasks only inside user’s projects)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/tasks` | Body: `projectId`, `title`, optional `description`, `status`, `priority`, `dueDate`, `labels` |
+| GET | `/tasks/project/:projectId` | List tasks for project |
+| PATCH | `/tasks/:id` | Partial update |
+| DELETE | `/tasks/:id` | Delete (**204**) |
+
+### Comments (stub)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/comments/task/:taskId` | **No** `requireAuth` in current code | Returns `{ ok: true, taskId, items: [] }` — **no persistence** |
+
+---
+
+## Errors
+
+- `HttpError` (`src/shared/http-error.ts`) with `statusCode`.  
+- Global handler: JSON `{ ok: false, message }`.  
+- Typical: **400** validation, **401** auth, **404** not found, **409** duplicate email.
+
+---
+
+## Tests
+
+| | |
+|--|--|
+| Test files | **8** (`tests/**/*.test.ts`, `src/**/*.test.ts`) |
+| Tests (Vitest) | **79** total (**78** passed, **1** skipped — rate limit placeholder in register suite) |
+| Config | [vitest.config.ts](vitest.config.ts) |
+| Setup | [tests/setup.ts](tests/setup.ts) |
+
+```bash
+cd backend
+npm test
+npm run test:watch
+npm run test:ui
+npm run test:coverage
+```
+
+Coverage highlights: **auth/register** (integration), **projects** CRUD + integration, **auth** service unit tests, **smoke** (register/login/me), project **mapper/parse** unit tests. **No dedicated HTTP test file for `/tasks` yet.**
+
+---
+
+## Frontend
+
+The React app lives in **`../frontend`**. It usually calls `/api` via the Vite proxy in development.
+
+---
+
+## Known limitations
+
+- **Comments**: only a **GET** stub; no create/update/delete; no auth on the route yet.  
+- **Tasks**: no Supertest suite under `tests/` (manual / frontend e2e exercise the API).  
+- **Production**: use a strong `JWT_SECRET`, `prisma migrate deploy`, structured logging, CORS if needed.
+
+Update this file when routes in `src/routes/v1` or `prisma/schema.prisma` change.

@@ -37,7 +37,11 @@ export const useCreateTaskMutation = (projectId: string) => {
   })
 }
 
-export const useUpdateTaskMutation = () => {
+/**
+ * @param tasksQueryKey — тот же идентификатор, что в `useProjectTasksQuery(tasksQueryKey)`:
+ * сегмент из URL (`project.key` или uuid), не обязательно `task.projectId` из API.
+ */
+export const useUpdateTaskMutation = (tasksQueryKey: string) => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -45,8 +49,8 @@ export const useUpdateTaskMutation = () => {
       const { task: row } = await updateTaskApi(task.id, taskToUpdateBody(task))
       return mapApiTaskToTask(row)
     },
-    onSuccess: (saved) => {
-      void queryClient.invalidateQueries({ queryKey: [...projectTasksQueryKey, saved.projectId] })
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [...projectTasksQueryKey, tasksQueryKey] })
     },
   })
 }
@@ -55,12 +59,16 @@ export const useDeleteTaskMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (payload: { taskId: string; projectId: string }) => {
+    mutationFn: async (payload: { taskId: string; tasksQueryKey: string }) => {
       await deleteTaskApi(payload.taskId)
-      return payload.projectId
+      return payload.tasksQueryKey
     },
-    onSuccess: (pid) => {
-      void queryClient.invalidateQueries({ queryKey: [...projectTasksQueryKey, pid] })
+    onSuccess: (tasksQueryKey, variables) => {
+      queryClient.setQueryData<Task[]>(
+        [...projectTasksQueryKey, tasksQueryKey],
+        (prev) => (prev ?? []).filter((t) => t.id !== variables.taskId)
+      )
+      void queryClient.invalidateQueries({ queryKey: [...projectTasksQueryKey, tasksQueryKey] })
     },
   })
 }

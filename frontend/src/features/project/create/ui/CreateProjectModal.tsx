@@ -109,6 +109,7 @@ export const CreateProjectModal = ({
 
   return (
     <Modal
+      data-testid="create-project-modal"
       open={open}
       title={t('projects.modal.title')}
       onCancel={handleClose}

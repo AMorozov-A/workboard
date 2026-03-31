@@ -1,12 +1,14 @@
 import {
   createProject as createProjectApi,
+  deleteProject as deleteProjectApi,
   getProject,
   listProjects,
+  updateProject as updateProjectApi,
 } from '@shared/api/crmV1Service'
 import { isApiError } from '@shared/api/errors'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { mapApiProjectToProject } from './lib/mapApiProject'
-import { projectUiToCreateBody } from './lib/projectToApi'
+import { projectUiToCreateBody, projectUiToUpdateBody } from './lib/projectToApi'
 import type { Project } from './types'
 
 export const projectsQueryKey = ['projects'] as const
@@ -15,7 +17,10 @@ export const projectDetailQueryKey = (projectId: string) => ['project', projectI
 
 export async function fetchProjects(): Promise<Project[]> {
   const { items } = await listProjects()
-  return items.map(mapApiProjectToProject)
+  const projects = items.map(mapApiProjectToProject)
+  return [...projects].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+  )
 }
 
 export async function fetchProjectById(projectId: string): Promise<Project | null> {
@@ -55,6 +60,48 @@ export const useCreateProjectMutation = () => {
     mutationFn: createProjectRemote,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: projectsQueryKey })
+    },
+  })
+}
+
+const deleteProjectRemote = async (projectId: string): Promise<void> => {
+  await deleteProjectApi(projectId)
+}
+
+export const useDeleteProjectMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: deleteProjectRemote,
+    onSuccess: (_, projectId) => {
+      void queryClient.invalidateQueries({ queryKey: projectsQueryKey })
+      void queryClient.invalidateQueries({ queryKey: projectDetailQueryKey(projectId) })
+    },
+  })
+}
+
+type UpdateProjectParams = {
+  projectId: string
+  project: Project
+}
+
+const updateProjectRemote = async ({
+  projectId,
+  project,
+}: UpdateProjectParams): Promise<Project> => {
+  const { project: row } = await updateProjectApi(projectId, projectUiToUpdateBody(project))
+  return mapApiProjectToProject(row)
+}
+
+export const useUpdateProjectMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: updateProjectRemote,
+    onSuccess: (updated) => {
+      queryClient.setQueryData(projectDetailQueryKey(updated.id), updated)
+      void queryClient.invalidateQueries({ queryKey: projectsQueryKey })
+      void queryClient.invalidateQueries({ queryKey: projectDetailQueryKey(updated.id) })
     },
   })
 }

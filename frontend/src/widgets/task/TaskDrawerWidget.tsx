@@ -1,5 +1,6 @@
 import type { Task } from '@entities/task/model/types'
 import { formatTaskDate, getTaskStatusLabel } from '@entities/task/lib/presentation'
+import { DeleteTaskButton } from '@features/task/delete'
 import {
   TaskDescriptionInlineEdit,
   TaskMetaForm,
@@ -16,6 +17,9 @@ type TaskDrawerWidgetProps = {
   task: Task | null
   onClose: () => void
   onSave: (task: Task) => void | Promise<void>
+  onTaskDeleted?: () => void
+  /** Ключ списка задач в TanStack Query (сегмент URL проекта). */
+  tasksQueryKey: string
 }
 
 type TaskComment = {
@@ -37,6 +41,8 @@ export const TaskDrawerWidget = ({
   task,
   onClose,
   onSave,
+  onTaskDeleted,
+  tasksQueryKey,
 }: TaskDrawerWidgetProps) => {
   const { t, i18n } = useTranslation()
 
@@ -48,6 +54,8 @@ export const TaskDrawerWidget = ({
         task={task}
         onClose={onClose}
         onSave={onSave}
+        onTaskDeleted={onTaskDeleted}
+        tasksQueryKey={tasksQueryKey}
       />
     ) : (
       <Drawer
@@ -76,6 +84,8 @@ type TaskDrawerContentProps = {
   task: Task
   onClose: () => void
   onSave: (task: Task) => void | Promise<void>
+  onTaskDeleted?: () => void
+  tasksQueryKey: string
 }
 
 const TaskDrawerContent = ({
@@ -83,6 +93,8 @@ const TaskDrawerContent = ({
   task,
   onClose,
   onSave,
+  onTaskDeleted,
+  tasksQueryKey,
 }: TaskDrawerContentProps) => {
   const { t } = useTranslation()
   const [draft, setDraft] = useState<Task>(task)
@@ -223,6 +235,14 @@ const TaskDrawerContent = ({
       extra={
         <Space>
           <Button onClick={onClose}>{t('common.close')}</Button>
+          <DeleteTaskButton
+            task={draft}
+            tasksQueryKey={tasksQueryKey}
+            onDeleted={() => {
+              onClose()
+              onTaskDeleted?.()
+            }}
+          />
           <Button type="primary" onClick={handleSave} disabled={isSaveDisabled}>
             {t('common.save')}
           </Button>

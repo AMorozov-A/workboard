@@ -94,11 +94,25 @@
     "title": "Projects",
     "description": "Keep all client projects, current statuses, and upcoming deadlines at hand.",
     "actions": {
-      "create": "Create project"
+      "create": "Create project",
+      "edit": "Edit project",
+      "delete": "Delete project"
+    },
+    "delete": {
+      "confirmTitle": "Delete this project?",
+      "confirmDescription": "This action cannot be undone. Project: {{name}}",
+      "confirmOk": "Delete",
+      "errorTitle": "Failed to delete project",
+      "errorDescription": "Please try again."
     },
     "modal": {
       "title": "New project",
       "submit": "Create"
+    },
+    "editModal": {
+      "title": "Edit project",
+      "submit": "Save",
+      "keyLabel": "Project key"
     },
     "form": {
       "name": "Project name",
@@ -127,7 +141,11 @@
       "createdTitle": "Project created",
       "createdDescription": "The new project already appears in the list and in the workspace menu.",
       "createErrorTitle": "Failed to create project",
-      "createErrorDescription": "Please try again. The form data is still there."
+      "createErrorDescription": "Please try again. The form data is still there.",
+      "updatedTitle": "Project updated",
+      "updatedDescription": "Changes are saved and visible in the list and on the project page.",
+      "updateErrorTitle": "Failed to update project",
+      "updateErrorDescription": "Please try again. The form data is still there."
     },
     "loading": {
       "title": "Loading projects",
@@ -148,7 +166,8 @@
         "project": "Project",
         "client": "Client",
         "status": "Status",
-        "deadline": "Deadline"
+        "deadline": "Deadline",
+        "actions": "Actions"
       },
       "descriptionFallback": "Project description will appear soon."
     },
@@ -205,7 +224,15 @@
   "tasks": {
     "actions": {
       "create": "Create task",
-      "addComment": "Add comment"
+      "addComment": "Add comment",
+      "delete": "Delete task"
+    },
+    "delete": {
+      "confirmTitle": "Delete this task?",
+      "confirmDescription": "This action cannot be undone. Task: {{title}}",
+      "confirmOk": "Delete",
+      "errorTitle": "Failed to delete task",
+      "errorDescription": "Please try again."
     },
     "status": {
       "todo": "To do",

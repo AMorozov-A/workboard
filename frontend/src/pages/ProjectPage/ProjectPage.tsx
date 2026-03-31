@@ -29,7 +29,7 @@ import {
   Timeline,
   Typography,
 } from 'antd'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { TaskDrawerWidget } from '@widgets/task/TaskDrawerWidget'
@@ -45,25 +45,20 @@ export const ProjectPage = () => {
   } = useProjectQuery(projectId)
 
   const {
-    data: fetchedTasks = [],
+    data: tasks = [],
     isLoading: isTasksLoading,
     isError: isTasksError,
     refetch: refetchTasks,
   } = useProjectTasksQuery(projectId ?? '')
 
   const createTaskMutation = useCreateTaskMutation(projectId ?? '')
-  const updateTaskMutation = useUpdateTaskMutation()
+  const updateTaskMutation = useUpdateTaskMutation(projectId ?? '')
 
-  const [tasks, setTasks] = useState<Task[]>([])
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [statusFilter, setStatusFilter] = useState<Task['status'] | 'all'>('all')
   const [priorityFilter, setPriorityFilter] = useState<Task['priority'] | 'all'>('all')
   const { isOpen, openModal, closeModal } = useCreateTaskModal()
-
-  useEffect(() => {
-    setTasks(fetchedTasks)
-  }, [fetchedTasks])
 
   const handleCreateTask = async (task: Task) => {
     await createTaskMutation.mutateAsync(task)
@@ -85,6 +80,10 @@ export const ProjectPage = () => {
 
   const handleSaveTask = async (updatedTask: Task) => {
     await updateTaskMutation.mutateAsync(updatedTask)
+  }
+
+  const handleTaskDeleted = () => {
+    setSelectedTaskId(null)
   }
 
   const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? null
@@ -137,12 +136,14 @@ export const ProjectPage = () => {
 
     if (tasks.length === 0) {
       return (
-        <ContentState
-          variant="empty"
-          title={t('projectDetails.tasksSection.emptyTitle')}
-          description={t('projectDetails.tasksSection.emptyDescription')}
-          action={<CreateTaskButton onClick={openModal} />}
-        />
+        <div data-testid="project-tasks-empty">
+          <ContentState
+            variant="empty"
+            title={t('projectDetails.tasksSection.emptyTitle')}
+            description={t('projectDetails.tasksSection.emptyDescription')}
+            action={<CreateTaskButton onClick={openModal} />}
+          />
+        </div>
       )
     }
 
@@ -406,6 +407,8 @@ export const ProjectPage = () => {
                     open={isDrawerOpen}
                     onClose={handleCloseDrawer}
                     onSave={handleSaveTask}
+                    onTaskDeleted={handleTaskDeleted}
+                    tasksQueryKey={projectId ?? ''}
                     task={selectedTask}
                   />
                 </>

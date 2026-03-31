@@ -63,3 +63,4 @@ export function renderWithProviders(
 }
 
 export { render, screen, within, waitFor, fireEvent, userEvent }
+export { testI18n } from './i18n'

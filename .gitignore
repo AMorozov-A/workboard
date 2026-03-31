@@ -5,14 +5,21 @@ node_modules/
 # Сборка
 dist/
 **/dist/
+build/
+**/build/
 
 # Локальные секреты (шаблоны .env.example остаются в git)
 .env
 .env.local
 .env.*.local
 
-# Vite (кэш в корне при некоторых настройках)
+# Vite / Vitest cache
 .vite/
+.vitest-cache/
+**/.vitest-cache/
+
+# E2E: временные SQLite и прочие артефакты пакета
+e2e/temp/
 
 # Покрытие и отчёты тестов
 coverage/
@@ -39,9 +46,8 @@ e2e/playwright-report/
 .DS_Store
 Thumbs.db
 
-# Cursor: не коммитим планы и локальные настройки; правила в .cursor/rules/ — в репозитории
-.cursor/plans/
-.cursor/settings.json
+# Cursor IDE (локальные правила и настройки)
+.cursor/
 
 # Логи
 *.log

@@ -49,7 +49,7 @@ export const LoginForm = () => {
         })
       )
       try {
-        await queryClient.prefetchQuery({
+        await queryClient.fetchQuery({
           queryKey: projectsQueryKey,
           queryFn: fetchProjects,
         })

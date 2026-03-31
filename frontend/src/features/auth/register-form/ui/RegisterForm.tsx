@@ -67,7 +67,8 @@ export const RegisterForm = () => {
         })
       )
       try {
-        await queryClient.prefetchQuery({
+        // fetchQuery — чтобы ошибка queryFn попала в catch; prefetchQuery в v5 глотает reject
+        await queryClient.fetchQuery({
           queryKey: projectsQueryKey,
           queryFn: fetchProjects,
         })
