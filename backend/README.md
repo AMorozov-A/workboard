@@ -42,13 +42,13 @@ Scripts and dependencies: `package.json`.
 Copy `**.env.example**` → `**.env**`. Do not commit real secrets.
 
 
-| Variable           | Description                                                                 |
-| ------------------ | --------------------------------------------------------------------------- |
-| `PORT`             | HTTP port (default `3001` in code if unset)                                 |
-| `ALLOWED_ORIGINS`  | Comma-separated CORS origins (e.g. `http://localhost:5173,https://app.netlify.app`). Default if unset: `http://localhost:5173` |
-| `DATABASE_URL`     | SQLite URL, e.g. `file:./dev.db` (path relative to `prisma/`)                 |
-| `JWT_SECRET`       | JWT signing secret (use a long random string in production)                 |
-| `JWT_EXPIRES_IN`   | Token lifetime (e.g. `7d`)                                                  |
+| Variable          | Description                                                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `PORT`            | HTTP port (default `3001` in code if unset)                                                                                    |
+| `ALLOWED_ORIGINS` | Comma-separated CORS origins (e.g. `http://localhost:5173,https://app.netlify.app`). Default if unset: `http://localhost:5173` |
+| `DATABASE_URL`    | SQLite URL, e.g. `file:./dev.db` (path relative to `prisma/`)                                                                  |
+| `JWT_SECRET`      | JWT signing secret (use a long random string in production)                                                                    |
+| `JWT_EXPIRES_IN`  | Token lifetime (e.g. `7d`)                                                                                                     |
 
 
 Template: [.env.example](.env.example)
