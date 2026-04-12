@@ -30,7 +30,7 @@ function createHookWrapper(queryClient: QueryClient) {
 
 describe('useCommentsList', () => {
   it('loads comment items from MSW', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     const row = mockComment({
       id: 'cc-1',
       body: 'From MSW',
@@ -53,7 +53,7 @@ describe('useCommentsList', () => {
   })
 
   it('does not fetch when taskId is empty (enabled: false)', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     let requests = 0
     server.use(
       http.get('*/api/v1/tasks/:taskId/comments', () => {
@@ -74,7 +74,7 @@ describe('useCommentsList', () => {
 
 describe('useCreateCommentMutation', () => {
   it('creates a comment successfully', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     const created = mockComment({ id: 'new-c', body: 'Created body' })
     server.use(commentsHandlers.createSuccess(created))
 
@@ -88,7 +88,7 @@ describe('useCreateCommentMutation', () => {
   })
 
   it('invalidates queries with task-comments key on success', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(commentsHandlers.createSuccess(mockComment({ id: 'x' })))
 
     const qc = createTestQueryClient()
@@ -108,7 +108,7 @@ describe('useCreateCommentMutation', () => {
 
 describe('useDeleteCommentMutation', () => {
   it('removes comment from cache via setQueryData and invalidates', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(commentsHandlers.deleteSuccess())
 
     const qc = createTestQueryClient()

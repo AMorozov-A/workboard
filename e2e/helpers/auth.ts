@@ -1,6 +1,6 @@
 import type { APIRequestContext, Page } from '@playwright/test'
 
-export const ACCESS_TOKEN_KEY = 'freelance_crm_access_token'
+export const ACCESS_TOKEN_KEY = 'workboard_access_token'
 
 export const getApiBaseUrl = (): string =>
   process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://localhost:3001'

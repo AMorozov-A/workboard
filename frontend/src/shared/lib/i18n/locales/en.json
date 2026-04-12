@@ -13,8 +13,8 @@
     }
   },
   "layout": {
-    "brand": "Freelance CRM",
-    "brandShort": "FreelanceCRM",
+    "brand": "WorkBoard",
+    "brandShort": "WorkBoard",
     "workspace": "Workspace",
     "language": "Language",
     "languageSelectLabel": "Choose app language",

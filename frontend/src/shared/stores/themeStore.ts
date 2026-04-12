@@ -18,7 +18,7 @@ export const useThemeStore = create<ThemeStore>()(
       toggle: () => set({ isDark: !get().isDark }),
     }),
     {
-      name: 'crm-theme',
+      name: 'workboard-theme',
       partialize: (state) => ({ isDark: state.isDark }),
     }
   )

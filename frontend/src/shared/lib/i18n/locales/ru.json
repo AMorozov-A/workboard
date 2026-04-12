@@ -13,8 +13,8 @@
     }
   },
   "layout": {
-    "brand": "Freelance CRM",
-    "brandShort": "FreelanceCRM",
+    "brand": "WorkBoard",
+    "brandShort": "WorkBoard",
     "workspace": "Рабочая область",
     "language": "Язык",
     "languageSelectLabel": "Выбор языка интерфейса",

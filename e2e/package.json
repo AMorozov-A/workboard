@@ -1,5 +1,5 @@
 {
-  "name": "freelance-crm-e2e",
+  "name": "workboard-e2e",
   "private": true,
   "description": "Playwright E2E — отдельный пакет, зависимости только в e2e/node_modules",
   "scripts": {

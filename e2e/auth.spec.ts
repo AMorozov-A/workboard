@@ -27,7 +27,7 @@ test.describe('Auth flow', () => {
     await page.getByRole('button', { name: 'Создать аккаунт' }).click()
 
     await expect(page).toHaveURL(/\/app\/projects/)
-    await expect(page.getByText('Freelance CRM')).toBeVisible()
+    await expect(page.getByText('WorkBoard')).toBeVisible()
     await expect(page.getByRole('menuitem', { name: 'Проекты' })).toBeVisible()
   })
 
@@ -71,7 +71,7 @@ test.describe('Auth flow', () => {
     await page.getByRole('button', { name: 'Войти' }).click()
 
     await expect(page).toHaveURL(/\/app\/projects/)
-    await expect(page.getByText('Freelance CRM')).toBeVisible()
+    await expect(page.getByText('WorkBoard')).toBeVisible()
   })
 
   test('redirects to login when not authenticated', async ({ page }) => {

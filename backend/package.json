@@ -1,8 +1,8 @@
 {
-  "name": "freelance-crm-backend",
+  "name": "workboard-backend",
   "version": "0.1.0",
   "private": true,
-  "description": "Freelance CRM API — Express + SQLite + Prisma + JWT",
+  "description": "WorkBoard API — Express + SQLite + Prisma + JWT",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",

@@ -13,7 +13,7 @@ import {
 
 describe('crmV1Service projects', () => {
   beforeEach(() => {
-    localStorage.setItem('freelance_crm_access_token', 'test-token')
+    localStorage.setItem('workboard_access_token', 'test-token')
   })
 
   afterEach(() => {

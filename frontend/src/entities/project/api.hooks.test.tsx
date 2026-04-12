@@ -33,7 +33,7 @@ function createHookWrapper(queryClient: QueryClient) {
 
 describe('useProjectsQuery', () => {
   it('успех — data — массив Project после маппинга', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(
       projectsHandlers.listSuccess([
         mockApiProject({ id: 'x1', title: 'Mapped', client: 'Cl' }),
@@ -55,7 +55,7 @@ describe('useProjectsQuery', () => {
   })
 
   it('isPending/isFetching до ответа', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     let release: () => void
     const gate = new Promise<void>((resolve) => {
       release = resolve
@@ -79,7 +79,7 @@ describe('useProjectsQuery', () => {
   })
 
   it('ошибка сети — isError', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(projectsHandlers.listError(500, 'err'))
 
     const qc = createTestQueryClient()
@@ -94,7 +94,7 @@ describe('useProjectsQuery', () => {
 
 describe('useProjectQuery', () => {
   it('при projectId undefined запрос не уходит', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     let requests = 0
     server.use(
       http.get('*/api/v1/projects/:id', () => {
@@ -113,7 +113,7 @@ describe('useProjectQuery', () => {
   })
 
   it('успех — один project', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     const p = mockApiProject({ id: 'pid', title: 'One' })
     server.use(projectsHandlers.detailSuccess(p))
 
@@ -127,7 +127,7 @@ describe('useProjectQuery', () => {
   })
 
   it('404 — data null, запрос успешен (не isError)', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(projectsHandlers.detailNotFound())
 
     const qc = createTestQueryClient()
@@ -143,7 +143,7 @@ describe('useProjectQuery', () => {
 
 describe('useCreateProjectMutation', () => {
   it('onSuccess инвалидирует список проектов', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     const created = mockApiProject({ id: 'new', title: 'Created' })
     server.use(
       http.post('*/api/v1/projects', () =>
@@ -175,7 +175,7 @@ describe('useCreateProjectMutation', () => {
   })
 
   it('ошибка API — mutation в error state', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(
       http.post('*/api/v1/projects', () => new HttpResponse('bad', { status: 400 }))
     )
@@ -200,7 +200,7 @@ describe('useCreateProjectMutation', () => {
 
 describe('useDeleteProjectMutation', () => {
   it('onSuccess инвалидирует список и деталь проекта', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(
       http.delete('*/api/v1/projects/:id', () => new HttpResponse(null, { status: 204 }))
     )
@@ -223,7 +223,7 @@ describe('useDeleteProjectMutation', () => {
   })
 
   it('ошибка API — mutation в error state', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(
       http.delete('*/api/v1/projects/:id', () => new HttpResponse('no', { status: 400 }))
     )
@@ -238,7 +238,7 @@ describe('useDeleteProjectMutation', () => {
   })
 
   it('при ошибке API вызывается onError из опций mutateAsync', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(projectsHandlers.deleteError(500))
 
     const qc = createTestQueryClient()
@@ -256,7 +256,7 @@ describe('useDeleteProjectMutation', () => {
 
 describe('useUpdateProjectMutation', () => {
   it('onSuccess инвалидирует список и деталь проекта', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     const updated = mockApiProject({ id: 'pid-up', title: 'Renamed' })
     server.use(
       http.patch('*/api/v1/projects/:id', () =>
@@ -290,7 +290,7 @@ describe('useUpdateProjectMutation', () => {
   })
 
   it('onSuccess обновляет кэш детали проекта через setQueryData', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     const updated = mockApiProject({ id: 'pid-up', title: 'Renamed' })
     server.use(projectsHandlers.updateSuccess(updated))
 
@@ -323,7 +323,7 @@ describe('useUpdateProjectMutation', () => {
   })
 
   it('ошибка API — mutation в error state', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(
       http.patch('*/api/v1/projects/:id', () => new HttpResponse('bad', { status: 400 }))
     )
@@ -348,7 +348,7 @@ describe('useUpdateProjectMutation', () => {
   })
 
   it('при ошибке API вызывается onError из опций mutateAsync', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(projectsHandlers.patchError(500))
 
     const qc = createTestQueryClient()

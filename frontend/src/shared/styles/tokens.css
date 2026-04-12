@@ -1,25 +1,19 @@
-/* Design tokens — Freelance CRM (sync with DESIGN_SYSTEM.md §4) */
-
 :root {
-  /* === Backgrounds === */
   --color-bg: #f7f6f2;
   --color-surface: #ffffff;
   --color-surface-alt: #f2f1ed;
   --color-border: #d4d1ca;
   --color-border-subtle: #e5e3de;
 
-  /* === Text === */
   --color-text: #28251d;
   --color-text-muted: #7a7974;
   --color-text-faint: #bab9b4;
 
-  /* === Primary (Teal) === */
   --color-primary: #01696f;
   --color-primary-hover: #0c4e54;
   --color-primary-bg: #e6f4f4;
   --color-primary-border: #a3d4d6;
 
-  /* === Semantic === */
   --color-error: #c0392b;
   --color-error-bg: #fdecea;
   --color-warning: #b7560e;
@@ -27,7 +21,6 @@
   --color-success: #2e7d32;
   --color-success-bg: #eaf4ea;
 
-  /* === Status: Projects === */
   --color-status-active: #01696f;
   --color-status-active-bg: #e6f4f4;
   --color-status-paused: #b7560e;
@@ -35,7 +28,6 @@
   --color-status-done: #7a7974;
   --color-status-done-bg: #f2f1ed;
 
-  /* === Priority: Tasks === */
   --color-priority-high: #c0392b;
   --color-priority-high-bg: #fdecea;
   --color-priority-medium: #b7560e;
@@ -43,7 +35,6 @@
   --color-priority-low: #2e7d32;
   --color-priority-low-bg: #eaf4ea;
 
-  /* === Labels === */
   --color-label-frontend: #0055a4;
   --color-label-frontend-bg: #e6eef8;
   --color-label-backend: #5a1f9e;
@@ -51,7 +42,6 @@
   --color-label-design: #a0005c;
   --color-label-design-bg: #faeaf2;
 
-  /* === Typography === */
   --font-display: 'Satoshi', -apple-system, sans-serif;
   --font-body: 'Inter', -apple-system, blinkmacsystemfont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
@@ -68,7 +58,6 @@
   --font-size-label: 11px;
   --font-size-code: 13px;
 
-  /* === Spacing (base: 8px) === */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -80,7 +69,6 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* === Radius === */
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -88,27 +76,23 @@
   --radius-xl: 16px;
   --radius-full: 9999px;
 
-  /* === Shadows === */
   --shadow-sm: 0 1px 3px rgba(40, 37, 29, 0.08), 0 1px 2px rgba(40, 37, 29, 0.06);
   --shadow-md: 0 4px 12px rgba(40, 37, 29, 0.1);
   --shadow-lg: 0 8px 24px rgba(40, 37, 29, 0.12);
   --shadow-inset: inset 0 1px 2px rgba(40, 37, 29, 0.06);
 
-  /* === Z-index === */
   --z-base: 0;
   --z-dropdown: 100;
   --z-sticky: 200;
   --z-modal: 1000;
   --z-toast: 1100;
 
-  /* === Layout === */
   --sidebar-width: 220px;
   --sidebar-collapsed: 64px;
   --header-height: 56px;
   --content-max-width: 1200px;
   --content-padding: 24px;
 
-  /* === Motion === */
   --duration-fast: 100ms;
   --duration-mid: 200ms;
   --duration-slow: 300ms;
@@ -118,25 +102,21 @@
 }
 
 [data-theme='dark'] {
-  /* === Backgrounds === */
   --color-bg: #141312;
   --color-surface: #1c1b19;
   --color-surface-alt: #242320;
   --color-border: #3a3937;
   --color-border-subtle: #2e2d2b;
 
-  /* === Text === */
   --color-text: #cdccca;
   --color-text-muted: #8a8987;
   --color-text-faint: #5c5b59;
 
-  /* === Primary (Teal) === */
   --color-primary: #4f98a3;
   --color-primary-hover: #6bb3bd;
   --color-primary-bg: #0e2527;
   --color-primary-border: #1e4e54;
 
-  /* === Semantic === */
   --color-error: #f17b72;
   --color-error-bg: #2d1614;
   --color-warning: #e0924a;
@@ -144,7 +124,6 @@
   --color-success: #68bb6e;
   --color-success-bg: #0e2110;
 
-  /* === Status: Projects === */
   --color-status-active: #4f98a3;
   --color-status-active-bg: #0e2527;
   --color-status-paused: #e0924a;
@@ -152,7 +131,6 @@
   --color-status-done: #8a8987;
   --color-status-done-bg: #242320;
 
-  /* === Priority: Tasks === */
   --color-priority-high: #f17b72;
   --color-priority-high-bg: #2d1614;
   --color-priority-medium: #e0924a;
@@ -160,7 +138,6 @@
   --color-priority-low: #68bb6e;
   --color-priority-low-bg: #0e2110;
 
-  /* === Labels === */
   --color-label-frontend: #5f9bd6;
   --color-label-frontend-bg: #0d1e33;
   --color-label-backend: #a47fd4;
@@ -168,7 +145,6 @@
   --color-label-design: #d47fad;
   --color-label-design-bg: #2d0e1e;
 
-  /* === Shadows (тёмная тема — глубже) === */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);

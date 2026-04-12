@@ -1,5 +1,5 @@
 {
-  "name": "freelance-crm",
+  "name": "workboard",
   "private": true,
   "description": "Монорепо без корневых зависимостей: frontend/, backend/, e2e/ — у каждого свой package.json и node_modules",
   "scripts": {

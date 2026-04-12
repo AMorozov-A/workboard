@@ -1,4 +1,4 @@
-# Freelance CRM
+# WorkBoard
 
 A portfolio-grade demo of a small **freelance project workspace**: sign in, browse **projects**, open a **project**, manage **tasks** in a **table or kanban** view and in the task drawer, with **persisted comments** (API + Prisma). This is a **monorepo without a root `node_modules`**: each package (`frontend/`, `backend/`, `e2e/`) has its own `package.json` and dependencies.
 

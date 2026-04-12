@@ -1,4 +1,4 @@
-# Freelance CRM — Frontend
+# WorkBoard — Frontend
 
 Portfolio demo (not a production CRM). Main flow: **login / register** → **workspace** → **projects list** → **project page** → **tasks** (table **or kanban** + drawer). Data for projects, tasks, and comments comes from the backend API.
 

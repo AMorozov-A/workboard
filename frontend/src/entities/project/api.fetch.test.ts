@@ -6,7 +6,7 @@ import { fetchProjectById, fetchProjects } from './api'
 
 describe('fetchProjects / fetchProjectById', () => {
   beforeEach(() => {
-    localStorage.setItem('freelance_crm_access_token', 'test-token')
+    localStorage.setItem('workboard_access_token', 'test-token')
   })
 
   it('fetchProjects — маппит items в Project[]', async () => {

@@ -41,7 +41,7 @@ const baseTask: Task = {
 
 describe('useProjectTasksQuery', () => {
   it('успех — data — массив Task после маппинга', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     const row = mockApiTask({
       id: 'ta-1',
       title: 'Mapped',
@@ -64,7 +64,7 @@ describe('useProjectTasksQuery', () => {
   })
 
   it('при projectId пустом запрос не уходит', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     let requests = 0
     server.use(
       http.get('*/api/v1/tasks/project/:projectId', () => {
@@ -87,7 +87,7 @@ describe('useProjectTasksQuery', () => {
   })
 
   it('ошибка сети — isError', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(tasksHandlers.listError(500, 'err'))
 
     const qc = createTestQueryClient()
@@ -102,7 +102,7 @@ describe('useProjectTasksQuery', () => {
 
 describe('useCreateTaskMutation', () => {
   it('onSuccess инвалидирует список задач проекта', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     const created = mockApiTask({ id: 'new-t', title: 'Created', projectId: 'p-1' })
     server.use(tasksHandlers.createSuccess(created))
 
@@ -126,7 +126,7 @@ describe('useCreateTaskMutation', () => {
   })
 
   it('ошибка API — mutation в error state', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(tasksHandlers.postError(400))
 
     const qc = createTestQueryClient()
@@ -146,7 +146,7 @@ describe('useCreateTaskMutation', () => {
 
 describe('useDeleteTaskMutation', () => {
   it('onSuccess инвалидирует список задач проекта', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(tasksHandlers.deleteNoContent())
 
     const qc = createTestQueryClient()
@@ -164,7 +164,7 @@ describe('useDeleteTaskMutation', () => {
   })
 
   it('ошибка API — mutation в error state', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(tasksHandlers.deleteError(400))
 
     const qc = createTestQueryClient()
@@ -179,7 +179,7 @@ describe('useDeleteTaskMutation', () => {
   })
 
   it('при ошибке API вызывается onError из опций mutateAsync', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(tasksHandlers.deleteError(500))
 
     const qc = createTestQueryClient()
@@ -197,7 +197,7 @@ describe('useDeleteTaskMutation', () => {
 
 describe('useUpdateTaskMutation', () => {
   it('onSuccess инвалидирует список задач проекта', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     const updated = mockApiTask({ id: 't-up', title: 'Renamed', projectId: 'p-up' })
     server.use(tasksHandlers.updateSuccess(updated))
 
@@ -221,7 +221,7 @@ describe('useUpdateTaskMutation', () => {
   })
 
   it('ошибка API — mutation в error state', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(tasksHandlers.patchError(400))
 
     const qc = createTestQueryClient()
@@ -239,7 +239,7 @@ describe('useUpdateTaskMutation', () => {
   })
 
   it('при ошибке API вызывается onError из опций mutateAsync', async () => {
-    localStorage.setItem('freelance_crm_access_token', 't')
+    localStorage.setItem('workboard_access_token', 't')
     server.use(tasksHandlers.patchError(500))
 
     const qc = createTestQueryClient()

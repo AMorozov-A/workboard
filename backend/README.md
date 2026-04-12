@@ -1,6 +1,6 @@
-# Freelance CRM — Backend
+# WorkBoard — Backend
 
-REST API for the Freelance CRM demo. All routes are mounted under `**/api/v1**` (see `src/app.ts`).
+REST API for the WorkBoard demo. All routes are mounted under `**/api/v1**` (see `src/app.ts`).
 
 ## Stack
 
