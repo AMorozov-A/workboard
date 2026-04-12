@@ -3,10 +3,6 @@ import { prisma } from '../../db/client';
 import { HttpError } from '../../shared/http-error';
 import * as authService from './auth.service';
 
-/**
- * Прямые вызовы auth.service.register (та же логика, что и POST /auth/register).
- * Дублирует часть integration-тестов, но фиксирует контракт сервиса без HTTP.
- */
 describe('auth.service.register', () => {
   const uniqueEmail = (label: string) =>
     `${label}-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;

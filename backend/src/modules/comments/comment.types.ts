@@ -1,6 +1,16 @@
-export interface Comment {
+export interface CommentAuthorResponse {
+  id: string;
+  email: string;
+}
+
+export interface CommentResponse {
   id: string;
   body: string;
   taskId: string;
-  createdAt: Date;
+  createdAt: string;
+  author: CommentAuthorResponse;
+}
+
+export interface CreateCommentDto {
+  body: string;
 }

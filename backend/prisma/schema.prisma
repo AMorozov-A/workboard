@@ -36,11 +36,11 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   projects     Project[]
+  comments     Comment[]
 }
 
 model Project {
   id          String         @id @default(uuid())
-  /** Человекочитаемый ключ: {prefix}-{n}, напр. proj-1 — для ссылок и отображения */
   key         String
   title       String
   description String?
@@ -59,7 +59,6 @@ model Project {
 
 model Task {
   id          String       @id @default(uuid())
-  /** Ключ задачи внутри проекта: task-1, task-2 */
   key         String
   title       String
   description String?
@@ -81,5 +80,7 @@ model Comment {
   body      String
   taskId    String
   task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }

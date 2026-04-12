@@ -1,6 +1,5 @@
 import type { APIRequestContext, Page } from '@playwright/test'
 
-/** Совпадает с frontend/src/shared/lib/auth/tokenStorage.ts */
 export const ACCESS_TOKEN_KEY = 'freelance_crm_access_token'
 
 export const getApiBaseUrl = (): string =>
@@ -55,10 +54,6 @@ export async function registerViaAPI(
   return { accessToken: json.accessToken }
 }
 
-/**
- * Регистрация через API, запись токена в localStorage и переход в рабочую область
- * (подгрузка пользователя через /me, как в обычном приложении).
- */
 export async function registerAndLogin(
   page: Page,
   creds: RegisterBody

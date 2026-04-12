@@ -1,5 +1,6 @@
-import { useProjectQuery } from '@entities/project/api'
+import { useProjectQuery, useUpdateProjectMutation } from '@entities/project/api'
 import { getProjectStatusTag } from '@entities/project/lib/presentation'
+import type { Project } from '@entities/project/types'
 import {
   useCreateTaskMutation,
   useProjectTasksQuery,
@@ -12,27 +13,45 @@ import {
   getTaskStatusOptions,
   getTaskStatusTag,
 } from '@entities/task/lib/presentation'
-import type { Task } from '@entities/task/model/types'
+import { KANBAN_STATUS_ORDER } from '@entities/task/lib/kanbanStatusOrder'
+import type { Task, TaskStatus } from '@entities/task/model/types'
 import type { TimelineEvent } from '@entities/timeline/types'
 import { CreateTaskButton, CreateTaskModal, useCreateTaskModal } from '@features/task/create'
+import { EditProjectModal, useEditProjectModal } from '@features/project/edit'
+import { routes } from '@shared/config/routes'
 import { formatLocaleCurrency, formatLocaleDate, formatLocaleDateTime } from '@shared/lib/i18n'
 import { ContentState } from '@shared/ui'
-import {
-  Button,
-  Card,
-  Descriptions,
-  Select,
-  Skeleton,
-  Space,
-  Table,
-  Tabs,
-  Timeline,
-  Typography,
-} from 'antd'
+import { EditOutlined } from '@ant-design/icons'
+import { Button, Card, Segmented, Select, Skeleton, Space, Table, Timeline, Typography } from 'antd'
+import { LayoutGrid, Table2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { TaskDrawerWidget } from '@widgets/task/TaskDrawerWidget'
+
+import {
+  BreadcrumbCurrent,
+  FilterField,
+  FilterLabel,
+  ProjectBreadcrumb,
+  ProjectHeaderRow,
+  ProjectPageDescription,
+  ProjectPageTitle,
+  ProjectSummaryCard,
+  ProjectTabs,
+  ProjectTitleBlock,
+  ProjectTitleRow,
+  SummaryDd,
+  SummaryDt,
+  SummaryGrid,
+  TasksFilters,
+  TasksTableShell,
+  TasksToolbar,
+  ToolbarActions,
+} from './ProjectPage.styles'
+import { ProjectKanbanBoard } from './ProjectKanbanBoard'
+
+type TasksViewMode = 'kanban' | 'table'
 
 export const ProjectPage = () => {
   const { t } = useTranslation()
@@ -51,13 +70,22 @@ export const ProjectPage = () => {
     refetch: refetchTasks,
   } = useProjectTasksQuery(projectId ?? '')
 
+  const { mutateAsync: updateProject } = useUpdateProjectMutation()
   const createTaskMutation = useCreateTaskMutation(projectId ?? '')
   const updateTaskMutation = useUpdateTaskMutation(projectId ?? '')
+
+  const {
+    projectToEdit,
+    isOpen: isEditOpen,
+    openModal: openEditModal,
+    closeModal: closeEditModal,
+  } = useEditProjectModal()
 
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [statusFilter, setStatusFilter] = useState<Task['status'] | 'all'>('all')
   const [priorityFilter, setPriorityFilter] = useState<Task['priority'] | 'all'>('all')
+  const [tasksView, setTasksView] = useState<TasksViewMode>('kanban')
   const { isOpen, openModal, closeModal } = useCreateTaskModal()
 
   const handleCreateTask = async (task: Task) => {
@@ -86,18 +114,34 @@ export const ProjectPage = () => {
     setSelectedTaskId(null)
   }
 
-  const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? null
-  const filteredTasks = useMemo(
-    () =>
-      tasks.filter((task) => {
-        const isStatusMatched = statusFilter === 'all' || task.status === statusFilter
-        const isPriorityMatched =
-          priorityFilter === 'all' || task.priority === priorityFilter
+  const handleUpdateProject = async (p: Project) => {
+    await updateProject({ projectId: p.id, project: p })
+  }
 
-        return isStatusMatched && isPriorityMatched
-      }),
-    [priorityFilter, statusFilter, tasks]
-  )
+  const handleTaskStatusChange = async (taskId: string, newStatus: Task['status']) => {
+    const task = filteredTasks.find((x) => x.id === taskId)
+    if (!task || task.status === newStatus) return
+    await updateTaskMutation.mutateAsync({ ...task, status: newStatus })
+  }
+
+  const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? null
+  const { filteredTasks, tasksByStatus } = useMemo(() => {
+    const filtered = tasks.filter((task) => {
+      const isStatusMatched = statusFilter === 'all' || task.status === statusFilter
+      const isPriorityMatched =
+        priorityFilter === 'all' || task.priority === priorityFilter
+      return isStatusMatched && isPriorityMatched
+    })
+    const map = new Map<TaskStatus, Task[]>()
+    for (const s of KANBAN_STATUS_ORDER) {
+      map.set(s, [])
+    }
+    for (const task of filtered) {
+      const list = map.get(task.status)
+      if (list) list.push(task)
+    }
+    return { filteredTasks: filtered, tasksByStatus: map }
+  }, [priorityFilter, statusFilter, tasks])
   const hasActiveFilters = statusFilter !== 'all' || priorityFilter !== 'all'
 
   const timeline: TimelineEvent[] = []
@@ -105,7 +149,7 @@ export const ProjectPage = () => {
   const renderTasksContent = () => {
     if (isTasksLoading) {
       return (
-        <Space direction="vertical" size={16} style={{ display: 'flex' }}>
+        <Space orientation="vertical" size={16} style={{ display: 'flex' }}>
           <div>
             <Typography.Text strong>
               {t('projectDetails.tasksSection.loadingTitle')}
@@ -162,54 +206,72 @@ export const ProjectPage = () => {
       )
     }
 
+    if (tasksView === 'table') {
+      return (
+        <TasksTableShell>
+          <Table<Task>
+            rowKey="id"
+            dataSource={filteredTasks}
+            pagination={false}
+            onRow={(record) => ({
+              onClick: () => handleOpenTask(record.id),
+              style: { cursor: 'pointer' },
+            })}
+            columns={[
+              {
+                title: t('projectDetails.tasksSection.columns.key'),
+                dataIndex: 'key',
+                width: 110,
+                render: (value: string) => (
+                  <Typography.Text code copyable={{ text: value }}>
+                    {value}
+                  </Typography.Text>
+                ),
+              },
+              {
+                title: t('projectDetails.tasksSection.columns.task'),
+                dataIndex: 'title',
+                render: (_, task) => (
+                  <Space orientation="vertical" size={2}>
+                    <Typography.Text strong>{task.title}</Typography.Text>
+                    <Typography.Text type="secondary">
+                      {task.description ?? t('projectDetails.tasksSection.descriptionFallback')}
+                    </Typography.Text>
+                  </Space>
+                ),
+              },
+              {
+                title: t('projectDetails.tasksSection.columns.status'),
+                dataIndex: 'status',
+                render: (value?: Task['status']) => getTaskStatusTag(value),
+              },
+              {
+                title: t('projectDetails.tasksSection.columns.priority'),
+                dataIndex: 'priority',
+                render: (value?: Task['priority']) => getTaskPriorityTag(value),
+              },
+              {
+                title: t('projectDetails.tasksSection.columns.deadline'),
+                dataIndex: 'dueDate',
+                render: (value?: string) => formatTaskDate(value),
+              },
+            ]}
+          />
+        </TasksTableShell>
+      )
+    }
+
     return (
-      <Table<Task>
-        rowKey="id"
-        dataSource={filteredTasks}
-        pagination={false}
-        onRow={(record) => ({
-          onClick: () => handleOpenTask(record.id),
-          style: { cursor: 'pointer' },
-        })}
-        columns={[
-          {
-            title: t('projectDetails.tasksSection.columns.key'),
-            dataIndex: 'key',
-            width: 110,
-            render: (value: string) => (
-              <Typography.Text code copyable={{ text: value }}>
-                {value}
-              </Typography.Text>
-            ),
-          },
-          {
-            title: t('projectDetails.tasksSection.columns.task'),
-            dataIndex: 'title',
-            render: (_, task) => (
-              <Space direction="vertical" size={2}>
-                <Typography.Text strong>{task.title}</Typography.Text>
-                <Typography.Text type="secondary">
-                  {task.description ?? t('projectDetails.tasksSection.descriptionFallback')}
-                </Typography.Text>
-              </Space>
-            ),
-          },
-          {
-            title: t('projectDetails.tasksSection.columns.status'),
-            dataIndex: 'status',
-            render: (value?: Task['status']) => getTaskStatusTag(value),
-          },
-          {
-            title: t('projectDetails.tasksSection.columns.priority'),
-            dataIndex: 'priority',
-            render: (value?: Task['priority']) => getTaskPriorityTag(value),
-          },
-          {
-            title: t('projectDetails.tasksSection.columns.deadline'),
-            dataIndex: 'dueDate',
-            render: (value?: string) => formatTaskDate(value),
-          },
-        ]}
+      <ProjectKanbanBoard
+        projectKey={project?.key ?? ''}
+        tasksByStatus={tasksByStatus}
+        tasksFlat={filteredTasks}
+        selectedTaskId={selectedTaskId}
+        isDrawerOpen={isDrawerOpen}
+        onTaskOpen={handleOpenTask}
+        onTaskStatusChange={(taskId, newStatus) => {
+          void handleTaskStatusChange(taskId, newStatus)
+        }}
       />
     )
   }
@@ -221,7 +283,7 @@ export const ProjectPage = () => {
   if (isProjectLoading) {
     return (
       <Card>
-        <Space direction="vertical" size={16} style={{ display: 'flex' }}>
+        <Space orientation="vertical" size={16} style={{ display: 'flex' }}>
           <div>
             <Typography.Text strong>{t('projectDetails.loadingTitle')}</Typography.Text>
             <Typography.Paragraph type="secondary" style={{ margin: '4px 0 0' }}>
@@ -282,21 +344,21 @@ export const ProjectPage = () => {
             <div
               style={{
                 padding: 12,
-                border: '1px solid #f0f0f0',
+                border: '1px solid var(--color-border)',
                 borderRadius: 12,
-                background: '#fafafa',
+                background: 'var(--color-surface-alt)',
               }}
             >
-              <Space direction="vertical" size={4} style={{ display: 'flex' }}>
+              <Space orientation="vertical" size={4} style={{ display: 'flex' }}>
                 <Typography.Text strong>{event.title}</Typography.Text>
                 <Typography.Text type="secondary">
                   {formatLocaleDateTime(event.time)}
                 </Typography.Text>
-                {event.description && (
+                {event.description ? (
                   <Typography.Paragraph type="secondary" style={{ margin: 0 }}>
                     {event.description}
                   </Typography.Paragraph>
-                )}
+                ) : null}
               </Space>
             </div>
           ),
@@ -306,122 +368,182 @@ export const ProjectPage = () => {
   }
 
   return (
-    <Card>
-      <Space direction="vertical" size={24} style={{ display: 'flex' }}>
-        <div>
-          <Typography.Title level={3} style={{ margin: 0 }}>
-            {project.name}
-          </Typography.Title>
+    <Space orientation="vertical" size={24} style={{ display: 'flex', width: '100%' }}>
+      <ProjectBreadcrumb
+        items={[
+          {
+            title: (
+              <Link to={routes.app}>
+                {t('projects.breadcrumb.workspace')}
+              </Link>
+            ),
+          },
+          {
+            title: (
+              <BreadcrumbCurrent>{project.name}</BreadcrumbCurrent>
+            ),
+          },
+        ]}
+      />
+
+      <ProjectHeaderRow>
+        <ProjectTitleBlock>
+          <ProjectTitleRow>
+            <ProjectPageTitle>{project.name}</ProjectPageTitle>
+            <Button
+              type="default"
+              icon={<EditOutlined />}
+              onClick={() => openEditModal(project)}
+            >
+              {t('projectDetails.editProject')}
+            </Button>
+          </ProjectTitleRow>
           {project.description ? (
-            <Typography.Paragraph type="secondary" style={{ margin: '8px 0 0' }}>
-              {project.description}
-            </Typography.Paragraph>
+            <ProjectPageDescription>{project.description}</ProjectPageDescription>
           ) : null}
-        </div>
-        <Descriptions column={2} bordered size="small">
-          <Descriptions.Item label={t('projectDetails.fields.key')}>
-            <Typography.Text code copyable={{ text: project.key }}>
-              {project.key}
-            </Typography.Text>
-          </Descriptions.Item>
-          <Descriptions.Item label={t('projectDetails.fields.client')}>
-            {project.client}
-          </Descriptions.Item>
-          <Descriptions.Item label={t('projectDetails.fields.status')}>
-            {getProjectStatusTag(project.status)}
-          </Descriptions.Item>
-          <Descriptions.Item label={t('projectDetails.fields.budget')}>
-            {formatLocaleCurrency(project.budget)}
-          </Descriptions.Item>
-          <Descriptions.Item label={t('projectDetails.fields.deadline')}>
-            {formatLocaleDate(project.deadline)}
-          </Descriptions.Item>
-        </Descriptions>
-        <Tabs
-          items={[
-            {
-              key: 'tasks',
-              label: t('projectDetails.tabs.tasks'),
-              children: (
-                <>
-                  <Space direction="vertical" size={16} style={{ display: 'flex' }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        gap: 16,
-                        flexWrap: 'wrap',
-                      }}
-                    >
-                      <div>
-                        <Typography.Title level={5} style={{ margin: 0 }}>
-                          {t('projectDetails.tasksSection.title')}
-                        </Typography.Title>
-                        <Typography.Paragraph
-                          type="secondary"
-                          style={{ margin: '8px 0 0' }}
-                        >
-                          {t('projectDetails.tasksSection.description')}
-                        </Typography.Paragraph>
-                      </div>
-                      <CreateTaskButton onClick={openModal} />
-                    </div>
-                    <Space size={12} wrap>
-                      <Select
-                        value={statusFilter}
-                        onChange={(value) => setStatusFilter(value)}
-                        style={{ width: 220 }}
-                        options={[
-                          { value: 'all', label: t('projectDetails.tasksSection.allStatuses') },
-                          ...getTaskStatusOptions(),
-                        ]}
-                      />
-                      <Select
-                        value={priorityFilter}
-                        onChange={(value) => setPriorityFilter(value)}
-                        style={{ width: 220 }}
-                        options={[
-                          {
-                            value: 'all',
-                            label: t('projectDetails.tasksSection.allPriorities'),
-                          },
-                          ...getTaskPriorityOptions(),
-                        ]}
-                      />
-                      {hasActiveFilters && (
-                        <Button onClick={handleResetFilters}>
-                          {t('common.resetFilters')}
-                        </Button>
-                      )}
-                    </Space>
+        </ProjectTitleBlock>
+
+        <ProjectSummaryCard>
+          <SummaryGrid>
+            <SummaryDt>{t('projectDetails.fields.key')}</SummaryDt>
+            <SummaryDd>
+              <Typography.Text code copyable={{ text: project.key }}>
+                {project.key}
+              </Typography.Text>
+            </SummaryDd>
+
+            <SummaryDt>{t('projectDetails.fields.client')}</SummaryDt>
+            <SummaryDd>{project.client ?? t('common.notSpecified')}</SummaryDd>
+
+            <SummaryDt>{t('projectDetails.fields.status')}</SummaryDt>
+            <SummaryDd>{getProjectStatusTag(project.status)}</SummaryDd>
+
+            <SummaryDt>{t('projectDetails.fields.budget')}</SummaryDt>
+            <SummaryDd>{formatLocaleCurrency(project.budget)}</SummaryDd>
+
+            <SummaryDt>{t('projectDetails.fields.deadline')}</SummaryDt>
+            <SummaryDd>
+              {project.deadline ? formatLocaleDate(project.deadline) : t('projects.table.tbd')}
+            </SummaryDd>
+
+            <SummaryDt>{t('projectDetails.fields.tasks')}</SummaryDt>
+            <SummaryDd>{tasks.length}</SummaryDd>
+          </SummaryGrid>
+        </ProjectSummaryCard>
+      </ProjectHeaderRow>
+
+      <ProjectTabs
+        items={[
+          {
+            key: 'tasks',
+            label: t('projectDetails.tabs.tasks'),
+            children: (
+              <>
+                {tasks.length > 0 || isTasksLoading ? (
+                  <>
+                    <TasksToolbar>
+                      <TasksFilters>
+                        <FilterField>
+                          <FilterLabel>{t('projectDetails.tasksSection.filterStatus')}</FilterLabel>
+                          <Select
+                            value={statusFilter}
+                            onChange={(value) => setStatusFilter(value)}
+                            style={{ width: 160 }}
+                            options={[
+                              {
+                                value: 'all',
+                                label: t('projectDetails.tasksSection.allStatuses'),
+                              },
+                              ...getTaskStatusOptions(),
+                            ]}
+                          />
+                        </FilterField>
+                        <FilterField>
+                          <FilterLabel>
+                            {t('projectDetails.tasksSection.filterPriority')}
+                          </FilterLabel>
+                          <Select
+                            value={priorityFilter}
+                            onChange={(value) => setPriorityFilter(value)}
+                            style={{ width: 160 }}
+                            options={[
+                              {
+                                value: 'all',
+                                label: t('projectDetails.tasksSection.allPriorities'),
+                              },
+                              ...getTaskPriorityOptions(),
+                            ]}
+                          />
+                        </FilterField>
+                        {hasActiveFilters && (
+                          <Button onClick={handleResetFilters}>
+                            {t('common.resetFilters')}
+                          </Button>
+                        )}
+                      </TasksFilters>
+                      <ToolbarActions>
+                        <Segmented
+                          value={tasksView}
+                          onChange={(v) => setTasksView(v as TasksViewMode)}
+                          options={[
+                            {
+                              value: 'kanban',
+                              label: (
+                                <Space size={6}>
+                                  <LayoutGrid size={14} aria-hidden />
+                                  {t('projectDetails.tasksSection.viewKanban')}
+                                </Space>
+                              ),
+                            },
+                            {
+                              value: 'table',
+                              label: (
+                                <Space size={6}>
+                                  <Table2 size={14} aria-hidden />
+                                  {t('projectDetails.tasksSection.viewTable')}
+                                </Space>
+                              ),
+                            },
+                          ]}
+                        />
+                        <CreateTaskButton onClick={openModal} />
+                      </ToolbarActions>
+                    </TasksToolbar>
                     {renderTasksContent()}
-                  </Space>
-                  <CreateTaskModal
-                    open={isOpen}
-                    onClose={closeModal}
-                    onCreate={handleCreateTask}
-                    projectId={project.id}
-                  />
-                  <TaskDrawerWidget
-                    open={isDrawerOpen}
-                    onClose={handleCloseDrawer}
-                    onSave={handleSaveTask}
-                    onTaskDeleted={handleTaskDeleted}
-                    tasksQueryKey={projectId ?? ''}
-                    task={selectedTask}
-                  />
-                </>
-              ),
-            },
-            {
-              key: 'timeline',
-              label: t('projectDetails.tabs.timeline'),
-              children: renderProjectTimeline(),
-            },
-          ]}
-        />
-      </Space>
-    </Card>
+                  </>
+                ) : (
+                  renderTasksContent()
+                )}
+                <CreateTaskModal
+                  open={isOpen}
+                  onClose={closeModal}
+                  onCreate={handleCreateTask}
+                  projectId={project.id}
+                />
+                <TaskDrawerWidget
+                  open={isDrawerOpen}
+                  onClose={handleCloseDrawer}
+                  onSave={handleSaveTask}
+                  onTaskDeleted={handleTaskDeleted}
+                  tasksQueryKey={projectId ?? ''}
+                  task={selectedTask}
+                />
+                <EditProjectModal
+                  project={projectToEdit}
+                  open={isEditOpen}
+                  onClose={closeEditModal}
+                  onUpdate={handleUpdateProject}
+                />
+              </>
+            ),
+          },
+          {
+            key: 'timeline',
+            label: t('projectDetails.tabs.timeline'),
+            children: renderProjectTimeline(),
+          },
+        ]}
+      />
+    </Space>
   )
 }

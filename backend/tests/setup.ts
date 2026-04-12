@@ -5,7 +5,6 @@ import path from 'node:path';
 import { createApp } from '../src/app';
 import { prisma } from '../src/db/client';
 
-/** Для прямого использования в тестах (Supertest, Prisma). */
 export { prisma, createApp };
 
 const backendRoot = path.resolve(__dirname, '..');

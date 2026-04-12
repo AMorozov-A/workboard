@@ -1,6 +1,6 @@
 # Freelance CRM — Frontend
 
-Portfolio demo (not a production CRM). Main flow: **login / register** → **workspace** → **projects list** → **project page** → **tasks** (table + drawer). Data for projects and tasks comes from the backend API.
+Portfolio demo (not a production CRM). Main flow: **login / register** → **workspace** → **projects list** → **project page** → **tasks** (table **or kanban** + drawer). Data for projects, tasks, and comments comes from the backend API.
 
 ## Stack
 
@@ -15,7 +15,7 @@ Portfolio demo (not a production CRM). Main flow: **login / register** → **wor
 
 ## API & env
 
-- HTTP base: `VITE_API_BASE_URL`; if unset, **`/api`** (same origin).  
+- HTTP base: `VITE_API_BASE_URL`; if unset, `**/api`** (same origin).  
 - In **dev**, [vite.config.ts](vite.config.ts) proxies `/api` to the backend (default `http://localhost:3001`).  
 - Restart the backend after API changes to avoid stale 404s.
 
@@ -50,12 +50,13 @@ Start the backend separately when you need auth and CRUD: `cd ../backend && npm 
 ### Tasks
 
 - List by project; create (modal); **inline** title/description edit in the drawer; status / meta; **delete** with confirmation.  
+- **Kanban** view on the project page (drag-and-drop between status columns where implemented).  
 - Mutations invalidate the correct TanStack Query keys.
 
 ### Comments
 
-- **GET** client exists (`listCommentsByTask`, `useTaskCommentsQuery`), but the API returns an empty list.  
-- The task drawer implements a **comments tab with local React state** only (not persisted across reloads).
+- **TanStack Query** hooks in `@entities/comment` load, create, and delete comments for the open task (`GET/POST/DELETE` → `/api/v1/tasks/:taskId/comments`).  
+- Comments are **persisted** in the database; the drawer shows **author** (from the API).
 
 ### Other
 
@@ -66,14 +67,16 @@ Start the backend separately when you need auth and CRUD: `cd ../backend && npm 
 
 ## FSD layout
 
-| Layer | Role |
-|-------|------|
-| `src/app` | Providers, Redux store, router, auth guards |
-| `src/pages` | Login, projects list, project detail |
-| `src/widgets` | App shell, task drawer |
+
+| Layer          | Role                                                                                   |
+| -------------- | -------------------------------------------------------------------------------------- |
+| `src/app`      | Providers, Redux store, router, auth guards                                            |
+| `src/pages`    | Login, projects list, project detail                                                   |
+| `src/widgets`  | App shell, task drawer                                                                 |
 | `src/features` | Auth forms, change password, project CRUD modals, task create/delete, task inline edit |
-| `src/entities` | Types, query/mutation hooks, API mappers |
-| `src/shared` | UI helpers, i18n, HTTP client, API service |
+| `src/entities` | Types, query/mutation hooks, API mappers                                               |
+| `src/shared`   | UI helpers, i18n, HTTP client, API service                                             |
+
 
 Entry points: [app/router/AppRouter.tsx](src/app/router/AppRouter.tsx), [app/store](src/app/store).
 
@@ -81,12 +84,14 @@ Entry points: [app/router/AppRouter.tsx](src/app/router/AppRouter.tsx), [app/sto
 
 ## Tests
 
-| | |
-|--|--|
-| Test files | **13** (files named `*.test.ts` / `*.test.tsx` under `src/`) |
-| Tests (Vitest) | **95** |
-| Config | [vite.config.ts](vite.config.ts) (`test` section) |
-| Setup | [tests/setup.ts](tests/setup.ts) |
+
+|                |                                                              |
+| -------------- | ------------------------------------------------------------ |
+| Test files     | **14** (files named `*.test.ts` / `*.test.tsx` under `src/`) |
+| Tests (Vitest) | **100**                                                      |
+| Config         | [vite.config.ts](vite.config.ts) (`test` section)            |
+| Setup          | [tests/setup.ts](tests/setup.ts)                             |
+
 
 ```bash
 cd frontend
@@ -100,6 +105,7 @@ npm run test:coverage
 
 ## Known limitations
 
-- **Comments**: no full CRUD vs backend; drawer comments are **in-memory** for the session.  
+- **Comments**: no **edit** (PATCH) in the API or UI yet.  
 - **Task editing**: inline editors are not covered by a large dedicated test file (unlike delete/create flows).  
 - **E2E** lives in the root `e2e/` package (Russian UI selectors).
+

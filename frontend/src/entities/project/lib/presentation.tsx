@@ -16,9 +16,9 @@ export const getProjectStatusLabel = (status?: Project['status']) =>
   i18n.t('projects.status.empty')
 
 export const getProjectStatusTag = (status?: Project['status']) => {
-  if (status === 'active') return <Tag color="green">{i18n.t('projects.status.active')}</Tag>
-  if (status === 'paused') return <Tag color="gold">{i18n.t('projects.status.paused')}</Tag>
-  if (status === 'done') return <Tag color="blue">{i18n.t('projects.status.done')}</Tag>
+  if (status === 'active') return <Tag color="cyan">{i18n.t('projects.status.active')}</Tag>
+  if (status === 'paused') return <Tag color="orange">{i18n.t('projects.status.paused')}</Tag>
+  if (status === 'done') return <Tag color="default">{i18n.t('projects.status.done')}</Tag>
 
   return <Tag>{i18n.t('projects.status.empty')}</Tag>
 }

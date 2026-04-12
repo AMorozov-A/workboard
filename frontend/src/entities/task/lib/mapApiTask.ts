@@ -1,7 +1,6 @@
 import type { ApiTask } from '@shared/api/crmV1.types'
 import type { Task } from '../model/types'
 
-/** Задача из API → доменная модель UI. */
 export function mapApiTaskToTask(t: ApiTask): Task {
   return {
     id: t.id,

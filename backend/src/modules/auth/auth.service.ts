@@ -27,7 +27,6 @@ function assertPassword(password: unknown): string {
   return password;
 }
 
-/** Для login не требуем минимальную длину — неверный короткий пароль даёт 401, а не 400. */
 function assertLoginPassword(password: unknown): string {
   if (typeof password !== 'string' || password.length === 0) {
     throw new HttpError(400, 'Укажите пароль');
@@ -120,9 +119,6 @@ export async function getMe(userId: string): Promise<{ user: PublicUser }> {
   return { user: toPublicUser(user) };
 }
 
-/**
- * Смена пароля: проверка текущего, валидация нового (как при регистрации).
- */
 export async function changePassword(
   userId: string,
   currentPassword: unknown,

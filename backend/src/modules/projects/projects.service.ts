@@ -5,7 +5,6 @@ import type { CreateProjectInput, UpdateProjectInput } from './project.types';
 
 const PROJECT_STATUSES: ProjectStatus[] = ['active', 'paused', 'done'];
 
-/** Префикс ключа проекта: proj → proj-1, crm → crm-1 */
 const KEY_PREFIX_RE = /^[a-z][a-z0-9-]{1,29}$/;
 
 const UUID_RE =
@@ -170,7 +169,6 @@ export async function listProjectsForUser(userId: string) {
   });
 }
 
-/** projectRef — uuid или человекочитаемый key (напр. proj-1) */
 export async function getProjectForUser(projectRef: string, userId: string) {
   if (UUID_RE.test(projectRef)) {
     const p = await prisma.project.findFirst({

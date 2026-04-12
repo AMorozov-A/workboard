@@ -1,12 +1,14 @@
 import { http, HttpResponse } from 'msw'
 import type { ApiProject, ApiTask } from '@shared/api/crmV1.types'
+import type { Comment } from '@entities/comment/types'
 
-/** Базовый путь API в тестах совпадает с client: `/api` + `/v1/...` */
 const projectsListPattern = '*/api/v1/projects'
 const projectByIdPattern = '*/api/v1/projects/:id'
 const tasksByProjectPattern = '*/api/v1/tasks/project/:projectId'
 const tasksPattern = '*/api/v1/tasks'
 const taskByIdPattern = '*/api/v1/tasks/:id'
+const taskCommentsPattern = '*/api/v1/tasks/:taskId/comments'
+const taskCommentByIdPattern = '*/api/v1/tasks/:taskId/comments/:commentId'
 
 export const mockApiProject = (overrides: Partial<ApiProject> = {}): ApiProject => ({
   id: 'p-1',
@@ -57,14 +59,20 @@ export const projectsHandlers = {
   deleteNoContent: () =>
     http.delete(projectByIdPattern, () => new HttpResponse(null, { status: 204 })),
 
-  /** DELETE с ошибкой (например 500) — для server.use в тестах */
   deleteError: (status: number = 500, body = 'Internal Server Error') =>
     http.delete(projectByIdPattern, () => new HttpResponse(body, { status })),
 
-  /** PATCH с ошибкой (например 500) — для server.use в тестах */
   patchError: (status: number = 500, body = 'Internal Server Error') =>
     http.patch(projectByIdPattern, () => new HttpResponse(body, { status })),
 }
+
+export const mockComment = (overrides: Partial<Comment> = {}): Comment => ({
+  id: 'c-1',
+  body: 'Mock comment',
+  createdAt: '2025-01-01T00:00:00.000Z',
+  author: { id: 'u-1', email: 'mock@example.com' },
+  ...overrides,
+})
 
 export const mockApiTask = (overrides: Partial<ApiTask> = {}): ApiTask => ({
   id: 't-1',
@@ -118,4 +126,32 @@ export const tasksHandlers = {
 
   patchError: (status: number = 500, body = 'Internal Server Error') =>
     http.patch(taskByIdPattern, () => new HttpResponse(body, { status })),
+}
+
+export const commentsHandlers = {
+  listSuccess: (taskId: string, items: Comment[] = [mockComment()]) =>
+    http.get(taskCommentsPattern, ({ params }) => {
+      const tid = params.taskId as string
+      return HttpResponse.json({
+        ok: true as const,
+        items: tid === taskId ? items : [],
+      })
+    }),
+
+  createSuccess: (comment: Comment) =>
+    http.post(taskCommentsPattern, async ({ request }) => {
+      await request.json()
+      return HttpResponse.json({ ok: true as const, comment }, { status: 201 })
+    }),
+
+  deleteSuccess: () =>
+    http.delete(taskCommentByIdPattern, () =>
+      HttpResponse.json({ ok: true as const })
+    ),
+
+  deleteError: (status: number = 500, body = 'Internal Server Error') =>
+    http.delete(taskCommentByIdPattern, () => new HttpResponse(body, { status })),
+
+  postError: (status: number = 400, body = 'Bad Request') =>
+    http.post(taskCommentsPattern, () => new HttpResponse(body, { status })),
 }

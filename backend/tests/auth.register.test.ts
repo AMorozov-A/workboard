@@ -234,7 +234,6 @@ describe('POST /api/v1/auth/register', () => {
       expect(res.status).toBeLessThan(500);
     });
 
-    /** REG-S-05: включить тест после добавления rate limit на POST /auth/register */
     it.skip('returns 429 when rate limiting is enabled on /auth/register', async () => {
       await getTestApp()
         .post('/api/v1/auth/register')

@@ -1,10 +1,6 @@
 import type { RequestHandler } from 'express';
 import { verifyToken } from './jwt';
 
-/**
- * Требует заголовок `Authorization: Bearer <token>`.
- * При успехе заполняет `req.user`; иначе отвечает 401 и не вызывает `next`.
- */
 export const requireAuth: RequestHandler = (req, res, next) => {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {

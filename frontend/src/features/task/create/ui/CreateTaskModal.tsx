@@ -6,6 +6,7 @@ import {
 } from '@entities/task/lib/presentation'
 import type { Task } from '@entities/task/model/types'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { rhfAntdOnFinish, textAreaCtrlEnterSubmit } from '@shared/lib/form/rhfAntdFormSubmit'
 import { notifyError, notifySuccess } from '@shared/ui'
 import { DatePicker, Form, Input, Modal, Select } from 'antd'
 import { Controller, useForm } from 'react-hook-form'
@@ -116,7 +117,7 @@ export const CreateTaskModal = ({
       okButtonProps={{ disabled: !isValid, loading: isSubmitting }}
       destroyOnClose
     >
-      <Form layout="vertical">
+      <Form layout="vertical" onFinish={rhfAntdOnFinish(handleSubmit, onSubmit)}>
         <Form.Item
           label={t('tasks.form.title')}
           required
@@ -127,7 +128,11 @@ export const CreateTaskModal = ({
             name="title"
             control={control}
             render={({ field }) => (
-              <Input {...field} placeholder={t('tasks.form.titlePlaceholder')} />
+              <Input
+                {...field}
+                placeholder={t('tasks.form.titlePlaceholder')}
+                onPressEnter={() => void handleSubmit(onSubmit)()}
+              />
             )}
           />
         </Form.Item>
@@ -140,6 +145,7 @@ export const CreateTaskModal = ({
                 {...field}
                 placeholder={t('tasks.form.descriptionPlaceholder')}
                 rows={3}
+                onKeyDown={textAreaCtrlEnterSubmit(handleSubmit, onSubmit)}
               />
             )}
           />

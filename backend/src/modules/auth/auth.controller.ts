@@ -36,10 +36,6 @@ export async function me(req: Request, res: Response): Promise<void> {
   res.status(200).json({ ok: true, user });
 }
 
-/**
- * Stateless JWT: сервер не хранит сессию. Тело не требуется — достаточно валидного Bearer.
- * Клиент после ответа удаляет токен локально.
- */
 export async function logout(_req: Request, res: Response): Promise<void> {
   res.status(204).send();
 }

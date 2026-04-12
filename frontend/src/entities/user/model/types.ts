@@ -1,4 +1,3 @@
-/** Публичный пользователь из API (без секретных полей). */
 export type PublicUser = {
   id: string
   email: string

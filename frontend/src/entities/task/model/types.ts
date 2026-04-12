@@ -4,7 +4,6 @@ export type TaskPriority = 'low' | 'medium' | 'high'
 
 export type Task = {
   id: string
-  /** Ключ внутри проекта: task-1, task-2 */
   key: string
   title: string
   description?: string

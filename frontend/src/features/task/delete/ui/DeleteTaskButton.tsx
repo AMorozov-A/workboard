@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next'
 
 type DeleteTaskButtonProps = {
   task: Task
-  /** Как в `useProjectTasksQuery` — сегмент из URL, не `task.projectId` из ответа API. */
   tasksQueryKey: string
   onDeleted?: () => void
 }
@@ -46,6 +45,8 @@ export const DeleteTaskButton = ({ task, tasksQueryKey, onDeleted }: DeleteTaskB
       aria-label={t('tasks.actions.delete')}
       data-testid={`delete-task-${task.id}`}
       onClick={handleClick}
-    />
+    >
+      {t('tasks.delete.confirmOk')}
+    </Button>
   )
 }

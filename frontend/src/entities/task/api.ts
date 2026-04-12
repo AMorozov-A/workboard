@@ -37,10 +37,6 @@ export const useCreateTaskMutation = (projectId: string) => {
   })
 }
 
-/**
- * @param tasksQueryKey — тот же идентификатор, что в `useProjectTasksQuery(tasksQueryKey)`:
- * сегмент из URL (`project.key` или uuid), не обязательно `task.projectId` из API.
- */
 export const useUpdateTaskMutation = (tasksQueryKey: string) => {
   const queryClient = useQueryClient()
 

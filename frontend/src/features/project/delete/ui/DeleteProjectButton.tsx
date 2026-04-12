@@ -20,7 +20,6 @@ export const DeleteProjectButton = ({ project }: DeleteProjectButtonProps) => {
       content: t('projects.delete.confirmDescription', { name: project.name }),
       okText: t('projects.delete.confirmOk'),
       cancelText: t('common.cancel'),
-      /** Стабильный якорь для E2E/автотестов вместо селектора по локализованному заголовку диалога. */
       wrapProps: { 'data-testid': 'delete-project-confirm' },
       okButtonProps: { danger: true },
       onOk: async () => {

@@ -1,4 +1,3 @@
-/** Пользователь из auth-эндпоинтов (совпадает с entities/user PublicUser). */
 export type AuthUserDto = {
   id: string
   email: string
@@ -36,7 +35,6 @@ export type ChangePasswordResponse = {
   ok: true
 }
 
-/** Проект в списке и в деталке (без passwordHash). */
 export type ApiProject = {
   id: string
   key: string
@@ -65,13 +63,11 @@ export type ProjectDetailResponse = {
 
 export type CreateProjectBody = {
   title: string
-  /** Префикс ключа: `proj` → proj-1, proj-2 */
   keyPrefix?: string | null
   description?: string | null
   client?: string | null
   status?: 'active' | 'paused' | 'done'
   budget?: number | null
-  /** ISO 8601 */
   deadline?: string | null
 }
 
@@ -124,16 +120,3 @@ export type TaskMutationResponse = {
   task: ApiTask
 }
 
-/** GET /v1/comments/task/:taskId */
-export type ApiComment = {
-  id: string
-  body: string
-  taskId: string
-  createdAt: string
-}
-
-export type CommentsByTaskResponse = {
-  ok: true
-  taskId: string
-  items: ApiComment[]
-}

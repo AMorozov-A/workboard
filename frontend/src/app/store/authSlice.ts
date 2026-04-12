@@ -41,3 +41,5 @@ export const selectIsAuthenticated = (state: { auth: AuthState }) =>
 
 export const selectSessionPending = (state: { auth: AuthState }) =>
   Boolean(state.auth.accessToken) && !state.auth.user
+
+export const selectCurrentUser = (state: { auth: AuthState }) => state.auth.user

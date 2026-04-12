@@ -5,6 +5,7 @@ import {
   screen,
   testI18n,
   userEvent,
+  within,
 } from '../../../../tests/test-utils'
 import { ProjectsPage } from '../ProjectsPage'
 
@@ -33,6 +34,7 @@ const sampleProject: Project = {
   name: 'Alpha CRM',
   client: 'Bright Agency',
   status: 'active',
+  budget: 12_500,
 }
 
 describe('ProjectsPage', () => {
@@ -99,6 +101,12 @@ describe('ProjectsPage', () => {
     expect(buttons.length).toBe(1)
     expect(screen.getByText('Alpha CRM')).toBeInTheDocument()
     expect(screen.getByText('Bright Agency')).toBeInTheDocument()
+    expect(
+      screen.getByRole('columnheader', { name: testI18n.t('projects.table.columns.budget') })
+    ).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('navigation')).getByText(testI18n.t('projects.breadcrumb.current'))
+    ).toHaveClass('crm-breadcrumb-current')
   })
 
   it('в строке таблицы есть действия редактирования и удаления', () => {

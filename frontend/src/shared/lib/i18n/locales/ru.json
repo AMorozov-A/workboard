@@ -14,13 +14,29 @@
   },
   "layout": {
     "brand": "Freelance CRM",
+    "brandShort": "FreelanceCRM",
     "workspace": "Рабочая область",
     "language": "Язык",
     "languageSelectLabel": "Выбор языка интерфейса",
     "logout": "Выйти",
     "changePassword": "Сменить пароль",
+    "theme": "Тема",
+    "themeLight": "Светлая",
+    "themeDark": "Тёмная",
+    "soloWorkspace": "Личное пространство",
+    "profilePlaceholder": "Аккаунт",
+    "openSettings": "Настройки аккаунта",
+    "sidebar": {
+      "createProject": "Новый проект"
+    },
+    "projectGroups": {
+      "active": "Активные",
+      "paused": "Пауза",
+      "done": "Завершённые"
+    },
     "menu": {
-      "projects": "Проекты"
+      "projects": "Проекты",
+      "projectsSection": "Проекты"
     }
   },
   "auth": {
@@ -92,7 +108,11 @@
   },
   "projects": {
     "title": "Проекты",
-    "description": "Держите под рукой все клиентские проекты, текущие статусы и ближайшие сроки.",
+    "breadcrumb": {
+      "workspace": "Рабочая область",
+      "current": "Проекты"
+    },
+    "description": "Управляйте клиентами, бюджетами и сроками проектов.",
     "actions": {
       "create": "Создать проект",
       "edit": "Редактировать проект",
@@ -161,11 +181,13 @@
     },
     "table": {
       "empty": "Проекты не найдены",
+      "tbd": "Уточняется",
       "columns": {
         "key": "Ключ",
         "project": "Проект",
         "client": "Клиент",
         "status": "Статус",
+        "budget": "Бюджет",
         "deadline": "Дедлайн",
         "actions": "Действия"
       },
@@ -183,16 +205,18 @@
     "loadingDescription": "Получаем данные проекта с сервера.",
     "notFoundTitle": "Проект не найден",
     "notFoundDescription": "Проект с таким идентификатором отсутствует или недоступен.",
+    "editProject": "Редактировать проект",
     "fields": {
       "key": "Ключ",
       "client": "Клиент",
       "status": "Статус",
       "budget": "Бюджет",
-      "deadline": "Дедлайн"
+      "deadline": "Дедлайн",
+      "tasks": "Задачи"
     },
     "tabs": {
       "tasks": "Задачи",
-      "timeline": "Хронология проекта"
+      "timeline": "Таймлайн"
     },
     "timeline": {
       "emptyTitle": "Событий проекта пока нет",
@@ -201,6 +225,10 @@
     "tasksSection": {
       "title": "Задачи проекта",
       "description": "Управляйте текущими задачами, сроками и приоритетами в одном рабочем списке.",
+      "viewKanban": "Канбан",
+      "viewTable": "Таблица",
+      "filterStatus": "Статус:",
+      "filterPriority": "Приоритет:",
       "allStatuses": "Все статусы",
       "allPriorities": "Все приоритеты",
       "loadingTitle": "Загружаем задачи проекта",
@@ -270,6 +298,16 @@
       "title": "Новая задача",
       "submit": "Создать задачу"
     },
+    "comments": {
+      "title": "Комментарии",
+      "empty": "Нет комментариев",
+      "placeholder": "Написать комментарий...",
+      "add": "Добавить",
+      "delete": "Удалить",
+      "deleteConfirm": "Удалить комментарий?",
+      "deleteError": "Не удалось удалить",
+      "createError": "Не удалось добавить"
+    },
     "drawer": {
       "title": "Карточка задачи",
       "descriptionSection": "Описание",
@@ -281,7 +319,6 @@
       "commentsEmpty": "Комментариев пока нет",
       "commentsEmptyTitle": "У задачи пока нет комментариев",
       "commentsEmptyDescription": "Добавьте первый комментарий, чтобы зафиксировать договорённость, вопрос клиента или заметку для себя.",
-      "commentsEmptyAction": "Добавить первый комментарий",
       "commentPlaceholder": "Напишите комментарий, чтобы зафиксировать решение или договорённость",
       "timelineCreated": "Задача создана",
       "timelineStatus": "Текущий статус",

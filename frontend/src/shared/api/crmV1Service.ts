@@ -1,7 +1,6 @@
 import { apiRequest } from './client'
 import type {
   ChangePasswordResponse,
-  CommentsByTaskResponse,
   CreateProjectBody,
   CreateTaskBody,
   LoginResponse,
@@ -149,10 +148,3 @@ export async function deleteTask(taskId: string): Promise<void> {
   })
 }
 
-/** GET /api/v1/comments/task/:taskId */
-export async function listCommentsByTask(taskId: string): Promise<CommentsByTaskResponse> {
-  return apiRequest<CommentsByTaskResponse>(
-    `${V1}/comments/task/${encodeURIComponent(taskId)}`,
-    { method: 'GET' }
-  )
-}

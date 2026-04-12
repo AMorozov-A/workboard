@@ -2,6 +2,7 @@ import { loginSuccess } from '@app/store/authSlice'
 import { fetchProjects, projectsQueryKey } from '@entities/project/api'
 import { registerRequest } from '@features/auth/session'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { rhfAntdOnFinish } from '@shared/lib/form/rhfAntdFormSubmit'
 import { routes } from '@shared/config/routes'
 import { isApiError } from '@shared/api/errors'
 import { useAppDispatch } from '@shared/lib/store'
@@ -103,7 +104,7 @@ export const RegisterForm = () => {
   const loading = isSubmitting || registerMutation.isPending
 
   return (
-    <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
+    <Form layout="vertical" onFinish={rhfAntdOnFinish(handleSubmit, onSubmit)}>
       <Form.Item
         label={t('auth.registerForm.email')}
         validateStatus={errors.email ? 'error' : ''}

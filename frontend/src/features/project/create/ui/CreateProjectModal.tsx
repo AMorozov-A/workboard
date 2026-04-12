@@ -1,6 +1,7 @@
 import { getProjectStatusOptions } from '@entities/project/lib/presentation'
 import type { Project } from '@entities/project/types'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { rhfAntdOnFinish, textAreaCtrlEnterSubmit } from '@shared/lib/form/rhfAntdFormSubmit'
 import { getDateInputFormat } from '@shared/lib/i18n'
 import { notifyError, notifySuccess } from '@shared/ui'
 import { DatePicker, Form, Input, InputNumber, Modal, Select } from 'antd'
@@ -119,7 +120,7 @@ export const CreateProjectModal = ({
       okButtonProps={{ disabled: !isValid, loading: isSubmitting }}
       destroyOnClose
     >
-      <Form layout="vertical">
+      <Form layout="vertical" onFinish={rhfAntdOnFinish(handleSubmit, onSubmit)}>
         <Form.Item
           label={t('projects.form.name')}
           required
@@ -194,6 +195,7 @@ export const CreateProjectModal = ({
                 min={0}
                 controls={false}
                 placeholder={t('projects.form.budgetPlaceholder')}
+                onPressEnter={() => void handleSubmit(onSubmit)()}
               />
             )}
           />
@@ -223,6 +225,7 @@ export const CreateProjectModal = ({
                 {...field}
                 rows={4}
                 placeholder={t('projects.form.descriptionPlaceholder')}
+                onKeyDown={textAreaCtrlEnterSubmit(handleSubmit, onSubmit)}
               />
             )}
           />

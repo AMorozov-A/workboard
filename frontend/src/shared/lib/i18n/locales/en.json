@@ -14,13 +14,29 @@
   },
   "layout": {
     "brand": "Freelance CRM",
+    "brandShort": "FreelanceCRM",
     "workspace": "Workspace",
     "language": "Language",
     "languageSelectLabel": "Choose app language",
     "logout": "Log out",
     "changePassword": "Change password",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "soloWorkspace": "Solo workspace",
+    "profilePlaceholder": "Account",
+    "openSettings": "Account settings",
+    "sidebar": {
+      "createProject": "New project"
+    },
+    "projectGroups": {
+      "active": "Active",
+      "paused": "Paused",
+      "done": "Done"
+    },
     "menu": {
-      "projects": "Projects"
+      "projects": "Projects",
+      "projectsSection": "Projects"
     }
   },
   "auth": {
@@ -92,7 +108,11 @@
   },
   "projects": {
     "title": "Projects",
-    "description": "Keep all client projects, current statuses, and upcoming deadlines at hand.",
+    "breadcrumb": {
+      "workspace": "Workspace",
+      "current": "Projects"
+    },
+    "description": "Manage your active clients, budgets, and project timelines.",
     "actions": {
       "create": "Create project",
       "edit": "Edit project",
@@ -161,11 +181,13 @@
     },
     "table": {
       "empty": "No projects found",
+      "tbd": "TBD",
       "columns": {
         "key": "Key",
         "project": "Project",
         "client": "Client",
         "status": "Status",
+        "budget": "Budget",
         "deadline": "Deadline",
         "actions": "Actions"
       },
@@ -183,16 +205,18 @@
     "loadingDescription": "Fetching project data from the server.",
     "notFoundTitle": "Project not found",
     "notFoundDescription": "There is no project with this id or it is not available.",
+    "editProject": "Edit project",
     "fields": {
       "key": "Key",
       "client": "Client",
       "status": "Status",
       "budget": "Budget",
-      "deadline": "Deadline"
+      "deadline": "Deadline",
+      "tasks": "Tasks"
     },
     "tabs": {
       "tasks": "Tasks",
-      "timeline": "Project timeline"
+      "timeline": "Timeline"
     },
     "timeline": {
       "emptyTitle": "No project events yet",
@@ -201,6 +225,10 @@
     "tasksSection": {
       "title": "Project tasks",
       "description": "Manage tasks, deadlines, and priorities in one place.",
+      "viewKanban": "Kanban",
+      "viewTable": "Table",
+      "filterStatus": "Status:",
+      "filterPriority": "Priority:",
       "allStatuses": "All statuses",
       "allPriorities": "All priorities",
       "loadingTitle": "Loading project tasks",
@@ -270,6 +298,16 @@
       "title": "New task",
       "submit": "Create task"
     },
+    "comments": {
+      "title": "Comments",
+      "empty": "No comments",
+      "placeholder": "Write a comment...",
+      "add": "Add",
+      "delete": "Delete",
+      "deleteConfirm": "Delete comment?",
+      "deleteError": "Failed to delete",
+      "createError": "Failed to add"
+    },
     "drawer": {
       "title": "Task card",
       "descriptionSection": "Description",
@@ -281,7 +319,6 @@
       "commentsEmpty": "No comments yet",
       "commentsEmptyTitle": "This task has no comments yet",
       "commentsEmptyDescription": "Add the first comment to capture an agreement, client request, or a note for yourself.",
-      "commentsEmptyAction": "Add the first comment",
       "commentPlaceholder": "Write a comment to capture a decision or agreement",
       "timelineCreated": "Task created",
       "timelineStatus": "Current status",

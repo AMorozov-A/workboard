@@ -1,4 +1,9 @@
 import type { Task } from '@entities/task/model/types'
+import {
+  useCommentsList,
+  useCreateCommentMutation,
+  useDeleteCommentMutation,
+} from '@entities/comment'
 import { formatTaskDate, getTaskStatusLabel } from '@entities/task/lib/presentation'
 import { DeleteTaskButton } from '@features/task/delete'
 import {
@@ -6,11 +11,15 @@ import {
   TaskMetaForm,
   TaskTitleInlineEdit,
 } from '@features/task/edit'
+import { selectCurrentUser } from '@app/store/authSlice'
 import { formatLocaleDateTime } from '@shared/lib/i18n'
+import { useAppSelector } from '@shared/lib/store'
 import { ContentState, notifyError, notifySuccess } from '@shared/ui'
-import { Button, Drawer, Input, List, Space, Tabs, Timeline, Typography } from 'antd'
+import { Button, Drawer, List, Space, Spin, Tabs, Timeline, Typography } from 'antd'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { CommentForm } from './ui/CommentForm'
+import { CommentItem } from './ui/CommentItem'
 
 type TaskDrawerWidgetProps = {
   open: boolean
@@ -18,15 +27,7 @@ type TaskDrawerWidgetProps = {
   onClose: () => void
   onSave: (task: Task) => void | Promise<void>
   onTaskDeleted?: () => void
-  /** Ключ списка задач в TanStack Query (сегмент URL проекта). */
   tasksQueryKey: string
-}
-
-type TaskComment = {
-  id: string
-  author: string
-  content: string
-  createdAt: string
 }
 
 type TaskHistoryItem = {
@@ -46,36 +47,29 @@ export const TaskDrawerWidget = ({
 }: TaskDrawerWidgetProps) => {
   const { t, i18n } = useTranslation()
 
-  return (
-    task ? (
-      <TaskDrawerContent
-        key={`${task.id}-${i18n.resolvedLanguage ?? i18n.language}`}
-        open={open}
-        task={task}
-        onClose={onClose}
-        onSave={onSave}
-        onTaskDeleted={onTaskDeleted}
-        tasksQueryKey={tasksQueryKey}
+  return task ? (
+    <TaskDrawerContent
+      key={`${task.id}-${i18n.resolvedLanguage ?? i18n.language}`}
+      open={open}
+      task={task}
+      onClose={onClose}
+      onSave={onSave}
+      onTaskDeleted={onTaskDeleted}
+      tasksQueryKey={tasksQueryKey}
+    />
+  ) : (
+    <Drawer
+      open={open}
+      onClose={onClose}
+      width={860}
+      title={<Typography.Text strong>{t('tasks.drawer.title')}</Typography.Text>}
+    >
+      <ContentState
+        variant="empty"
+        title={t('tasks.drawer.emptyTitle')}
+        description={t('tasks.drawer.emptyDescription')}
       />
-    ) : (
-      <Drawer
-        open={open}
-        onClose={onClose}
-        width={860}
-        title={<Typography.Text strong>{t('tasks.drawer.title')}</Typography.Text>}
-        extra={
-          <Space>
-            <Button onClick={onClose}>{t('common.close')}</Button>
-          </Space>
-        }
-      >
-        <ContentState
-          variant="empty"
-          title={t('tasks.drawer.emptyTitle')}
-          description={t('tasks.drawer.emptyDescription')}
-        />
-      </Drawer>
-    )
+    </Drawer>
   )
 }
 
@@ -97,19 +91,23 @@ const TaskDrawerContent = ({
   tasksQueryKey,
 }: TaskDrawerContentProps) => {
   const { t } = useTranslation()
-  const [draft, setDraft] = useState<Task>(task)
-  const [comments, setComments] = useState<TaskComment[]>([])
-  const [historyItems, setHistoryItems] = useState<TaskHistoryItem[]>([])
-  const [commentInput, setCommentInput] = useState('')
+  const currentUser = useAppSelector(selectCurrentUser)
+  const currentUserId = currentUser?.id ?? ''
 
-  const commentInputId = `task-comment-input-${task.id}`
+  const [draft, setDraft] = useState<Task>(task)
+  const [historyItems, setHistoryItems] = useState<TaskHistoryItem[]>([])
+
+  const taskId = task.id
+  const { data: comments = [], isLoading: commentsLoading } = useCommentsList(taskId)
+  const createMutation = useCreateCommentMutation(taskId)
+  const deleteMutation = useDeleteCommentMutation(taskId)
+
   const isSaveDisabled = useMemo(() => !draft.title?.trim(), [draft.title])
 
   const handleFocusCommentInput = () => {
     if (typeof document === 'undefined') return
-
-    const input = document.getElementById(commentInputId)
-    input?.focus()
+    const el = document.querySelector<HTMLElement>('[data-testid="comment-form-input"]')
+    el?.focus()
   }
 
   const handleSave = async () => {
@@ -160,31 +158,32 @@ const TaskDrawerContent = ({
     }
   }
 
-  const handleAddComment = () => {
-    const content = commentInput.trim()
-    if (!content) return
-
+  const handleCreateComment = async (body: string) => {
     const now = new Date().toISOString()
-
-    setComments((prevComments) => [
-      ...prevComments,
-      {
-        id: `${draft.id}-comment-${prevComments.length + 1}`,
-        author: t('common.you'),
-        content,
-        createdAt: now,
-      },
-    ])
+    try {
+      await createMutation.mutateAsync({ body })
+    } catch {
+      notifyError(t('tasks.comments.createError'), t('tasks.comments.createError'))
+      throw new Error('create-comment-failed')
+    }
     setHistoryItems((prevHistory) => [
       ...prevHistory,
       {
-        id: `${draft.id}-history-comment-${prevHistory.length + 1}`,
+        id: `${draft.id}-history-comment-${now}`,
         title: t('tasks.historyEvent.commentAddedTitle'),
         description: t('tasks.historyEvent.commentAddedDescription'),
         createdAt: now,
       },
     ])
-    setCommentInput('')
+  }
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await deleteMutation.mutateAsync(commentId)
+    } catch {
+      notifyError(t('tasks.comments.deleteError'), t('tasks.comments.deleteError'))
+      throw new Error('delete-comment-failed')
+    }
   }
 
   const timelineItems = useMemo(
@@ -233,20 +232,9 @@ const TaskDrawerContent = ({
         </Space>
       }
       extra={
-        <Space>
-          <Button onClick={onClose}>{t('common.close')}</Button>
-          <DeleteTaskButton
-            task={draft}
-            tasksQueryKey={tasksQueryKey}
-            onDeleted={() => {
-              onClose()
-              onTaskDeleted?.()
-            }}
-          />
-          <Button type="primary" onClick={handleSave} disabled={isSaveDisabled}>
-            {t('common.save')}
-          </Button>
-        </Space>
+        <Button type="primary" onClick={handleSave} disabled={isSaveDisabled}>
+          {t('common.save')}
+        </Button>
       }
     >
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
@@ -282,6 +270,16 @@ const TaskDrawerContent = ({
               setDraft((prev) => ({ ...prev, ...payload }))
             }
           />
+          <div style={{ marginTop: 4 }}>
+            <DeleteTaskButton
+              task={draft}
+              tasksQueryKey={tasksQueryKey}
+              onDeleted={() => {
+                onClose()
+                onTaskDeleted?.()
+              }}
+            />
+          </div>
         </div>
       </div>
       <div style={{ marginTop: 32 }}>
@@ -292,77 +290,53 @@ const TaskDrawerContent = ({
               label: t('tasks.drawer.tabs.comments'),
               children: (
                 <Space direction="vertical" size={16} style={{ display: 'flex' }}>
-                  {comments.length > 0 ? (
-                    <List
-                      split={false}
-                      dataSource={comments}
-                      renderItem={(item) => (
-                        <List.Item
-                          style={{
-                            padding: 0,
-                            border: 'none',
-                            marginBottom: 12,
-                          }}
-                        >
-                          <div
+                  <Spin spinning={commentsLoading}>
+                    {comments.length > 0 ? (
+                      <List
+                        split={false}
+                        dataSource={comments}
+                        renderItem={(item) => (
+                          <List.Item
                             style={{
-                              width: '100%',
-                              padding: 16,
-                              border: '1px solid #f0f0f0',
-                              borderRadius: 12,
-                              background: '#fafafa',
+                              padding: 0,
+                              border: 'none',
+                              marginBottom: 12,
                             }}
                           >
-                            <Space direction="vertical" size={8} style={{ display: 'flex' }}>
-                              <Space
-                                size={12}
-                                style={{
-                                  justifyContent: 'space-between',
-                                  width: '100%',
-                                  flexWrap: 'wrap',
-                                }}
-                              >
-                                <Typography.Text strong>{item.author}</Typography.Text>
-                                <Typography.Text type="secondary">
-                                  {formatLocaleDateTime(item.createdAt)}
-                                </Typography.Text>
-                              </Space>
-                              <Typography.Paragraph style={{ margin: 0 }}>
-                                {item.content}
-                              </Typography.Paragraph>
-                            </Space>
-                          </div>
-                        </List.Item>
-                      )}
-                    />
-                  ) : (
-                    <ContentState
-                      variant="empty"
-                      title={t('tasks.drawer.commentsEmptyTitle')}
-                      description={t('tasks.drawer.commentsEmptyDescription')}
-                      action={
-                        <Button type="primary" onClick={handleFocusCommentInput}>
-                          {t('tasks.drawer.commentsEmptyAction')}
-                        </Button>
-                      }
-                    />
-                  )}
-                  <Input.TextArea
-                    id={commentInputId}
-                    rows={3}
-                    value={commentInput}
-                    onChange={(event) => setCommentInput(event.target.value)}
-                    placeholder={t('tasks.drawer.commentPlaceholder')}
+                            <div
+                              style={{
+                                width: '100%',
+                                padding: 'var(--space-4)',
+                                border: '1px solid var(--color-border-subtle)',
+                                borderRadius: 'var(--radius-lg)',
+                                background: 'var(--color-surface-alt)',
+                              }}
+                            >
+                              <CommentItem
+                                comment={item}
+                                currentUserId={currentUserId}
+                                onDelete={handleDeleteComment}
+                                isDeleting={
+                                  deleteMutation.isPending &&
+                                  deleteMutation.variables === item.id
+                                }
+                              />
+                            </div>
+                          </List.Item>
+                        )}
+                      />
+                    ) : !commentsLoading ? (
+                      <ContentState
+                        variant="empty"
+                        title={t('tasks.comments.empty')}
+                        description={t('tasks.drawer.commentsEmptyDescription')}
+                      />
+                    ) : null}
+                  </Spin>
+                  <CommentForm
+                    onSubmit={handleCreateComment}
+                    loading={createMutation.isPending}
                   />
-                  <div style={{ marginTop: 12 }}>
-                    <Button
-                      type="primary"
-                      onClick={handleAddComment}
-                      disabled={!commentInput.trim()}
-                    >
-                      {t('tasks.actions.addComment')}
-                    </Button>
-                  </div>
                 </Space>
               ),
             },

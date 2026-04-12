@@ -1,6 +1,7 @@
 import { changePasswordRequest } from '@features/auth/session'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isApiError } from '@shared/api/errors'
+import { rhfAntdOnFinish } from '@shared/lib/form/rhfAntdFormSubmit'
 import { notifyError, notifySuccess } from '@shared/ui/notify'
 import { useMutation } from '@tanstack/react-query'
 import { Button, Form, Input, Modal } from 'antd'
@@ -101,7 +102,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
       destroyOnClose
       afterClose={() => reset()}
     >
-      <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
+      <Form layout="vertical" onFinish={rhfAntdOnFinish(handleSubmit, onSubmit)}>
         <Form.Item
           label={t('auth.changePassword.currentPassword')}
           validateStatus={errors.currentPassword ? 'error' : ''}

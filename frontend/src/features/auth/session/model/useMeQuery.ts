@@ -26,7 +26,6 @@ export function useMeQuery() {
     }
   }, [query.data, dispatch])
 
-  /** Любая ошибка /me при «есть токен, нет user» — сбрасываем сессию (в т.ч. 401 без Bearer из-за гонки bridge). */
   useEffect(() => {
     if (!query.isError || !enabled) return
     dispatch(logout())

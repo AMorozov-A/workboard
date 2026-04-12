@@ -4,7 +4,6 @@ import { ApiError } from './errors'
 export const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '/api'
 
 export type ApiRequestOptions = {
-  /** Не подставлять Authorization (логин и т.п.) */
   skipAuth?: boolean
 }
 

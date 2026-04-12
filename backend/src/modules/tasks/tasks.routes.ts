@@ -6,12 +6,10 @@ export const tasksRouter = Router();
 
 tasksRouter.use(requireAuth);
 
-/** POST /api/v1/tasks — тело: { projectId, title, ... } */
 tasksRouter.post('/', (req, res, next) => {
   void tasksController.create(req, res).catch(next);
 });
 
-/** GET /api/v1/tasks/project/:projectId */
 tasksRouter.get('/project/:projectId', (req, res, next) => {
   void tasksController.listByProject(req, res).catch(next);
 });

@@ -2,16 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { prisma } from '../src/db/client';
 import { createTestUser, getTestApp } from './helpers';
 
-/**
- * Интеграционные сценарии CRUD по плану Planner (Supertest + тестовая БД).
- * Второй пользователь для «чужого» проекта: в основном сценарии — `other@test.com`;
- * в остальных тестах — уникальные `other-*@test.com`, чтобы не ломать unique(email) при concurrent it.
- *
- * При нескольких воркерах Vitest и одной SQLite возможны гонки с `tests/setup.ts` (beforeEach).
- * Стабильный прогон: `cd backend && npm test -- --maxWorkers=1`
- */
-
-/** HTTP-контракт: поле названия — `title` (см. Planner: name в UI → title в API). */
 const validCreateBody = {
   title: 'Интеграционный проект',
   client: 'ООО Клиент',

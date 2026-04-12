@@ -1,10 +1,16 @@
 import type { PropsWithChildren } from 'react'
 import { useSyncExternalStore } from 'react'
-import { ConfigProvider } from 'antd'
+import { App as AntdApp, ConfigProvider } from 'antd'
+import { AntdAppBridge } from '@app/providers/AntdAppBridge'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Provider } from 'react-redux'
+import { ThemeProvider } from 'styled-components'
 import { store } from '@app/store/store'
+import { ThemeSync } from '@app/providers/ThemeProvider'
+import { darkTheme, lightTheme } from '@app/providers/themeConfig'
 import i18n, { getAntdLocale } from '@shared/lib/i18n'
+import { GlobalStyle } from '@shared/styles/GlobalStyle'
+import { useThemeStore } from '@shared/stores/themeStore'
 import { initNotifications } from '@shared/ui'
 
 initNotifications()
@@ -38,16 +44,24 @@ const AppProvidersContent = ({ children }: PropsWithChildren) => {
     getLanguageSnapshot,
     getLanguageSnapshot
   )
+  const isDark = useThemeStore((s) => s.isDark)
 
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <ConfigProvider
-          locale={getAntdLocale(language)}
-          theme={{ token: { colorPrimary: '#1677ff' } }}
-        >
-          {children}
-        </ConfigProvider>
+        <ThemeProvider theme={{}}>
+          <GlobalStyle />
+          <ThemeSync />
+          <ConfigProvider
+            locale={getAntdLocale(language)}
+            theme={isDark ? darkTheme : lightTheme}
+          >
+            <AntdApp>
+              <AntdAppBridge />
+              {children}
+            </AntdApp>
+          </ConfigProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </Provider>
   )
