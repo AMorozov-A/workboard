@@ -149,5 +149,3 @@ Full route list: **[backend/README.md](backend/README.md)** (all paths under `/a
 | Build frontend | `cd frontend && npm run build` |
 | Build backend  | `cd backend && npm run build`  |
 
-
-Legacy note: [DEVELOPER_DASHBOARD.md](DEVELOPER_DASHBOARD.md).
