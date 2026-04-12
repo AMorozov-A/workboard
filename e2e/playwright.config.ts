@@ -14,7 +14,7 @@ function shSingleQuote(s: string): string {
 
 const resetE2eDb = `rm -f ${shSingleQuote(e2eDbFilePath)} ${shSingleQuote(`${e2eDbFilePath}-wal`)} ${shSingleQuote(`${e2eDbFilePath}-shm`)} 2>/dev/null; `
 
-const backendShellCommand = `${resetE2eDb}cd ${shSingleQuote(backendDir)} && export DATABASE_URL=${shSingleQuote(e2eDatabaseUrl)} && export JWT_SECRET=${shSingleQuote(jwtSecretForE2e)} && export PORT=3001 && export NODE_ENV=test && npx prisma migrate deploy && exec npx tsx src/server.ts`
+const backendShellCommand = `${resetE2eDb}cd ${shSingleQuote(backendDir)} && export DATABASE_URL=${shSingleQuote(e2eDatabaseUrl)} && export JWT_SECRET=${shSingleQuote(jwtSecretForE2e)} && export PORT=3001 && export NODE_ENV=test && npx prisma migrate deploy && exec npx tsx src/index.ts`
 
 const frontendShellCommand = `cd ${shSingleQuote(frontendDir)} && exec npm run dev`
 

@@ -24,7 +24,7 @@ Scripts and dependencies: `package.json`.
 
 | Path                     | Purpose                                                                    |
 | ------------------------ | -------------------------------------------------------------------------- |
-| `src/server.ts`          | Entry: Prisma, `listen`, graceful shutdown                                 |
+| `src/index.ts`           | Entry: Prisma, `listen`, graceful shutdown                                 |
 | `src/app.ts`             | Express: `json`, logging, `/api/v1` router, 404, error handler             |
 | `src/config/env.ts`      | `PORT`, `DATABASE_URL`, `JWT_*`                                            |
 | `src/db/client.ts`       | `PrismaClient`                                                             |
@@ -60,7 +60,7 @@ cd backend
 npm install
 npm run dev          # tsx watch
 npm run build        # prisma generate + tsc → dist/
-npm start            # node dist/server.js (after build)
+npm start            # node dist/index.js (after build)
 ```
 
 ### Prisma
