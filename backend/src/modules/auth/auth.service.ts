@@ -7,6 +7,10 @@ import type { PublicUser } from './user.types';
 const BCRYPT_ROUNDS = 10;
 const PASSWORD_MIN_LENGTH = 8;
 
+const DEMO_EMAIL = 'demo@workboard.app';
+const DEMO_PASSWORD = 'demo123';
+const DEMO_NAME = 'Demo User';
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function normalizeEmail(email: string): string {
@@ -145,4 +149,27 @@ export async function changePassword(
     where: { id: userId },
     data: { passwordHash },
   });
+}
+
+export async function ensureDemoUser(): Promise<{ email: string }> {
+  const existing = await prisma.user.findUnique({
+    where: { email: DEMO_EMAIL },
+    select: { id: true },
+  });
+
+  if (existing) {
+    return { email: DEMO_EMAIL };
+  }
+
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, BCRYPT_ROUNDS);
+
+  await prisma.user.create({
+    data: {
+      email: DEMO_EMAIL,
+      passwordHash,
+      name: DEMO_NAME,
+    },
+  });
+
+  return { email: DEMO_EMAIL };
 }

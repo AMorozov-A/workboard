@@ -3,6 +3,7 @@ import type {
   ChangePasswordResponse,
   CreateProjectBody,
   CreateTaskBody,
+  EnsureDemoResponse,
   LoginResponse,
   MeResponse,
   PingResponse,
@@ -50,6 +51,11 @@ export async function loginRequest(email: string, password: string): Promise<Log
     { method: 'POST', body: JSON.stringify({ email, password }) },
     { skipAuth: true }
   )
+}
+
+/** POST /api/v1/auth/ensure-demo */
+export async function ensureDemo(): Promise<EnsureDemoResponse> {
+  return apiRequest<EnsureDemoResponse>(`${V1}/auth/ensure-demo`, { method: 'POST' }, { skipAuth: true })
 }
 
 /** GET /api/v1/auth/me */

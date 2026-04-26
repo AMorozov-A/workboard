@@ -35,6 +35,11 @@ export type ChangePasswordResponse = {
   ok: true
 }
 
+/** POST /v1/auth/ensure-demo */
+export type EnsureDemoResponse = {
+  ok: true
+}
+
 export type ApiProject = {
   id: string
   key: string

@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { rhfAntdOnFinish } from '@shared/lib/form/rhfAntdFormSubmit'
 import { routes } from '@shared/config/routes'
 import { isApiError } from '@shared/api/errors'
+import { ensureDemo } from '@shared/api/crmV1Service'
 import { useAppDispatch } from '@shared/lib/store'
 import { notifyError } from '@shared/ui/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -83,9 +84,19 @@ export const LoginForm = () => {
 
   const loading = isSubmitting || loginMutation.isPending
 
-  const fillDemoCredentials = () => {
-    setValue('email', 'demo@workboard.app', { shouldDirty: true, shouldTouch: true })
-    setValue('password', 'demo123', { shouldDirty: true, shouldTouch: true })
+  const tryDemoLogin = async () => {
+    const email = 'demo@workboard.app'
+    const password = 'demo123'
+    setValue('email', email, { shouldDirty: true, shouldTouch: true })
+    setValue('password', password, { shouldDirty: true, shouldTouch: true })
+
+    try {
+      await ensureDemo()
+    } catch {
+      // if ensure-demo fails, still try to login (maybe demo already exists)
+    }
+
+    loginMutation.mutate({ email, password })
   }
 
   return (
@@ -130,7 +141,7 @@ export const LoginForm = () => {
         </Button>
       </Form.Item>
       <Form.Item style={{ marginBottom: 0 }}>
-        <Button type="default" htmlType="button" block onClick={fillDemoCredentials} disabled={loading}>
+        <Button type="default" htmlType="button" block onClick={() => void tryDemoLogin()} disabled={loading}>
           {t('auth.demoLogin')}
         </Button>
       </Form.Item>

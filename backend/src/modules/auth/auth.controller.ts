@@ -36,6 +36,11 @@ export async function login(req: Request, res: Response): Promise<void> {
   });
 }
 
+export async function ensureDemo(_req: Request, res: Response): Promise<void> {
+  await authService.ensureDemoUser();
+  res.status(200).json({ ok: true });
+}
+
 export async function me(req: Request, res: Response): Promise<void> {
   const userId = requireUserId(req);
   const { user } = await authService.getMe(userId);

@@ -12,6 +12,10 @@ authRouter.post('/login', (req, res, next) => {
   void authController.login(req, res).catch(next);
 });
 
+authRouter.post('/ensure-demo', (req, res, next) => {
+  void authController.ensureDemo(req, res).catch(next);
+});
+
 authRouter.get('/me', requireAuth, (req, res, next) => {
   void authController.me(req, res).catch(next);
 });
