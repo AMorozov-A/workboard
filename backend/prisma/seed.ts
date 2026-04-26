@@ -4,6 +4,15 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
+  const existingDemo = await prisma.user.findUnique({
+    where: { email: 'demo@workboard.app' },
+    select: { id: true },
+  });
+
+  if (existingDemo) {
+    return;
+  }
+
   await prisma.$transaction([
     prisma.taskNote.deleteMany(),
     prisma.comment.deleteMany(),
