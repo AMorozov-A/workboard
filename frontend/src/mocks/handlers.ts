@@ -13,6 +13,7 @@ const taskCommentByIdPattern = '*/api/v1/tasks/:taskId/comments/:commentId'
 export const mockApiProject = (overrides: Partial<ApiProject> = {}): ApiProject => ({
   id: 'p-1',
   key: 'proj-1',
+  taskKeyPrefix: 'T',
   title: 'Test project',
   userId: 'u-1',
   createdAt: '2025-01-01T00:00:00.000Z',

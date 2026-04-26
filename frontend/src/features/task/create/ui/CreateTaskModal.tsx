@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { rhfAntdOnFinish, textAreaCtrlEnterSubmit } from '@shared/lib/form/rhfAntdFormSubmit'
 import { notifyError, notifySuccess } from '@shared/ui'
 import { DatePicker, Form, Input, Modal, Select } from 'antd'
+import dayjs, { type Dayjs } from 'dayjs'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
@@ -25,7 +26,9 @@ const schema = z.object({
   description: z.string().optional(),
   status: z.enum(['todo', 'in_progress', 'review', 'done']),
   priority: z.enum(['low', 'medium', 'high']),
-  dueDate: z.any().optional(),
+  dueDate: z
+    .custom<Dayjs | null>((value) => value == null || dayjs.isDayjs(value))
+    .optional(),
   labels: z.array(z.string()).optional(),
 })
 

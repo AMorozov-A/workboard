@@ -16,10 +16,19 @@ import { formatLocaleDateTime } from '@shared/lib/i18n'
 import { useAppSelector } from '@shared/lib/store'
 import { ContentState, notifyError, notifySuccess } from '@shared/ui'
 import { Button, Drawer, List, Space, Spin, Tabs, Timeline, Typography } from 'antd'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CommentForm } from './ui/CommentForm'
 import { CommentItem } from './ui/CommentItem'
+
+const TASK_DRAWER_WIDTH = 860
+
+const TIMELINE_CARD_STYLE: React.CSSProperties = {
+  padding: 12,
+  border: '1px solid #f0f0f0',
+  borderRadius: 12,
+  background: '#fafafa',
+}
 
 type TaskDrawerWidgetProps = {
   open: boolean
@@ -61,7 +70,7 @@ export const TaskDrawerWidget = ({
     <Drawer
       open={open}
       onClose={onClose}
-      width={860}
+      width={TASK_DRAWER_WIDTH}
       title={<Typography.Text strong>{t('tasks.drawer.title')}</Typography.Text>}
     >
       <ContentState
@@ -102,7 +111,7 @@ const TaskDrawerContent = ({
   const createMutation = useCreateCommentMutation(taskId)
   const deleteMutation = useDeleteCommentMutation(taskId)
 
-  const isSaveDisabled = useMemo(() => !draft.title?.trim(), [draft.title])
+  const isSaveDisabled = !draft.title?.trim()
 
   const handleFocusCommentInput = () => {
     if (typeof document === 'undefined') return
@@ -186,41 +195,30 @@ const TaskDrawerContent = ({
     }
   }
 
-  const timelineItems = useMemo(
-    () =>
-      historyItems.map((item) => ({
-        key: item.id,
-        children: (
-          <div
-            style={{
-              padding: 12,
-              border: '1px solid #f0f0f0',
-              borderRadius: 12,
-              background: '#fafafa',
-            }}
-          >
-            <Space direction="vertical" size={4} style={{ display: 'flex' }}>
-              <Typography.Text strong>{item.title}</Typography.Text>
-              <Typography.Text type="secondary">
-                {formatLocaleDateTime(item.createdAt)}
-              </Typography.Text>
-              {item.description && (
-                <Typography.Paragraph type="secondary" style={{ margin: 0 }}>
-                  {item.description}
-                </Typography.Paragraph>
-              )}
-            </Space>
-          </div>
-        ),
-      })),
-    [historyItems]
-  )
+  const timelineItems = historyItems.map((item) => ({
+    key: item.id,
+    children: (
+      <div style={TIMELINE_CARD_STYLE}>
+        <Space direction="vertical" size={4} style={{ display: 'flex' }}>
+          <Typography.Text strong>{item.title}</Typography.Text>
+          <Typography.Text type="secondary">
+            {formatLocaleDateTime(item.createdAt)}
+          </Typography.Text>
+          {item.description && (
+            <Typography.Paragraph type="secondary" style={{ margin: 0 }}>
+              {item.description}
+            </Typography.Paragraph>
+          )}
+        </Space>
+      </div>
+    ),
+  }))
 
   return (
     <Drawer
       open={open}
       onClose={onClose}
-      width={860}
+      width={TASK_DRAWER_WIDTH}
       title={
         <Space size={12}>
           {draft.key ? (

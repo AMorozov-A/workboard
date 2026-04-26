@@ -162,6 +162,7 @@ describe('useCreateProjectMutation', () => {
       id: 'local-id',
       key: '',
       keyPrefix: 'proj',
+      taskKeyPrefix: 'T',
       name: 'Created',
       client: 'C',
       status: 'active',
@@ -188,6 +189,7 @@ describe('useCreateProjectMutation', () => {
     const payload: Project = {
       id: 'local-id',
       key: '',
+      taskKeyPrefix: 'T',
       name: 'N',
       client: 'C',
       status: 'active',
@@ -274,6 +276,7 @@ describe('useUpdateProjectMutation', () => {
     const payload: Project = {
       id: 'pid-up',
       key: 'proj-1',
+      taskKeyPrefix: 'T',
       name: 'Renamed',
       client: 'C',
       status: 'active',
@@ -305,6 +308,7 @@ describe('useUpdateProjectMutation', () => {
     const payload: Project = {
       id: 'pid-up',
       key: 'proj-1',
+      taskKeyPrefix: 'T',
       name: 'Renamed',
       client: 'C',
       status: 'active',
@@ -336,6 +340,7 @@ describe('useUpdateProjectMutation', () => {
     const payload: Project = {
       id: 'pid',
       key: 'k',
+      taskKeyPrefix: 'T',
       name: 'N',
       client: 'C',
       status: 'active',
@@ -359,6 +364,7 @@ describe('useUpdateProjectMutation', () => {
     const payload: Project = {
       id: 'pid-patch-err',
       key: 'k',
+      taskKeyPrefix: 'T',
       name: 'N',
       client: 'C',
       status: 'active',

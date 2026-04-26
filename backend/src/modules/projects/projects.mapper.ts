@@ -5,6 +5,7 @@ export function mapProjectToJson(p: PrismaProject): ProjectJson {
   return {
     id: p.id,
     key: p.key,
+    taskKeyPrefix: p.taskKeyPrefix,
     title: p.title,
     description: p.description,
     client: p.client,

@@ -111,7 +111,7 @@ npm run test:e2e    # from repo root
 - **Comments**: full list/create/delete under `**/api/v1/tasks/:taskId/comments`** (JWT); comments are stored with an **author** (`User`). There is no PATCH/edit endpoint yet.
 - **Backend Tasks API**: full CRUD is implemented; there are **no dedicated HTTP integration tests** for `/tasks` (unlike projects).
 - **Task inline edit** (`TaskTitleInlineEdit`, `TaskDescriptionInlineEdit`): covered indirectly; **no dedicated component test suite** like for delete/create modals.
-- **i18n in e2e**: scenarios use **Russian** UI strings for stability.
+- **i18n in e2e**: Playwright `storageState` sets `crm.language` to **ru** so selectors stay on Russian copy while the app default locale is **en**.
 - **Portfolio scope**: no production hardening (rate limiting optional, single-user demo data patterns).
 
 ---

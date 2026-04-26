@@ -3,6 +3,7 @@ import type { ProjectStatus } from '@prisma/client';
 export interface ProjectJson {
   id: string;
   key: string;
+  taskKeyPrefix: string;
   title: string;
   description: string | null;
   client: string | null;
@@ -17,6 +18,7 @@ export interface ProjectJson {
 export interface CreateProjectInput {
   title: string;
   keyPrefix?: string | null;
+  taskKeyPrefix?: string | null;
   description?: string | null;
   client: string;
   status?: ProjectStatus;

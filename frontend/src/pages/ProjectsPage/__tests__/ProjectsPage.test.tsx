@@ -1,4 +1,5 @@
 import type { Project } from '@entities/project/types'
+import { act } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   renderWithProviders,
@@ -6,8 +7,10 @@ import {
   testI18n,
   userEvent,
   within,
+  waitFor,
 } from '../../../../tests/test-utils'
 import { ProjectsPage } from '../ProjectsPage'
+import { APP_CONTEXT_ACTION_EVENT, APP_CONTEXT_ACTIONS } from '@shared/config/appContextActions'
 
 const mockUseProjectsQuery = vi.fn()
 const mockUseCreateProjectMutation = vi.fn()
@@ -31,6 +34,7 @@ vi.mock('@entities/project/api', () => ({
 const sampleProject: Project = {
   id: 'p1',
   key: 'proj-1',
+  taskKeyPrefix: 'T',
   name: 'Alpha CRM',
   client: 'Bright Agency',
   status: 'active',
@@ -83,11 +87,12 @@ describe('ProjectsPage', () => {
     renderWithProviders(<ProjectsPage />)
 
     expect(screen.getByText(testI18n.t('projects.empty.title'))).toBeInTheDocument()
-    const buttons = screen.getAllByRole('button', { name: testI18n.t('projects.actions.create') })
-    expect(buttons.length).toBeGreaterThanOrEqual(1)
+    expect(
+      screen.queryByRole('button', { name: testI18n.t('projects.actions.create') })
+    ).not.toBeInTheDocument()
   })
 
-  it('в шапке есть кнопка создания при непустом списке', () => {
+  it('при непустом списке показывает проекты и навигацию (без columnheader и без кнопки создания)', () => {
     mockUseProjectsQuery.mockReturnValue({
       data: [sampleProject],
       isLoading: false,
@@ -97,13 +102,12 @@ describe('ProjectsPage', () => {
 
     renderWithProviders(<ProjectsPage />)
 
-    const buttons = screen.getAllByRole('button', { name: testI18n.t('projects.actions.create') })
-    expect(buttons.length).toBe(1)
-    expect(screen.getByText('Alpha CRM')).toBeInTheDocument()
-    expect(screen.getByText('Bright Agency')).toBeInTheDocument()
     expect(
-      screen.getByRole('columnheader', { name: testI18n.t('projects.table.columns.budget') })
-    ).toBeInTheDocument()
+      screen.queryByRole('button', { name: testI18n.t('projects.actions.create') })
+    ).not.toBeInTheDocument()
+    expect(screen.getByText('proj-1')).toBeInTheDocument()
+    expect(screen.getByText('Alpha CRM')).toBeInTheDocument()
+    expect(screen.queryByRole('columnheader')).not.toBeInTheDocument()
     expect(
       within(screen.getByRole('navigation')).getByText(testI18n.t('projects.breadcrumb.current'))
     ).toHaveClass('crm-breadcrumb-current')
@@ -137,5 +141,30 @@ describe('ProjectsPage', () => {
     expect(screen.getByText(testI18n.t('projects.error.title'))).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: testI18n.t('common.retry') }))
     expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('открывает модалку создания проекта через глобальное контекстное действие', async () => {
+    mockUseProjectsQuery.mockReturnValue({
+      data: [sampleProject],
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    })
+
+    renderWithProviders(<ProjectsPage />)
+
+    expect(screen.queryByTestId('create-project-modal')).not.toBeInTheDocument()
+
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent(APP_CONTEXT_ACTION_EVENT, {
+          detail: { key: APP_CONTEXT_ACTIONS.projectsCreateProject },
+        })
+      )
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('create-project-modal')).toBeInTheDocument()
+    })
   })
 })

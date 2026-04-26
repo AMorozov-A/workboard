@@ -38,6 +38,7 @@ export type ChangePasswordResponse = {
 export type ApiProject = {
   id: string
   key: string
+  taskKeyPrefix: string
   title: string
   userId: string
   createdAt: string
@@ -64,6 +65,7 @@ export type ProjectDetailResponse = {
 export type CreateProjectBody = {
   title: string
   keyPrefix?: string | null
+  taskKeyPrefix?: string | null
   description?: string | null
   client?: string | null
   status?: 'active' | 'paused' | 'done'

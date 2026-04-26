@@ -24,12 +24,12 @@ export function useMeQuery() {
     if (query.data?.user) {
       dispatch(setUser(query.data.user))
     }
-  }, [query.data, dispatch])
+  }, [query.data?.user, dispatch])
 
   useEffect(() => {
     if (!query.isError || !enabled) return
     dispatch(logout())
-  }, [query.isError, query.error, enabled, dispatch])
+  }, [query.isError, enabled, dispatch])
 
   return query
 }

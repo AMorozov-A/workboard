@@ -31,7 +31,7 @@ test.describe('Projects: полный флоу', () => {
       name: 'E2E User',
     })
 
-    await expect(page.getByRole('heading', { name: ruProjects.title, level: 3 })).toBeVisible()
+    await expect(page.getByRole('heading', { name: ruProjects.title, level: 1 })).toBeVisible()
     await expect(page.getByTestId('projects-page-root')).toBeVisible()
 
     await createProjectViaUi(page, projectTitle)
@@ -120,9 +120,9 @@ test.describe('Projects: полный флоу', () => {
 
     await page.locator('tbody').getByRole('row').filter({ hasText: projectTitle }).click()
     await expect(page).toHaveURL(/\/app\/projects\/[^/]+$/)
-    await expect(
-      page.getByRole('heading', { name: ruProjectDetails.tasksSection.title, level: 5 })
-    ).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByRole('heading', { name: projectTitle, level: 1 })).toBeVisible({
+      timeout: 15_000,
+    })
 
     await page.getByRole('button', { name: ruTasks.actions.create }).first().click()
     const taskModal = page.getByRole('dialog', { name: ruTasks.modal.title })
@@ -131,11 +131,11 @@ test.describe('Projects: полный флоу', () => {
     await taskModal.getByRole('button', { name: ruTasks.modal.submit }).click()
     await expect(taskModal).toBeHidden({ timeout: 15_000 })
 
-    await expect(page.locator('tbody').getByText(taskTitle, { exact: true })).toBeVisible({
+    await expect(page.getByText(taskTitle, { exact: true })).toBeVisible({
       timeout: 15_000,
     })
 
-    await page.locator('tbody').getByRole('row').filter({ hasText: taskTitle }).click()
+    await page.getByText(taskTitle, { exact: true }).first().click()
     await expect(page.locator('.ant-drawer-open')).toBeVisible({ timeout: 15_000 })
     await expect(page.getByText(taskTitle, { exact: true }).first()).toBeVisible()
 
@@ -163,13 +163,10 @@ test.describe('Projects: полный флоу', () => {
     await page.locator('tbody').getByRole('row').filter({ hasText: projectTitle }).click()
 
     await expect(page).toHaveURL(/\/app\/projects\/[^/]+$/)
-    await expect(page.getByRole('heading', { level: 3 }).filter({ hasText: projectTitle })).toBeVisible({
+    await expect(page.getByRole('heading', { name: projectTitle, level: 1 })).toBeVisible({
       timeout: 15_000,
     })
     await expect(page.getByRole('tab', { name: ruProjectDetails.tabs.tasks })).toBeVisible()
-    await expect(
-      page.getByRole('heading', { name: ruProjectDetails.tasksSection.title, level: 5 })
-    ).toBeVisible()
   })
 
   test('5) негатив: без названия — кнопка Создать неактивна', async ({ page }) => {

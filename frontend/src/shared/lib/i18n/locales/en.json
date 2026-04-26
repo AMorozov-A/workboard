@@ -40,6 +40,7 @@
     }
   },
   "auth": {
+    "demoLogin": "Try Demo Account",
     "page": {
       "titleLogin": "Sign in",
       "titleRegister": "Create account",
@@ -140,6 +141,9 @@
       "keyPrefix": "Key prefix",
       "keyPrefixPlaceholder": "e.g. proj or crm",
       "keyPrefixHint": "Generates keys like prefix-1, prefix-2 (unique among your projects). Default: proj.",
+      "taskKeyPrefix": "Task key prefix",
+      "taskKeyPrefixPlaceholder": "e.g. T",
+      "taskKeyPrefixHint": "Used for task keys like T-1, T-2 inside this project. Cannot be changed later.",
       "client": "Client",
       "clientPlaceholder": "For example: Bright Agency",
       "status": "Status",
@@ -153,6 +157,7 @@
     "validation": {
       "nameRequired": "Enter a project name",
       "keyPrefix": "2–30 characters: lowercase Latin letters, digits, hyphen; must start with a letter",
+      "taskKeyPrefix": "1–10 characters: A–Z and digits; must start with a letter",
       "clientRequired": "Enter a client name",
       "budgetNonNegative": "Budget cannot be negative"
     },
@@ -239,6 +244,7 @@
       "emptyDescription": "Create the first task to capture the next step and keep the work under control.",
       "filteredEmptyTitle": "No tasks match the selected filters",
       "filteredEmptyDescription": "Reset the filters or choose different parameters to see the project tasks again.",
+      "statusGroupEmpty": "No tasks",
       "descriptionFallback": "Task description has not been added yet.",
       "columns": {
         "key": "Key",
@@ -347,6 +353,29 @@
     },
     "validation": {
       "titleRequired": "Enter a title"
+    },
+    "detailModal": {
+      "closeAria": "Close task",
+      "idLabel": "Task ID",
+      "newTaskTitle": "New task",
+      "titlePlaceholder": "Give this task a clear, specific name",
+      "sections": {
+        "title": "Title",
+        "description": "Description",
+        "notes": "Notes",
+        "details": "Details"
+      },
+      "notes": {
+        "empty": "No personal notes yet. Capture ideas, context, or reminders here.",
+        "addPlaceholder": "Add a personal note…",
+        "save": "Save note",
+        "untitled": "Note",
+        "titlePlaceholder": "Title",
+        "removeAria": "Remove note"
+      },
+      "delete": {
+        "action": "Delete task"
+      }
     }
   }
 }

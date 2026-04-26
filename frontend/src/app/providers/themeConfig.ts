@@ -62,9 +62,9 @@ export const lightTheme: ThemeConfig = {
     colorInfoBorder: '#A3D4D6',
     colorInfoText: '#01696F',
 
-    borderRadius: 8,
-    borderRadiusSM: 6,
-    borderRadiusLG: 12,
+    borderRadius: 10,
+    borderRadiusSM: 8,
+    borderRadiusLG: 14,
     borderRadiusXS: 4,
 
     padding: 16,
@@ -78,8 +78,8 @@ export const lightTheme: ThemeConfig = {
     marginXS: 8,
     marginXXS: 4,
 
-    boxShadow: '0 1px 3px rgba(40, 37, 29, 0.08), 0 1px 2px rgba(40, 37, 29, 0.06)',
-    boxShadowSecondary: '0 4px 12px rgba(40, 37, 29, 0.10)',
+    boxShadow: '0 1px 2px rgba(40, 37, 29, 0.06), 0 8px 24px rgba(40, 37, 29, 0.08)',
+    boxShadowSecondary: '0 10px 30px rgba(40, 37, 29, 0.10)',
 
     motionDurationFast: '0.1s',
     motionDurationMid: '0.2s',
@@ -127,6 +127,7 @@ export const lightTheme: ThemeConfig = {
       paddingLG: 24,
       headerBg: 'transparent',
       actionsLiMargin: '12px 0',
+      boxShadow: '0 1px 2px rgba(40, 37, 29, 0.06), 0 10px 26px rgba(40, 37, 29, 0.08)',
     },
     Button: {
       primaryShadow: 'none',
@@ -229,9 +230,9 @@ export const darkTheme: ThemeConfig = {
     colorInfoBorder: '#1E4E54',
     colorInfoText: '#4F98A3',
 
-    borderRadius: 8,
-    borderRadiusSM: 6,
-    borderRadiusLG: 12,
+    borderRadius: 10,
+    borderRadiusSM: 8,
+    borderRadiusLG: 14,
     borderRadiusXS: 4,
 
     padding: 16,
@@ -245,8 +246,8 @@ export const darkTheme: ThemeConfig = {
     marginXS: 8,
     marginXXS: 4,
 
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.30), 0 1px 2px rgba(0, 0, 0, 0.20)',
-    boxShadowSecondary: '0 4px 16px rgba(0, 0, 0, 0.40)',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 28px rgba(0, 0, 0, 0.45)',
+    boxShadowSecondary: '0 16px 40px rgba(0, 0, 0, 0.50)',
 
     motionDurationFast: '0.1s',
     motionDurationMid: '0.2s',
@@ -293,6 +294,7 @@ export const darkTheme: ThemeConfig = {
     Card: {
       paddingLG: 24,
       headerBg: 'transparent',
+      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.35), 0 14px 30px rgba(0, 0, 0, 0.45)',
     },
     Button: {
       primaryShadow: 'none',

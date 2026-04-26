@@ -200,7 +200,7 @@ export const AppContent = styled(Layout.Content)`
   overflow-y: auto;
   overflow-x: hidden;
   padding: 24px;
-  background: var(--color-bg);
+  background: var(--app-bg-gradient);
 `
 
 export const ContentShell = styled.div`

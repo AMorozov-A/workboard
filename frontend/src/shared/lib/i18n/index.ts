@@ -8,7 +8,7 @@ import { initReactI18next } from 'react-i18next'
 import en from './locales/en.json'
 import ru from './locales/ru.json'
 
-export const defaultLanguage = 'ru'
+export const defaultLanguage = 'en'
 export const languageStorageKey = 'crm.language'
 export const supportedLanguages = ['ru', 'en'] as const
 

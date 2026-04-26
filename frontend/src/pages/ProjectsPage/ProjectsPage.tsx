@@ -1,34 +1,48 @@
 import { useCreateProjectMutation, useProjectsQuery, useUpdateProjectMutation } from '@entities/project/api'
-import { getProjectInitials } from '@entities/project/lib/initials'
-import { getProjectStatusTag } from '@entities/project/lib/presentation'
 import type { Project } from '@entities/project/types'
 import {
-  CreateProjectButton,
   CreateProjectModal,
   useCreateProjectModal,
 } from '@features/project/create'
 import { DeleteProjectButton } from '@features/project/delete'
 import { EditProjectModal, useEditProjectModal } from '@features/project/edit'
 import { routes } from '@shared/config/routes'
-import { formatLocaleCurrency, formatLocaleDate } from '@shared/lib/i18n'
-import { ContentState } from '@shared/ui'
+import { APP_CONTEXT_ACTION_EVENT, APP_CONTEXT_ACTIONS } from '@shared/config/appContextActions'
+import { formatLocaleDate } from '@shared/lib/i18n'
+import { ContentState, GroupedSections } from '@shared/ui'
 import { EditOutlined } from '@ant-design/icons'
 import { Button, Skeleton, Space, Table, Tooltip, Typography } from 'antd'
+import { CheckCircle2, Circle, Info, PauseCircle, PlayCircle } from 'lucide-react'
+import type { ComponentType } from 'react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import {
   BreadcrumbCurrent,
-  KeyAvatar,
-  KeyCell,
-  PageDescription,
-  PageHeaderRow,
-  PageTitle,
   ProjectsBreadcrumb,
-  ProjectsCard,
   ProjectsTableShell,
 } from './ProjectsPage.styles'
+
+const hasOpenCreateProjectFlag = (
+  state: unknown
+): state is { openCreateProject?: boolean } => {
+  if (!state || typeof state !== 'object') return false
+  if (!('openCreateProject' in state)) return false
+  return typeof (state as { openCreateProject?: unknown }).openCreateProject === 'boolean'
+}
+
+const getProjectStatusHeaderMeta = (
+  status: NonNullable<Project['status']>
+): {
+  color: string
+  Icon: ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>
+} => {
+  if (status === 'active') return { color: 'var(--color-primary)', Icon: PlayCircle }
+  if (status === 'paused') return { color: 'var(--color-warning)', Icon: PauseCircle }
+  if (status === 'done') return { color: 'var(--color-success)', Icon: CheckCircle2 }
+  return { color: 'var(--color-text-muted)', Icon: Circle }
+}
 
 export const ProjectsPage = () => {
   const { t } = useTranslation()
@@ -46,12 +60,26 @@ export const ProjectsPage = () => {
   } = useEditProjectModal()
 
   useEffect(() => {
-    const state = location.state as { openCreateProject?: boolean } | null
-    if (state?.openCreateProject) {
+    if (hasOpenCreateProjectFlag(location.state) && location.state.openCreateProject) {
       openModal()
       navigate(location.pathname, { replace: true, state: {} })
     }
   }, [location.pathname, location.state, navigate, openModal])
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const custom = event as CustomEvent<{ key: string }>
+      const key = custom.detail?.key
+      if (!key) return
+
+      if (key === APP_CONTEXT_ACTIONS.projectsCreateProject) {
+        openModal()
+      }
+    }
+
+    window.addEventListener(APP_CONTEXT_ACTION_EVENT, handler as EventListener)
+    return () => window.removeEventListener(APP_CONTEXT_ACTION_EVENT, handler as EventListener)
+  }, [openModal])
 
   const handleCreateProject = async (project: Project) => {
     await createProject(project)
@@ -97,93 +125,121 @@ export const ProjectsPage = () => {
           variant="empty"
           title={t('projects.empty.title')}
           description={t('projects.empty.description')}
-          action={
-            <CreateProjectButton onClick={openModal} />
-          }
         />
       )
     }
 
+    const statusOrder: Array<NonNullable<Project['status']>> = ['active', 'paused', 'done']
+    const statusGroups = statusOrder.map((status) => {
+      const { color, Icon } = getProjectStatusHeaderMeta(status)
+      return {
+        key: status,
+        label: t(`projects.status.${status}`),
+        emptyText: t('projects.table.empty'),
+        color,
+        Icon,
+      }
+    })
+
     return (
       <ProjectsTableShell className="crm-projects-table-root">
-        <Table<Project>
-          rowKey="id"
-          dataSource={data}
-          pagination={false}
-          size="middle"
-          scroll={{ x: 'max-content' }}
-          locale={{ emptyText: t('projects.table.empty') }}
-          onRow={(record) => ({
-            onClick: () => navigate(routes.project(record.key)),
-            style: { cursor: 'pointer' },
-          })}
-          columns={[
-            {
-              title: t('projects.table.columns.key'),
-              dataIndex: 'key',
-              width: 100,
-              render: (_value: string, project) => (
-                <KeyCell>
-                  <KeyAvatar size={36}>{getProjectInitials(project.name, project.key)}</KeyAvatar>
-                </KeyCell>
-              ),
-            },
-            {
-              title: t('projects.table.columns.project'),
-              dataIndex: 'name',
-              render: (_, project) => (
-                <Space orientation="vertical" size={2}>
-                  <Typography.Text strong>{project.name}</Typography.Text>
-                  <Typography.Text type="secondary">
-                    {project.description ?? t('projects.table.descriptionFallback')}
-                  </Typography.Text>
-                </Space>
-              ),
-            },
-            {
-              title: t('projects.table.columns.client'),
-              dataIndex: 'client',
-              render: (value?: string) => value ?? t('common.notSpecified'),
-            },
-            {
-              title: t('projects.table.columns.status'),
-              dataIndex: 'status',
-              render: (value?: Project['status']) => getProjectStatusTag(value),
-            },
-            {
-              title: t('projects.table.columns.budget'),
-              dataIndex: 'budget',
-              align: 'right',
-              render: (value?: number) => formatLocaleCurrency(value),
-            },
-            {
-              title: t('projects.table.columns.deadline'),
-              dataIndex: 'deadline',
-              render: (value?: string) =>
-                value ? formatLocaleDate(value) : t('projects.table.tbd'),
-            },
-            {
-              title: t('projects.table.columns.actions'),
-              key: 'actions',
-              width: 120,
-              fixed: 'right',
-              render: (_, record) => (
-                <Space onClick={(e) => e.stopPropagation()}>
-                  <Tooltip title={t('projects.actions.edit')}>
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<EditOutlined />}
-                      aria-label={t('projects.actions.edit')}
-                      data-testid={`edit-project-${record.id}`}
-                      onClick={() => openEditModal(record)}
-                    />
-                  </Tooltip>
-                  <DeleteProjectButton project={record} />
-                </Space>
-              ),
-            },
-          ]}
+        <GroupedSections<Project, NonNullable<Project['status']>>
+          groups={statusGroups}
+          items={data}
+          groupBy={(project) => project.status ?? 'active'}
+          renderGroupBody={({ groupItems, group }) =>
+            groupItems.length === 0 ? (
+              <div style={{ padding: '6px 0' }}>
+                <Typography.Text type="secondary">{group.emptyText}</Typography.Text>
+              </div>
+            ) : (
+              <Table<Project>
+                rowKey="id"
+                dataSource={groupItems}
+                pagination={false}
+                showHeader={false}
+                size="middle"
+                scroll={{ x: 'max-content' }}
+                locale={{ emptyText: null }}
+                onRow={(record) => ({
+                  onClick: () => navigate(routes.project(record.key)),
+                  style: { cursor: 'pointer' },
+                })}
+                columns={[
+                  {
+                    title: t('projects.table.columns.project'),
+                    dataIndex: 'name',
+                    width: '100%',
+                    className: 'crm-project-table-col-title',
+                    render: (_, project) => (
+                      <Space size={10} align="center">
+                        <Typography.Text
+                          style={{
+                            fontFamily: 'var(--font-mono)',
+                            letterSpacing: '0.02em',
+                            color: 'var(--color-text-muted)',
+                            whiteSpace: 'nowrap',
+                            fontSize: 'var(--font-size-caption)',
+                          }}
+                        >
+                          {project.key || '—'}
+                        </Typography.Text>
+                        <Typography.Text strong style={{ fontSize: 'var(--font-size-sm)' }}>
+                          {project.name}
+                        </Typography.Text>
+                      </Space>
+                    ),
+                  },
+                  {
+                    title: t('projects.table.columns.actions'),
+                    key: 'actions',
+                    width: 120,
+                    fixed: 'right',
+                    className: 'crm-project-table-col-actions',
+                    render: (_, record) => (
+                      <Space onClick={(e) => e.stopPropagation()}>
+                        <Tooltip
+                          title={
+                            <Space orientation="vertical" size={2}>
+                              <Typography.Text style={{ fontSize: 'var(--font-size-caption)' }}>
+                                {t('projects.form.taskKeyPrefix')}: {record.taskKeyPrefix || '—'}
+                              </Typography.Text>
+                              <Typography.Text style={{ fontSize: 'var(--font-size-caption)' }}>
+                                {t('projects.table.columns.client')}:{' '}
+                                {record.client ? record.client : '—'}
+                              </Typography.Text>
+                              <Typography.Text style={{ fontSize: 'var(--font-size-caption)' }}>
+                                {t('projects.table.columns.deadline')}:{' '}
+                                {record.deadline ? formatLocaleDate(record.deadline) : '—'}
+                              </Typography.Text>
+                            </Space>
+                          }
+                        >
+                          <Button
+                            type="text"
+                            size="small"
+                            icon={<Info size={14} aria-hidden />}
+                            aria-label={t('projects.table.columns.key')}
+                          />
+                        </Tooltip>
+                        <Tooltip title={t('projects.actions.edit')}>
+                          <Button
+                            type="text"
+                            size="small"
+                            icon={<EditOutlined />}
+                            aria-label={t('projects.actions.edit')}
+                            data-testid={`edit-project-${record.id}`}
+                            onClick={() => openEditModal(record)}
+                          />
+                        </Tooltip>
+                        <DeleteProjectButton project={record} />
+                      </Space>
+                    ),
+                  },
+                ]}
+              />
+            )
+          }
         />
       </ProjectsTableShell>
     )
@@ -210,18 +266,7 @@ export const ProjectsPage = () => {
             },
           ]}
         />
-        <ProjectsCard styles={{ body: { padding: 24 } }}>
-          <Space orientation="vertical" size={24} style={{ display: 'flex' }}>
-            <PageHeaderRow>
-              <div>
-                <PageTitle>{t('projects.title')}</PageTitle>
-                <PageDescription>{t('projects.description')}</PageDescription>
-              </div>
-              <CreateProjectButton onClick={openModal} />
-            </PageHeaderRow>
-            {renderContent()}
-          </Space>
-        </ProjectsCard>
+        {renderContent()}
         <CreateProjectModal
           open={isOpen}
           onClose={closeModal}

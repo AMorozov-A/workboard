@@ -5,6 +5,7 @@ import { rhfAntdOnFinish, textAreaCtrlEnterSubmit } from '@shared/lib/form/rhfAn
 import { getDateInputFormat } from '@shared/lib/i18n'
 import { notifyError, notifySuccess } from '@shared/ui'
 import { DatePicker, Form, Input, InputNumber, Modal, Select } from 'antd'
+import dayjs, { type Dayjs } from 'dayjs'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
@@ -18,10 +19,13 @@ type CreateProjectModalProps = {
 const schema = z.object({
   name: z.string().min(1),
   keyPrefix: z.string(),
+  taskKeyPrefix: z.string(),
   client: z.string().min(1),
   status: z.enum(['active', 'paused', 'done']),
   budget: z.union([z.number().nonnegative(), z.null(), z.undefined()]),
-  deadline: z.any().optional(),
+  deadline: z
+    .custom<Dayjs | null>((value) => value == null || dayjs.isDayjs(value))
+    .optional(),
   description: z.string().optional(),
 })
 
@@ -47,6 +51,13 @@ export const CreateProjectModal = ({
       .refine((s) => /^[a-z][a-z0-9-]{1,29}$/.test(s), {
         message: t('projects.validation.keyPrefix'),
       }),
+    taskKeyPrefix: z
+      .string()
+      .transform((s) => s.trim().toUpperCase())
+      .transform((s) => (s === '' ? 'T' : s))
+      .refine((s) => /^[A-Z][A-Z0-9]{0,9}$/.test(s), {
+        message: t('projects.validation.taskKeyPrefix'),
+      }),
     client: z.string().min(1, t('projects.validation.clientRequired')),
     budget: z.union([
       z.number().nonnegative(t('projects.validation.budgetNonNegative')),
@@ -66,6 +77,7 @@ export const CreateProjectModal = ({
     defaultValues: {
       name: '',
       keyPrefix: 'proj',
+      taskKeyPrefix: 'T',
       client: '',
       status: 'active',
       budget: null,
@@ -86,6 +98,7 @@ export const CreateProjectModal = ({
           id: createProjectId(),
           key: '',
           keyPrefix: values.keyPrefix,
+          taskKeyPrefix: values.taskKeyPrefix,
           name: values.name.trim(),
           client: values.client.trim(),
           status: values.status,
@@ -148,6 +161,25 @@ export const CreateProjectModal = ({
               <Input
                 {...field}
                 placeholder={t('projects.form.keyPrefixPlaceholder')}
+                autoComplete="off"
+              />
+            )}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label={t('projects.form.taskKeyPrefix')}
+          required
+          validateStatus={errors.taskKeyPrefix ? 'error' : ''}
+          help={errors.taskKeyPrefix?.message ?? t('projects.form.taskKeyPrefixHint')}
+        >
+          <Controller
+            name="taskKeyPrefix"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                placeholder={t('projects.form.taskKeyPrefixPlaceholder')}
                 autoComplete="off"
               />
             )}

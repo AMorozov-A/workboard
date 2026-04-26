@@ -21,6 +21,8 @@ export const GlobalStyle = createGlobalStyle`
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
+    background: var(--app-bg-gradient);
+    background-attachment: fixed;
   }
 
   #root {

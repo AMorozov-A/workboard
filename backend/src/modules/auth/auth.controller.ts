@@ -2,6 +2,13 @@ import type { Request, Response } from 'express';
 import { env } from '../../config/env';
 import { signToken } from './jwt';
 import * as authService from './auth.service';
+import { HttpError } from '../../shared/http-error';
+
+function requireUserId(req: Request): string {
+  const userId = req.user?.userId;
+  if (!userId) throw new HttpError(401, 'Unauthorized');
+  return userId;
+}
 
 export async function register(req: Request, res: Response): Promise<void> {
   const body = req.body as { email?: unknown; password?: unknown; name?: unknown };
@@ -30,8 +37,7 @@ export async function login(req: Request, res: Response): Promise<void> {
 }
 
 export async function me(req: Request, res: Response): Promise<void> {
-  // `requireAuth` гарантирует `req.user`
-  const userId = req.user!.userId;
+  const userId = requireUserId(req);
   const { user } = await authService.getMe(userId);
   res.status(200).json({ ok: true, user });
 }
@@ -41,7 +47,7 @@ export async function logout(_req: Request, res: Response): Promise<void> {
 }
 
 export async function changePassword(req: Request, res: Response): Promise<void> {
-  const userId = req.user!.userId;
+  const userId = requireUserId(req);
   const body = req.body as { currentPassword?: unknown; newPassword?: unknown };
   await authService.changePassword(userId, body.currentPassword, body.newPassword);
   res.status(200).json({ ok: true });

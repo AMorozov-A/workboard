@@ -1,9 +1,12 @@
 import type { Request, Response } from 'express';
 import * as commentsService from './comments.service';
 import { mapCommentToJson } from './comments.mapper';
+import { HttpError } from '../../shared/http-error';
 
 function userId(req: Request): string {
-  return req.user!.userId;
+  const id = req.user?.userId;
+  if (!id) throw new HttpError(401, 'Unauthorized');
+  return id;
 }
 
 export async function list(req: Request, res: Response): Promise<void> {

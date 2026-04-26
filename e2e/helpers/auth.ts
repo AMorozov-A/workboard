@@ -2,6 +2,8 @@ import type { APIRequestContext, Page } from '@playwright/test'
 
 export const ACCESS_TOKEN_KEY = 'workboard_access_token'
 
+export const LANGUAGE_STORAGE_KEY = 'crm.language'
+
 export const getApiBaseUrl = (): string =>
   process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://localhost:3001'
 
@@ -61,10 +63,16 @@ export async function registerAndLogin(
   const { accessToken } = await registerViaAPI(page.request, creds)
   await page.goto('/')
   await page.evaluate(
-    ([key, token]) => {
-      localStorage.setItem(key, token)
+    ([langKey, lang, tokenKey, token]) => {
+      localStorage.setItem(langKey, lang)
+      localStorage.setItem(tokenKey, token)
     },
-    [ACCESS_TOKEN_KEY, accessToken] as [string, string]
+    [LANGUAGE_STORAGE_KEY, 'ru', ACCESS_TOKEN_KEY, accessToken] as [
+      string,
+      string,
+      string,
+      string,
+    ]
   )
   await page.goto('/app/projects')
   await page.waitForURL(/\/app\/projects/)

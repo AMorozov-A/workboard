@@ -1,30 +1,5 @@
-import { Avatar, Breadcrumb, Card } from 'antd'
+import { Breadcrumb } from 'antd'
 import styled from 'styled-components'
-
-export const PageHeaderRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  flex-wrap: wrap;
-`
-
-export const PageTitle = styled.h1`
-  font-family: var(--font-display);
-  font-size: var(--font-size-h2);
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
-  margin: 0;
-  color: var(--color-text);
-`
-
-export const PageDescription = styled.p`
-  margin: var(--space-2) 0 0;
-  font-size: var(--font-size-body);
-  line-height: 1.6;
-  color: var(--color-text-muted);
-`
 
 export const ProjectsBreadcrumb = styled(Breadcrumb)`
   .ant-breadcrumb-link {
@@ -43,48 +18,94 @@ export const BreadcrumbCurrent = styled.span.attrs(() => ({
 `
 
 export const ProjectsTableShell = styled.div`
-  .ant-table-thead > tr > th {
-    background: var(--color-primary-bg) !important;
-    font-family: var(--font-body);
-    font-size: var(--font-size-label);
-    font-weight: 500;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    color: var(--color-text-muted) !important;
-    border-bottom: 1px solid var(--color-border) !important;
+  /* mimic tasks table compact layout */
+  .ant-table {
+    background: transparent;
   }
 
-  .ant-table-thead > tr > th::before {
-    display: none !important;
+  /* keep fixed columns transparent but preserve row hover */
+  .ant-table-cell-fix,
+  .ant-table-cell-fix-left,
+  .ant-table-cell-fix-right {
+    background: transparent !important;
   }
 
-  html[data-theme='dark'] & .ant-table-thead > tr > th {
-    background: var(--color-primary-bg) !important;
+  /* AntD technical row for width measurements */
+  .ant-table-tbody > tr.ant-table-measure-row {
+    height: 0 !important;
+    pointer-events: none;
   }
-`
 
-export const KeyCell = styled.div`
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-`
+  .ant-table-tbody > tr.ant-table-measure-row > td {
+    padding: 0 !important;
+    border: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
 
-export const KeyAvatar = styled(Avatar)`
-  flex-shrink: 0;
+  .ant-table-tbody > tr.ant-table-measure-row:hover > td {
+    background: transparent !important;
+  }
 
-  && {
-    font-size: 11px !important;
-    font-weight: 600;
+  /* 2px gap between rows without top "empty row" */
+  .ant-table-tbody > tr + tr > td {
+    border-top: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .ant-table-tbody > tr > td {
+    background: transparent;
+  }
+
+  .ant-table-tbody > tr:hover > td {
     background: var(--color-surface-alt) !important;
-    color: var(--color-text-muted) !important;
-    border: 1px solid var(--color-border-subtle);
+  }
+
+  .ant-table-tbody > tr:hover > td.ant-table-cell-fix,
+  .ant-table-tbody > tr:hover > td.ant-table-cell-fix-left,
+  .ant-table-tbody > tr:hover > td.ant-table-cell-fix-right {
+    background: var(--color-surface-alt) !important;
+  }
+
+  .ant-table-tbody > tr:hover .crm-project-table-col-actions .ant-btn {
+    color: var(--color-text) !important;
+    background: transparent !important;
+  }
+
+  .ant-table-thead {
+    display: none;
+  }
+
+  .ant-table-tbody > tr > td {
+    padding: 4px 4px !important;
+    border-bottom: none !important;
+  }
+
+  .ant-table-cell {
+    vertical-align: middle;
+  }
+
+  .ant-table-tbody > tr > td:first-child {
+    padding-left: 4px !important;
+    border-top-left-radius: var(--radius-md);
+    border-bottom-left-radius: var(--radius-md);
+  }
+
+  .ant-table-tbody > tr > td:last-child {
+    padding-right: 4px !important;
+    border-top-right-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+  }
+
+  .ant-table-tbody > tr > td.crm-project-table-col-title {
+    padding-right: 12px !important;
+    min-width: 220px;
+  }
+
+  .ant-table-tbody > tr > td.crm-project-table-col-actions {
+    padding-left: 6px !important;
+    padding-right: 4px !important;
+    white-space: nowrap;
   }
 `
 
-export const ProjectsCard = styled(Card)`
-  &.ant-card {
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-border);
-    box-shadow: var(--shadow-sm);
-  }
-`

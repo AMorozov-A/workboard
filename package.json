@@ -3,6 +3,7 @@
   "private": true,
   "description": "Монорепо без корневых зависимостей: frontend/, backend/, e2e/ — у каждого свой package.json и node_modules",
   "scripts": {
+    "db:seed": "cd backend && npx prisma db seed",
     "test:e2e": "npm --prefix e2e run test",
     "test:e2e:ui": "npm --prefix e2e run test:ui",
     "test:e2e:headed": "npm --prefix e2e run test:headed",

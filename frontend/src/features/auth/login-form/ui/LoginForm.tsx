@@ -31,6 +31,7 @@ export const LoginForm = () => {
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(schema),
@@ -82,6 +83,11 @@ export const LoginForm = () => {
 
   const loading = isSubmitting || loginMutation.isPending
 
+  const fillDemoCredentials = () => {
+    setValue('email', 'demo@workboard.app', { shouldDirty: true, shouldTouch: true })
+    setValue('password', 'demo123', { shouldDirty: true, shouldTouch: true })
+  }
+
   return (
     <Form layout="vertical" onFinish={rhfAntdOnFinish(handleSubmit, onSubmit)}>
       <Form.Item
@@ -121,6 +127,11 @@ export const LoginForm = () => {
       <Form.Item>
         <Button type="primary" htmlType="submit" block loading={loading}>
           {t('auth.form.submit')}
+        </Button>
+      </Form.Item>
+      <Form.Item style={{ marginBottom: 0 }}>
+        <Button type="default" htmlType="button" block onClick={fillDemoCredentials} disabled={loading}>
+          {t('auth.demoLogin')}
         </Button>
       </Form.Item>
     </Form>

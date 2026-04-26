@@ -1,22 +1,23 @@
 import { createApp } from './app';
 import { env } from './config/env';
 import { prisma } from './db/client';
+import { logger } from './shared/logger';
 
 async function main(): Promise<void> {
   await prisma.$connect();
-  console.log('[db] Prisma connected');
+  logger.info('Prisma connected');
 
   const app = createApp();
   const server = app.listen(env.PORT, () => {
-    console.log(`[server] Listening on http://localhost:${env.PORT}`);
-    console.log(`[server] Health: GET http://localhost:${env.PORT}/api/v1/ping`);
+    logger.info('Server listening', { url: `http://localhost:${env.PORT}` });
+    logger.info('Health check', { url: `http://localhost:${env.PORT}/api/v1/ping` });
   });
 
   const shutdown = async (signal: string) => {
-    console.log(`[server] ${signal} received, shutting down`);
+    logger.info('Shutdown signal received', { signal });
     server.close(async () => {
       await prisma.$disconnect();
-      console.log('[db] Prisma disconnected');
+      logger.info('Prisma disconnected');
       process.exit(0);
     });
   };
@@ -26,6 +27,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  console.error('[server] Fatal error', err);
+  logger.error('Fatal error', err);
   process.exit(1);
 });

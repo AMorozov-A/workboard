@@ -23,6 +23,7 @@ export default defineConfig({
   timeout: 30_000,
   use: {
     baseURL: 'http://localhost:5173',
+    storageState: path.join(__dirname, 'ru-language.storage.json'),
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },

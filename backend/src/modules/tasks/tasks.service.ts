@@ -94,18 +94,28 @@ function parseLabels(value: unknown): string[] | null | undefined {
 }
 
 async function nextTaskKeyForProject(projectId: string): Promise<string> {
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { taskKeyPrefix: true },
+  });
+  if (!project) {
+    throw new HttpError(404, 'Проект не найден');
+  }
+  const prefix = project.taskKeyPrefix;
+  const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`^${escaped}-(\\d+)$`);
   const rows = await prisma.task.findMany({
     where: { projectId },
     select: { key: true },
   });
   let max = 0;
   for (const { key } of rows) {
-    const m = key.match(/^task-(\d+)$/);
+    const m = key.match(re);
     if (m) {
       max = Math.max(max, parseInt(m[1], 10));
     }
   }
-  return `task-${max + 1}`;
+  return `${prefix}-${max + 1}`;
 }
 
 export async function assertProjectOwnedByUser(projectRef: string, userId: string) {

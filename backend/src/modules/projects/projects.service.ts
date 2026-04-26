@@ -6,6 +6,7 @@ import type { CreateProjectInput, UpdateProjectInput } from './project.types';
 const PROJECT_STATUSES: ProjectStatus[] = ['active', 'paused', 'done'];
 
 const KEY_PREFIX_RE = /^[a-z][a-z0-9-]{1,29}$/;
+const TASK_KEY_PREFIX_RE = /^[A-Z][A-Z0-9]{0,9}$/;
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -25,6 +26,31 @@ function parseKeyPrefix(value: unknown): string {
     );
   }
   return t;
+}
+
+function parseTaskKeyPrefix(value: unknown): string {
+  if (value === undefined || value === null || value === '') {
+    return 'T';
+  }
+  if (typeof value !== 'string') {
+    throw new HttpError(400, 'Префикс ключа задач должен быть строкой');
+  }
+  const t = value.trim().toUpperCase();
+  if (!TASK_KEY_PREFIX_RE.test(t)) {
+    throw new HttpError(
+      400,
+      'Префикс ключа задач: 1–10 символов, A–Z и цифры, начинается с буквы (пример: T)',
+    );
+  }
+  return t;
+}
+
+function defaultTaskKeyPrefixFromProjectPrefix(projectKeyPrefix: string): string {
+  const cleaned = projectKeyPrefix.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (cleaned.length > 0) {
+    return cleaned.slice(0, 10);
+  }
+  return 'T';
 }
 
 async function nextProjectKeyForUser(userId: string, prefix: string): Promise<string> {
@@ -124,9 +150,15 @@ export function parseCreateProjectBody(body: unknown): CreateProjectInput {
     throw new HttpError(400, 'Ожидается JSON-объект');
   }
   const b = body as Record<string, unknown>;
+  const keyPrefix = 'keyPrefix' in b ? parseKeyPrefix(b.keyPrefix) : 'proj';
+  const taskKeyPrefix =
+    'taskKeyPrefix' in b
+      ? parseTaskKeyPrefix(b.taskKeyPrefix)
+      : defaultTaskKeyPrefixFromProjectPrefix(keyPrefix);
   return {
     title: assertTitle(b.title),
-    keyPrefix: 'keyPrefix' in b ? parseKeyPrefix(b.keyPrefix) : 'proj',
+    keyPrefix,
+    taskKeyPrefix,
     description: parseOptionalString(b.description) ?? null,
     client: assertClient(b.client),
     status: parseStatus(b.status, 'active'),
@@ -140,6 +172,9 @@ export function parseUpdateProjectBody(body: unknown): UpdateProjectInput {
     throw new HttpError(400, 'Ожидается JSON-объект');
   }
   const b = body as Record<string, unknown>;
+  if ('taskKeyPrefix' in b) {
+    throw new HttpError(400, 'Нельзя изменить префикс ключа задач после создания проекта');
+  }
   const out: UpdateProjectInput = {};
   if ('title' in b) {
     out.title = assertTitle(b.title);
@@ -194,6 +229,7 @@ export async function createProject(userId: string, input: CreateProjectInput) {
   return prisma.project.create({
     data: {
       key,
+      taskKeyPrefix: input.taskKeyPrefix ?? defaultTaskKeyPrefixFromProjectPrefix(prefix),
       title: input.title,
       description: input.description ?? null,
       client: input.client,

@@ -29,6 +29,7 @@ describe('parseCreateProjectBody', () => {
       client: 'Client Co',
       status: 'active',
       keyPrefix: 'proj',
+      taskKeyPrefix: 'PROJ',
       description: null,
       budget: null,
       deadline: null,
@@ -44,11 +45,13 @@ describe('parseCreateProjectBody', () => {
       budget: 1000,
       deadline: '2026-06-01T00:00:00.000Z',
       keyPrefix: 'crm',
+      taskKeyPrefix: 'T',
     });
     expect(input.status).toBe('paused');
     expect(input.budget).toBe(1000);
     expect(input.deadline).toBeInstanceOf(Date);
     expect(input.keyPrefix).toBe('crm');
+    expect(input.taskKeyPrefix).toBe('T');
   });
 
   it('throws 400 when body is not an object', () => {
@@ -108,6 +111,13 @@ describe('parseCreateProjectBody', () => {
       400,
     );
   });
+
+  it('throws 400 on invalid taskKeyPrefix', () => {
+    expectHttpError(
+      () => parseCreateProjectBody({ title: 'T', client: 'C', taskKeyPrefix: 't-1' }),
+      400,
+    );
+  });
 });
 
 describe('parseUpdateProjectBody', () => {
@@ -141,6 +151,14 @@ describe('parseUpdateProjectBody', () => {
       () => parseUpdateProjectBody({ status: 'invalid' }),
       400,
       'Некорректный статус проекта',
+    );
+  });
+
+  it('throws 400 when taskKeyPrefix is present', () => {
+    expectHttpError(
+      () => parseUpdateProjectBody({ taskKeyPrefix: 'T' }),
+      400,
+      'Нельзя изменить префикс ключа задач после создания проекта',
     );
   });
 });

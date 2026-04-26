@@ -8,6 +8,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
   return {
     id: '550e8400-e29b-41d4-a716-446655440000',
     key: 'proj-1',
+    taskKeyPrefix: 'T',
     title: 'Test',
     description: null,
     client: 'ACME',

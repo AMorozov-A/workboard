@@ -1,5 +1,5 @@
 import { useProjectQuery, useUpdateProjectMutation } from '@entities/project/api'
-import { getProjectStatusTag } from '@entities/project/lib/presentation'
+import { getProjectStatusOptions, getProjectStatusTag } from '@entities/project/lib/presentation'
 import type { Project } from '@entities/project/types'
 import {
   useCreateTaskMutation,
@@ -11,47 +11,113 @@ import {
   getTaskPriorityOptions,
   getTaskPriorityTag,
   getTaskStatusOptions,
+  getTaskStatusLabel,
   getTaskStatusTag,
 } from '@entities/task/lib/presentation'
 import { KANBAN_STATUS_ORDER } from '@entities/task/lib/kanbanStatusOrder'
 import type { Task, TaskStatus } from '@entities/task/model/types'
-import type { TimelineEvent } from '@entities/timeline/types'
-import { CreateTaskButton, CreateTaskModal, useCreateTaskModal } from '@features/task/create'
-import { EditProjectModal, useEditProjectModal } from '@features/project/edit'
+import { CreateTaskButton } from '@features/task/create'
 import { routes } from '@shared/config/routes'
+import { APP_CONTEXT_ACTION_EVENT, APP_CONTEXT_ACTIONS } from '@shared/config/appContextActions'
 import { formatLocaleCurrency, formatLocaleDate, formatLocaleDateTime } from '@shared/lib/i18n'
-import { ContentState } from '@shared/ui'
-import { EditOutlined } from '@ant-design/icons'
-import { Button, Card, Segmented, Select, Skeleton, Space, Table, Timeline, Typography } from 'antd'
-import { LayoutGrid, Table2 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { ContentState, GroupedSections, notifyError, notifySuccess } from '@shared/ui'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Button, Card, DatePicker, Divider, Input, InputNumber, Popover, Select, Skeleton, Space, Table, Timeline, Typography } from 'antd'
+import dayjs, { type Dayjs } from 'dayjs'
+import {
+  CheckCircle2,
+  Circle,
+  CircleAlert,
+  Eye,
+  Filter,
+  Loader2,
+  LayoutGrid,
+  Table2,
+  X,
+} from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
-import { TaskDrawerWidget } from '@widgets/task/TaskDrawerWidget'
+import { TaskModalWidget } from '@widgets/task/TaskModalWidget'
+import { Controller, useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import {
   BreadcrumbCurrent,
   FilterField,
-  FilterLabel,
   ProjectBreadcrumb,
+  ProjectBreadcrumbRight,
+  ProjectBreadcrumbRow,
+  ProjectBreadcrumbLeft,
   ProjectHeaderRow,
   ProjectPageDescription,
   ProjectPageTitle,
-  ProjectSummaryCard,
-  ProjectTabs,
   ProjectTitleBlock,
   ProjectTitleRow,
-  SummaryDd,
-  SummaryDt,
-  SummaryGrid,
+  InlineBodyField,
+  InlineEditControl,
+  InlineEditText,
+  InlineTitleField,
   TasksFilters,
   TasksTableShell,
   TasksToolbar,
-  ToolbarActions,
 } from './ProjectPage.styles'
 import { ProjectKanbanBoard } from './ProjectKanbanBoard'
 
 type TasksViewMode = 'kanban' | 'table'
+
+const TASKS_VIEW_STORAGE_KEY = 'crm:projectTasksView'
+
+const isTasksViewMode = (value: unknown): value is TasksViewMode =>
+  value === 'kanban' || value === 'table'
+
+const readStoredTasksView = (): TasksViewMode | null => {
+  try {
+    const raw = localStorage.getItem(TASKS_VIEW_STORAGE_KEY)
+    return isTasksViewMode(raw) ? raw : null
+  } catch {
+    return null
+  }
+}
+
+const storeTasksView = (value: TasksViewMode) => {
+  try {
+    localStorage.setItem(TASKS_VIEW_STORAGE_KEY, value)
+  } catch {
+    // ignore storage errors (private mode, quota, etc.)
+  }
+}
+
+type ProjectEditFormValues = {
+  name: string
+  client: string
+  status: 'active' | 'paused' | 'done'
+  budget: number | null | undefined
+  deadline?: Dayjs | null
+  description?: string
+}
+
+type EditableProjectField = keyof Pick<
+  ProjectEditFormValues,
+  'name' | 'description' | 'client' | 'status' | 'budget' | 'deadline'
+>
+
+function formatTaskMonthDay(value?: string): string {
+  if (!value) return '—'
+  const date = dayjs(value)
+  if (!date.isValid()) return '—'
+  return date.format('MMM D')
+}
+
+function getStatusHeaderMeta(status: TaskStatus): {
+  color: string
+  Icon: React.ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>
+} {
+  if (status === 'in_progress') return { color: 'var(--color-primary)', Icon: Loader2 }
+  if (status === 'review') return { color: 'var(--color-warning)', Icon: Eye }
+  if (status === 'done') return { color: 'var(--color-success)', Icon: CheckCircle2 }
+  return { color: 'var(--color-text-muted)', Icon: Circle }
+}
 
 export const ProjectPage = () => {
   const { t } = useTranslation()
@@ -74,19 +140,54 @@ export const ProjectPage = () => {
   const createTaskMutation = useCreateTaskMutation(projectId ?? '')
   const updateTaskMutation = useUpdateTaskMutation(projectId ?? '')
 
-  const {
-    projectToEdit,
-    isOpen: isEditOpen,
-    openModal: openEditModal,
-    closeModal: closeEditModal,
-  } = useEditProjectModal()
-
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [taskModalMode, setTaskModalMode] = useState<'create' | 'edit' | null>(null)
+  const isTaskModalOpen = taskModalMode !== null
   const [statusFilter, setStatusFilter] = useState<Task['status'] | 'all'>('all')
   const [priorityFilter, setPriorityFilter] = useState<Task['priority'] | 'all'>('all')
-  const [tasksView, setTasksView] = useState<TasksViewMode>('kanban')
-  const { isOpen, openModal, closeModal } = useCreateTaskModal()
+  const [collapsedStatuses, setCollapsedStatuses] = useState<TaskStatus[]>([])
+  const [tasksView, setTasksView] = useState<TasksViewMode>(
+    () => readStoredTasksView() ?? 'kanban'
+  )
+  const [editingField, setEditingField] = useState<EditableProjectField | null>(null)
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
+  const [infoOpen, setInfoOpen] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
+
+  const setTasksViewPersisted = (next: TasksViewMode) => {
+    setTasksView(next)
+    storeTasksView(next)
+  }
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const custom = event as CustomEvent<{ key: string }>
+      const key = custom.detail?.key
+      if (!key) return
+
+      if (key === APP_CONTEXT_ACTIONS.projectCreateTask) {
+        openCreateTaskModal()
+        return
+      }
+
+      if (key === APP_CONTEXT_ACTIONS.projectViewKanban) {
+        setTasksViewPersisted('kanban')
+        return
+      }
+
+      if (key === APP_CONTEXT_ACTIONS.projectViewTable) {
+        setTasksViewPersisted('table')
+      }
+    }
+
+    window.addEventListener(APP_CONTEXT_ACTION_EVENT, handler as EventListener)
+    return () => window.removeEventListener(APP_CONTEXT_ACTION_EVENT, handler as EventListener)
+  }, [])
+
+  const openCreateTaskModal = () => {
+    setSelectedTaskId(null)
+    setTaskModalMode('create')
+  }
 
   const handleCreateTask = async (task: Task) => {
     await createTaskMutation.mutateAsync(task)
@@ -94,11 +195,11 @@ export const ProjectPage = () => {
 
   const handleOpenTask = (taskId: string) => {
     setSelectedTaskId(taskId)
-    setIsDrawerOpen(true)
+    setTaskModalMode('edit')
   }
 
-  const handleCloseDrawer = () => {
-    setIsDrawerOpen(false)
+  const handleCloseTaskModal = () => {
+    setTaskModalMode(null)
   }
 
   const handleResetFilters = () => {
@@ -114,9 +215,116 @@ export const ProjectPage = () => {
     setSelectedTaskId(null)
   }
 
-  const handleUpdateProject = async (p: Project) => {
-    await updateProject({ projectId: p.id, project: p })
+  const validationSchema = z.object({
+    name: z.string().min(1, t('projects.validation.nameRequired')),
+    client: z.string().min(1, t('projects.validation.clientRequired')),
+    status: z.enum(['active', 'paused', 'done']),
+    budget: z.union([
+      z.number().nonnegative(t('projects.validation.budgetNonNegative')),
+      z.null(),
+      z.undefined(),
+    ]),
+    deadline: z.custom<Dayjs | null>((value) => value == null || dayjs.isDayjs(value)).optional(),
+    description: z.string().optional(),
+  })
+
+  const {
+    control: projectControl,
+    handleSubmit: handleProjectSubmit,
+    reset: resetProjectForm,
+    watch: watchProjectForm,
+    getValues: getProjectValues,
+    formState: {
+      errors: projectErrors,
+      isDirty: isProjectDirty,
+      isSubmitting: isProjectSubmitting,
+      isValid: isProjectValid,
+    },
+  } = useForm<ProjectEditFormValues>({
+    resolver: zodResolver(validationSchema),
+    mode: 'onChange',
+    defaultValues: {
+      name: '',
+      client: '',
+      status: 'active',
+      budget: null,
+      deadline: null,
+      description: '',
+    },
+  })
+
+  useEffect(() => {
+    if (!project) return
+    resetProjectForm({
+      name: project.name,
+      client: project.client ?? '',
+      status: project.status ?? 'active',
+      budget: project.budget ?? null,
+      deadline: project.deadline ? dayjs(project.deadline) : null,
+      description: project.description ?? '',
+    })
+  }, [project, resetProjectForm])
+
+  const onSubmitProjectInline = async (values: ProjectEditFormValues) => {
+    if (!project) return
+    try {
+      await updateProject({
+        projectId: project.id,
+        project: {
+          ...project,
+          name: values.name.trim(),
+          client: values.client.trim(),
+          status: values.status,
+          budget: values.budget ?? undefined,
+          deadline: values.deadline?.format ? values.deadline.format('YYYY-MM-DD') : undefined,
+          description: values.description?.trim() || undefined,
+        },
+      })
+      notifySuccess(
+        t('projects.notifications.updatedTitle'),
+        t('projects.notifications.updatedDescription'),
+      )
+    } catch {
+      notifyError(
+        t('projects.notifications.updateErrorTitle'),
+        t('projects.notifications.updateErrorDescription'),
+      )
+    }
   }
+
+  const trySubmitProject = async () => {
+    if (!isProjectDirty) return
+    if (!isProjectValid) return
+    await handleProjectSubmit(onSubmitProjectInline)()
+  }
+
+  const trySubmitProjectStatus = async (nextStatus?: ProjectEditFormValues['status']) => {
+    if (!project) return
+    if (!isProjectValid) return
+
+    const current = nextStatus ?? getProjectValues('status')
+    const prev = project.status ?? 'active'
+    if (current === prev) return
+
+    await handleProjectSubmit(onSubmitProjectInline)()
+  }
+
+  const startEditField = (field: EditableProjectField, event: React.MouseEvent) => {
+    if (isProjectSubmitting) return
+    // if switching fields, try to submit current changes first
+    void trySubmitProject()
+
+    setEditingField(field)
+  }
+
+  const stopEditField = (field: EditableProjectField) => {
+    if (editingField !== field) return
+    setEditingField(null)
+    if (field === 'status') {
+      setStatusDropdownOpen(false)
+    }
+  }
+
 
   const handleTaskStatusChange = async (taskId: string, newStatus: Task['status']) => {
     const task = filteredTasks.find((x) => x.id === taskId)
@@ -143,8 +351,6 @@ export const ProjectPage = () => {
     return { filteredTasks: filtered, tasksByStatus: map }
   }, [priorityFilter, statusFilter, tasks])
   const hasActiveFilters = statusFilter !== 'all' || priorityFilter !== 'all'
-
-  const timeline: TimelineEvent[] = []
 
   const renderTasksContent = () => {
     if (isTasksLoading) {
@@ -185,7 +391,7 @@ export const ProjectPage = () => {
             variant="empty"
             title={t('projectDetails.tasksSection.emptyTitle')}
             description={t('projectDetails.tasksSection.emptyDescription')}
-            action={<CreateTaskButton onClick={openModal} />}
+            action={<CreateTaskButton onClick={openCreateTaskModal} />}
           />
         </div>
       )
@@ -207,55 +413,97 @@ export const ProjectPage = () => {
     }
 
     if (tasksView === 'table') {
+      const statusGroups = KANBAN_STATUS_ORDER.map((status) => {
+        const { color, Icon } = getStatusHeaderMeta(status)
+        return {
+          key: status,
+          label: getTaskStatusLabel(status),
+          Icon,
+          color,
+          emptyText: t('projectDetails.tasksSection.statusGroupEmpty'),
+        }
+      })
+
       return (
         <TasksTableShell>
-          <Table<Task>
-            rowKey="id"
-            dataSource={filteredTasks}
-            pagination={false}
-            onRow={(record) => ({
-              onClick: () => handleOpenTask(record.id),
-              style: { cursor: 'pointer' },
-            })}
-            columns={[
-              {
-                title: t('projectDetails.tasksSection.columns.key'),
-                dataIndex: 'key',
-                width: 110,
-                render: (value: string) => (
-                  <Typography.Text code copyable={{ text: value }}>
-                    {value}
-                  </Typography.Text>
-                ),
-              },
-              {
-                title: t('projectDetails.tasksSection.columns.task'),
-                dataIndex: 'title',
-                render: (_, task) => (
-                  <Space orientation="vertical" size={2}>
-                    <Typography.Text strong>{task.title}</Typography.Text>
-                    <Typography.Text type="secondary">
-                      {task.description ?? t('projectDetails.tasksSection.descriptionFallback')}
-                    </Typography.Text>
-                  </Space>
-                ),
-              },
-              {
-                title: t('projectDetails.tasksSection.columns.status'),
-                dataIndex: 'status',
-                render: (value?: Task['status']) => getTaskStatusTag(value),
-              },
-              {
-                title: t('projectDetails.tasksSection.columns.priority'),
-                dataIndex: 'priority',
-                render: (value?: Task['priority']) => getTaskPriorityTag(value),
-              },
-              {
-                title: t('projectDetails.tasksSection.columns.deadline'),
-                dataIndex: 'dueDate',
-                render: (value?: string) => formatTaskDate(value),
-              },
-            ]}
+          <GroupedSections<Task, TaskStatus>
+            groups={statusGroups}
+            items={filteredTasks}
+            groupBy={(task) => task.status}
+            collapsedKeys={collapsedStatuses}
+            onCollapsedKeysChange={setCollapsedStatuses}
+            renderGroupBody={({ groupItems, group }) =>
+              groupItems.length === 0 ? (
+                <div style={{ padding: '6px 0' }}>
+                  <Typography.Text type="secondary">{group.emptyText}</Typography.Text>
+                </div>
+              ) : (
+                <Table<Task>
+                  rowKey="id"
+                  dataSource={groupItems}
+                  pagination={false}
+                  showHeader={false}
+                  tableLayout="auto"
+                  onRow={(record) => ({
+                    onClick: () => handleOpenTask(record.id),
+                    style: { cursor: 'pointer' },
+                  })}
+                  columns={[
+                    {
+                      title: t('projectDetails.tasksSection.columns.key'),
+                      dataIndex: 'key',
+                      className: 'crm-task-table-col-key',
+                      render: (value: string) => (
+                        <Typography.Text
+                          style={{
+                            fontFamily: 'var(--font-mono)',
+                            letterSpacing: '0.02em',
+                            color: 'var(--color-text-muted)',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {value}
+                        </Typography.Text>
+                      ),
+                    },
+                    {
+                      title: t('projectDetails.tasksSection.columns.task'),
+                      dataIndex: 'title',
+                      className: 'crm-task-table-col-title',
+                      width: '100%',
+                      render: (_, task) => (
+                        <Space orientation="vertical" size={2}>
+                          <Typography.Text strong>{task.title}</Typography.Text>
+                        </Space>
+                      ),
+                    },
+                    {
+                      title: t('projectDetails.tasksSection.columns.status'),
+                      dataIndex: 'status',
+                      align: 'right',
+                      className: 'crm-task-table-col-status',
+                      width: 120,
+                      render: (value?: Task['status']) => getTaskStatusTag(value),
+                    },
+                    {
+                      title: t('projectDetails.tasksSection.columns.priority'),
+                      dataIndex: 'priority',
+                      align: 'right',
+                      className: 'crm-task-table-col-priority',
+                      width: 120,
+                      render: (value?: Task['priority']) => getTaskPriorityTag(value),
+                    },
+                    {
+                      title: t('projectDetails.tasksSection.columns.deadline'),
+                      dataIndex: 'dueDate',
+                      className: 'crm-task-table-col-deadline',
+                      width: 110,
+                      render: (value?: string) => formatTaskMonthDay(value),
+                    },
+                  ]}
+                />
+              )
+            }
           />
         </TasksTableShell>
       )
@@ -267,7 +515,7 @@ export const ProjectPage = () => {
         tasksByStatus={tasksByStatus}
         tasksFlat={filteredTasks}
         selectedTaskId={selectedTaskId}
-        isDrawerOpen={isDrawerOpen}
+        isDrawerOpen={isTaskModalOpen}
         onTaskOpen={handleOpenTask}
         onTaskStatusChange={(taskId, newStatus) => {
           void handleTaskStatusChange(taskId, newStatus)
@@ -325,225 +573,398 @@ export const ProjectPage = () => {
     )
   }
 
-  const renderProjectTimeline = () => {
-    if (timeline.length === 0) {
-      return (
-        <ContentState
-          variant="empty"
-          title={t('projectDetails.timeline.emptyTitle')}
-          description={t('projectDetails.timeline.emptyDescription')}
-        />
-      )
-    }
-
-    return (
-      <Timeline
-        items={timeline.map((event) => ({
-          key: event.id,
-          children: (
-            <div
-              style={{
-                padding: 12,
-                border: '1px solid var(--color-border)',
-                borderRadius: 12,
-                background: 'var(--color-surface-alt)',
-              }}
-            >
-              <Space orientation="vertical" size={4} style={{ display: 'flex' }}>
-                <Typography.Text strong>{event.title}</Typography.Text>
-                <Typography.Text type="secondary">
-                  {formatLocaleDateTime(event.time)}
-                </Typography.Text>
-                {event.description ? (
-                  <Typography.Paragraph type="secondary" style={{ margin: 0 }}>
-                    {event.description}
-                  </Typography.Paragraph>
-                ) : null}
-              </Space>
-            </div>
-          ),
-        }))}
-      />
-    )
-  }
-
   return (
-    <Space orientation="vertical" size={24} style={{ display: 'flex', width: '100%' }}>
-      <ProjectBreadcrumb
-        items={[
-          {
-            title: (
-              <Link to={routes.app}>
-                {t('projects.breadcrumb.workspace')}
-              </Link>
-            ),
-          },
-          {
-            title: (
-              <BreadcrumbCurrent>{project.name}</BreadcrumbCurrent>
-            ),
-          },
-        ]}
-      />
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', paddingTop: 12 }}>
+      <ProjectBreadcrumbRow>
+        <ProjectBreadcrumbLeft>
+          <ProjectBreadcrumb
+            items={[
+              {
+                title: (
+                  <Link to={routes.app}>
+                    {t('projects.breadcrumb.workspace')}
+                  </Link>
+                ),
+              },
+              {
+                title: (
+                  <BreadcrumbCurrent>{project.name}</BreadcrumbCurrent>
+                ),
+              },
+            ]}
+          />
+        </ProjectBreadcrumbLeft>
+        <ProjectBreadcrumbRight>
+          <Typography.Text
+            style={{
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.02em',
+              color: 'var(--color-text-muted)',
+            }}
+          >
+            {project.key}
+          </Typography.Text>
+          <Controller
+            name="status"
+            control={projectControl}
+            render={({ field }) => (
+              <InlineEditControl>
+                <Select
+                  {...field}
+                  variant="borderless"
+                  options={getProjectStatusOptions()}
+                  disabled={isProjectSubmitting}
+                  aria-label={t('projects.form.status')}
+                  dropdownMatchSelectWidth={false}
+                  dropdownStyle={{ minWidth: 100 }}
+                  open={editingField === 'status' ? statusDropdownOpen : false}
+                  suffixIcon={null}
+                  labelRender={() => getProjectStatusTag(field.value)}
+                  onDropdownVisibleChange={(open) => {
+                    if (editingField !== 'status') return
+                    setStatusDropdownOpen(open)
+                    if (!open) {
+                      void trySubmitProjectStatus().finally(() => stopEditField('status'))
+                    }
+                  }}
+                  onClick={(e) => {
+                    if (editingField !== 'status') {
+                      startEditField('status', e as unknown as React.MouseEvent)
+                      setStatusDropdownOpen(true)
+                    }
+                  }}
+                  onChange={(value) => {
+                    field.onChange(value)
+                    setStatusDropdownOpen(false)
+                    setTimeout(() => {
+                      void trySubmitProjectStatus(value).finally(() => stopEditField('status'))
+                    }, 0)
+                  }}
+                />
+              </InlineEditControl>
+            )}
+          />
+          <Popover
+            open={infoOpen}
+            trigger="click"
+            placement="bottomRight"
+            arrow={false}
+            overlayStyle={{ maxWidth: 280 }}
+            onOpenChange={(open) => setInfoOpen(open)}
+            align={{ offset: [-8, 8] }}
+            content={
+              <div style={{ maxWidth: 280 }}>
+                <div
+                  style={{ display: 'grid', gap: 10 }}
+                >
+                  <div style={{ display: 'grid', gap: 8 }}>
+                    <div>
+                      <Typography.Text type="secondary">
+                        {t('projectDetails.fields.client')}
+                      </Typography.Text>
+                      <Controller
+                        name="client"
+                        control={projectControl}
+                        render={({ field }) => (
+                          <InlineEditControl>
+                            <Input
+                              {...field}
+                              bordered={false}
+                              placeholder={t('projects.form.clientPlaceholder')}
+                              disabled={isProjectSubmitting}
+                              aria-label={t('projects.form.client')}
+                              onBlur={() => {
+                                if (projectErrors.client) return
+                                void trySubmitProject()
+                              }}
+                            />
+                          </InlineEditControl>
+                        )}
+                      />
+                    </div>
+                    <div>
+                      <Typography.Text type="secondary">
+                        {t('projectDetails.fields.budget')}
+                      </Typography.Text>
+                      <Controller
+                        name="budget"
+                        control={projectControl}
+                        render={({ field }) => (
+                          <InlineEditControl>
+                            <InputNumber
+                              value={field.value ?? null}
+                              onChange={field.onChange}
+                              variant="borderless"
+                              min={0}
+                              controls={false}
+                              placeholder={t('projects.form.budgetPlaceholder')}
+                              disabled={isProjectSubmitting}
+                              aria-label={t('projects.form.budget')}
+                              onBlur={() => {
+                                if (projectErrors.budget) return
+                                void trySubmitProject()
+                              }}
+                            />
+                          </InlineEditControl>
+                        )}
+                      />
+                    </div>
+                    <div>
+                      <Typography.Text type="secondary">
+                        {t('projectDetails.fields.deadline')}
+                      </Typography.Text>
+                      <Controller
+                        name="deadline"
+                        control={projectControl}
+                        render={({ field }) => (
+                          <InlineEditControl>
+                            <DatePicker
+                              {...field}
+                              variant="borderless"
+                              style={{ width: '100%' }}
+                              disabled={isProjectSubmitting}
+                              aria-label={t('projects.form.deadline')}
+                              onOpenChange={(open) => {
+                                if (!open) void trySubmitProject()
+                              }}
+                            />
+                          </InlineEditControl>
+                        )}
+                      />
+                    </div>
+                    <div>
+                      <Typography.Text type="secondary">
+                        {t('projectDetails.fields.tasks')}
+                      </Typography.Text>
+                      <div>{tasks.length}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          >
+            <Button
+              className="project-page-help-icon-button"
+              type="text"
+              size="small"
+              aria-label={t('common.help')}
+              icon={<CircleAlert size={16} aria-hidden />}
+            />
+          </Popover>
+        </ProjectBreadcrumbRight>
+      </ProjectBreadcrumbRow>
+
+      <div style={{ height: 12 }} />
 
       <ProjectHeaderRow>
         <ProjectTitleBlock>
           <ProjectTitleRow>
-            <ProjectPageTitle>{project.name}</ProjectPageTitle>
-            <Button
-              type="default"
-              icon={<EditOutlined />}
-              onClick={() => openEditModal(project)}
-            >
-              {t('projectDetails.editProject')}
-            </Button>
+            <div style={{ display: 'grid', gap: 8, width: '100%' }}>
+              <Controller
+                name="name"
+                control={projectControl}
+                render={({ field }) => (
+                  editingField === 'name' ? (
+                    <>
+                      <InlineTitleField>
+                        <InlineEditControl>
+                          <Input
+                            {...field}
+                            autoFocus
+                            bordered={false}
+                            placeholder={t('projects.form.namePlaceholder')}
+                            status={projectErrors.name ? 'error' : ''}
+                            disabled={isProjectSubmitting}
+                            aria-label={t('projects.form.name')}
+                            style={{
+                              fontFamily: 'var(--font-display)',
+                              fontSize: 'var(--font-size-h2)',
+                              fontWeight: 600,
+                              lineHeight: 1.25,
+                              letterSpacing: '-0.01em',
+                              color: 'var(--color-text)',
+                            }}
+                            onBlur={() => {
+                              if (projectErrors.name) return
+                              void trySubmitProject().finally(() => stopEditField('name'))
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key !== 'Enter') return
+                              e.preventDefault()
+                              ;(e.currentTarget as HTMLInputElement).blur()
+                            }}
+                            ref={field.ref}
+                          />
+                        </InlineEditControl>
+                      </InlineTitleField>
+                      {projectErrors.name?.message ? (
+                        <Typography.Text type="danger">{projectErrors.name.message}</Typography.Text>
+                      ) : null}
+                    </>
+                  ) : (
+                    <InlineTitleField>
+                      <InlineEditText onClick={(e) => startEditField('name', e)} aria-label={t('projects.form.name')}>
+                        <ProjectPageTitle>{field.value || t('projects.form.namePlaceholder')}</ProjectPageTitle>
+                      </InlineEditText>
+                    </InlineTitleField>
+                  )
+                )}
+              />
+              <Controller
+                name="description"
+                control={projectControl}
+                render={({ field }) => (
+                  editingField === 'description' ? (
+                    <InlineBodyField>
+                      <InlineEditControl>
+                        <Input.TextArea
+                          {...field}
+                          autoFocus
+                          bordered={false}
+                          autoSize={{ minRows: 1, maxRows: 4 }}
+                          placeholder={t('projects.form.descriptionPlaceholder')}
+                          disabled={isProjectSubmitting}
+                          aria-label={t('projects.form.description')}
+                          style={{
+                            margin: 0,
+                            fontSize: 'var(--font-size-body)',
+                            lineHeight: 1.6,
+                            color: 'var(--color-text-muted)',
+                          }}
+                          onBlur={() => {
+                            void trySubmitProject().finally(() => stopEditField('description'))
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key !== 'Enter') return
+                            if (e.shiftKey) return
+                            e.preventDefault()
+                            ;(e.currentTarget as HTMLTextAreaElement).blur()
+                          }}
+                        />
+                      </InlineEditControl>
+                    </InlineBodyField>
+                  ) : field.value ? (
+                    <InlineBodyField>
+                      <InlineEditText onClick={(e) => startEditField('description', e)}>
+                        <ProjectPageDescription>{field.value}</ProjectPageDescription>
+                      </InlineEditText>
+                    </InlineBodyField>
+                  ) : (
+                    <InlineBodyField>
+                      <InlineEditText onClick={(e) => startEditField('description', e)}>
+                        <Typography.Text type="secondary">
+                          {t('projects.form.descriptionPlaceholder')}
+                        </Typography.Text>
+                      </InlineEditText>
+                    </InlineBodyField>
+                  )
+                )}
+              />
+            </div>
           </ProjectTitleRow>
-          {project.description ? (
-            <ProjectPageDescription>{project.description}</ProjectPageDescription>
-          ) : null}
         </ProjectTitleBlock>
-
-        <ProjectSummaryCard>
-          <SummaryGrid>
-            <SummaryDt>{t('projectDetails.fields.key')}</SummaryDt>
-            <SummaryDd>
-              <Typography.Text code copyable={{ text: project.key }}>
-                {project.key}
-              </Typography.Text>
-            </SummaryDd>
-
-            <SummaryDt>{t('projectDetails.fields.client')}</SummaryDt>
-            <SummaryDd>{project.client ?? t('common.notSpecified')}</SummaryDd>
-
-            <SummaryDt>{t('projectDetails.fields.status')}</SummaryDt>
-            <SummaryDd>{getProjectStatusTag(project.status)}</SummaryDd>
-
-            <SummaryDt>{t('projectDetails.fields.budget')}</SummaryDt>
-            <SummaryDd>{formatLocaleCurrency(project.budget)}</SummaryDd>
-
-            <SummaryDt>{t('projectDetails.fields.deadline')}</SummaryDt>
-            <SummaryDd>
-              {project.deadline ? formatLocaleDate(project.deadline) : t('projects.table.tbd')}
-            </SummaryDd>
-
-            <SummaryDt>{t('projectDetails.fields.tasks')}</SummaryDt>
-            <SummaryDd>{tasks.length}</SummaryDd>
-          </SummaryGrid>
-        </ProjectSummaryCard>
       </ProjectHeaderRow>
 
-      <ProjectTabs
-        items={[
-          {
-            key: 'tasks',
-            label: t('projectDetails.tabs.tasks'),
-            children: (
-              <>
-                {tasks.length > 0 || isTasksLoading ? (
-                  <>
-                    <TasksToolbar>
-                      <TasksFilters>
-                        <FilterField>
-                          <FilterLabel>{t('projectDetails.tasksSection.filterStatus')}</FilterLabel>
-                          <Select
-                            value={statusFilter}
-                            onChange={(value) => setStatusFilter(value)}
-                            style={{ width: 160 }}
-                            options={[
-                              {
-                                value: 'all',
-                                label: t('projectDetails.tasksSection.allStatuses'),
-                              },
-                              ...getTaskStatusOptions(),
-                            ]}
-                          />
-                        </FilterField>
-                        <FilterField>
-                          <FilterLabel>
-                            {t('projectDetails.tasksSection.filterPriority')}
-                          </FilterLabel>
-                          <Select
-                            value={priorityFilter}
-                            onChange={(value) => setPriorityFilter(value)}
-                            style={{ width: 160 }}
-                            options={[
-                              {
-                                value: 'all',
-                                label: t('projectDetails.tasksSection.allPriorities'),
-                              },
-                              ...getTaskPriorityOptions(),
-                            ]}
-                          />
-                        </FilterField>
-                        {hasActiveFilters && (
-                          <Button onClick={handleResetFilters}>
-                            {t('common.resetFilters')}
-                          </Button>
-                        )}
-                      </TasksFilters>
-                      <ToolbarActions>
-                        <Segmented
-                          value={tasksView}
-                          onChange={(v) => setTasksView(v as TasksViewMode)}
-                          options={[
-                            {
-                              value: 'kanban',
-                              label: (
-                                <Space size={6}>
-                                  <LayoutGrid size={14} aria-hidden />
-                                  {t('projectDetails.tasksSection.viewKanban')}
-                                </Space>
-                              ),
-                            },
-                            {
-                              value: 'table',
-                              label: (
-                                <Space size={6}>
-                                  <Table2 size={14} aria-hidden />
-                                  {t('projectDetails.tasksSection.viewTable')}
-                                </Space>
-                              ),
-                            },
-                          ]}
-                        />
-                        <CreateTaskButton onClick={openModal} />
-                      </ToolbarActions>
-                    </TasksToolbar>
-                    {renderTasksContent()}
-                  </>
-                ) : (
-                  renderTasksContent()
-                )}
-                <CreateTaskModal
-                  open={isOpen}
-                  onClose={closeModal}
-                  onCreate={handleCreateTask}
-                  projectId={project.id}
-                />
-                <TaskDrawerWidget
-                  open={isDrawerOpen}
-                  onClose={handleCloseDrawer}
-                  onSave={handleSaveTask}
-                  onTaskDeleted={handleTaskDeleted}
-                  tasksQueryKey={projectId ?? ''}
-                  task={selectedTask}
-                />
-                <EditProjectModal
-                  project={projectToEdit}
-                  open={isEditOpen}
-                  onClose={closeEditModal}
-                  onUpdate={handleUpdateProject}
-                />
-              </>
-            ),
-          },
-          {
-            key: 'timeline',
-            label: t('projectDetails.tabs.timeline'),
-            children: renderProjectTimeline(),
-          },
-        ]}
+      {tasks.length > 0 || isTasksLoading ? (
+        <>
+          <div style={{ marginTop: 8 }}>
+            <TasksToolbar>
+              <div />
+              <Popover
+                open={filtersOpen}
+                trigger="click"
+                placement="bottomRight"
+                arrow={false}
+                onOpenChange={(open) => setFiltersOpen(open)}
+                content={
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      gap: 8,
+                      padding: 2,
+                    }}
+                  >
+                    <Select
+                      value={statusFilter}
+                      onChange={(value) => setStatusFilter(value)}
+                      style={{ width: 'fit-content', maxWidth: 240 }}
+                      size="small"
+                      variant="borderless"
+                      dropdownMatchSelectWidth={false}
+                      dropdownStyle={{ minWidth: 180 }}
+                      className="project-page-filter-select"
+                      options={[
+                        {
+                          value: 'all',
+                          label: t('projectDetails.tasksSection.allStatuses'),
+                        },
+                        ...getTaskStatusOptions(),
+                      ]}
+                    />
+                    <Select
+                      value={priorityFilter}
+                      onChange={(value) => setPriorityFilter(value)}
+                      style={{ width: 'fit-content', maxWidth: 240 }}
+                      size="small"
+                      variant="borderless"
+                      dropdownMatchSelectWidth={false}
+                      dropdownStyle={{ minWidth: 180 }}
+                      className="project-page-filter-select"
+                      options={[
+                        {
+                          value: 'all',
+                          label: t('projectDetails.tasksSection.allPriorities'),
+                        },
+                        ...getTaskPriorityOptions(),
+                      ]}
+                    />
+                    {hasActiveFilters ? (
+                      <Button
+                        type="text"
+                        size="small"
+                        onClick={() => {
+                          handleResetFilters()
+                          setFiltersOpen(false)
+                        }}
+                        icon={<X size={16} aria-hidden />}
+                        style={{ justifySelf: 'end' }}
+                      >
+                        {t('common.resetFilters')}
+                      </Button>
+                    ) : null}
+                  </div>
+                }
+              >
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<Filter size={14} aria-hidden />}
+                  aria-label="Filters"
+                >
+                </Button>
+              </Popover>
+            </TasksToolbar>
+          </div>
+          <Divider style={{ margin: '12px 0' }} />
+          {renderTasksContent()}
+        </>
+      ) : (
+        renderTasksContent()
+      )}
+
+      <TaskModalWidget
+        open={isTaskModalOpen}
+        mode={taskModalMode ?? 'create'}
+        task={taskModalMode === 'edit' ? selectedTask : null}
+        projectId={project.id}
+        tasksQueryKey={projectId ?? ''}
+        onClose={handleCloseTaskModal}
+        onCreate={handleCreateTask}
+        onSave={handleSaveTask}
+        onTaskDeleted={handleTaskDeleted}
       />
-    </Space>
+    </div>
   )
 }

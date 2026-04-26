@@ -5,7 +5,7 @@ import { rhfAntdOnFinish, textAreaCtrlEnterSubmit } from '@shared/lib/form/rhfAn
 import { getDateInputFormat } from '@shared/lib/i18n'
 import { notifyError, notifySuccess } from '@shared/ui'
 import { DatePicker, Form, Input, InputNumber, Modal, Select, Typography } from 'antd'
-import dayjs from 'dayjs'
+import dayjs, { type Dayjs } from 'dayjs'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -23,7 +23,7 @@ type FormValues = {
   client: string
   status: 'active' | 'paused' | 'done'
   budget: number | null | undefined
-  deadline?: ReturnType<typeof dayjs> | null
+  deadline?: Dayjs | null
   description?: string
 }
 
@@ -44,7 +44,9 @@ export const EditProjectModal = ({
       z.null(),
       z.undefined(),
     ]),
-    deadline: z.any().optional(),
+    deadline: z
+      .custom<Dayjs | null>((value) => value == null || dayjs.isDayjs(value))
+      .optional(),
     description: z.string().optional(),
   })
 
@@ -137,6 +139,12 @@ export const EditProjectModal = ({
         <Form.Item label={t('projects.editModal.keyLabel')}>
           <Typography.Text code copyable={{ text: project.key }}>
             {project.key}
+          </Typography.Text>
+        </Form.Item>
+
+        <Form.Item label={t('projects.form.taskKeyPrefix')}>
+          <Typography.Text code copyable={{ text: project.taskKeyPrefix }}>
+            {project.taskKeyPrefix}
           </Typography.Text>
         </Form.Item>
 
