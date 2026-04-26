@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../../db/client';
 import { HttpError } from '../../shared/http-error';
 import type { PublicUser } from './user.types';
+import { ensureDemoWorkspace } from './demoSeed';
 
 const BCRYPT_ROUNDS = 10;
 const PASSWORD_MIN_LENGTH = 8;
@@ -157,19 +158,20 @@ export async function ensureDemoUser(): Promise<{ email: string }> {
     select: { id: true },
   });
 
-  if (existing) {
-    return { email: DEMO_EMAIL };
-  }
+  const userId = existing?.id
+    ? existing.id
+    : (
+        await prisma.user.create({
+          data: {
+            email: DEMO_EMAIL,
+            passwordHash: await bcrypt.hash(DEMO_PASSWORD, BCRYPT_ROUNDS),
+            name: DEMO_NAME,
+          },
+          select: { id: true },
+        })
+      ).id;
 
-  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, BCRYPT_ROUNDS);
-
-  await prisma.user.create({
-    data: {
-      email: DEMO_EMAIL,
-      passwordHash,
-      name: DEMO_NAME,
-    },
-  });
+  await ensureDemoWorkspace(prisma, userId);
 
   return { email: DEMO_EMAIL };
 }
