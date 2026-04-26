@@ -17,20 +17,22 @@ const nodeProto = Node.prototype as unknown as {
   getBoundingClientRect?: () => DOMRect
 }
 if (typeof nodeProto.getClientRects !== 'function') {
-  nodeProto.getClientRects = () => []
+  nodeProto.getClientRects = () =>
+    ({ length: 0, item: () => null } as unknown as DOMRectList)
 }
 if (typeof nodeProto.getBoundingClientRect !== 'function') {
-  nodeProto.getBoundingClientRect = () => ({
-    x: 0,
-    y: 0,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: 0,
-    height: 0,
-    toJSON: () => ({}),
-  })
+  nodeProto.getBoundingClientRect = () =>
+    ({
+      x: 0,
+      y: 0,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: 0,
+      height: 0,
+      toJSON: () => ({}),
+    } as unknown as DOMRect)
 }
 
 class ResizeObserverStub {

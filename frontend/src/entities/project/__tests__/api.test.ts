@@ -19,6 +19,7 @@ function mockApiProject(overrides: Partial<ApiProject> = {}): ApiProject {
   return {
     id: 'default-id',
     key: 'key-1',
+    taskKeyPrefix: 'T',
     title: 'Default title',
     userId: 'user-1',
     createdAt: '2024-01-01T00:00:00.000Z',

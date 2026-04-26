@@ -31,6 +31,7 @@ vi.mock('@entities/project/api', () => ({
 const sampleProject: Project = {
   id: 'p-del-1',
   key: 'proj-9',
+  taskKeyPrefix: 'T',
   name: 'To delete',
   client: 'X',
   status: 'active',

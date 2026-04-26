@@ -1,13 +1,11 @@
 import { useProjectQuery, useUpdateProjectMutation } from '@entities/project/api'
 import { getProjectStatusOptions, getProjectStatusTag } from '@entities/project/lib/presentation'
-import type { Project } from '@entities/project/types'
 import {
   useCreateTaskMutation,
   useProjectTasksQuery,
   useUpdateTaskMutation,
 } from '@entities/task/api'
 import {
-  formatTaskDate,
   getTaskPriorityOptions,
   getTaskPriorityTag,
   getTaskStatusOptions,
@@ -19,10 +17,9 @@ import type { Task, TaskStatus } from '@entities/task/model/types'
 import { CreateTaskButton } from '@features/task/create'
 import { routes } from '@shared/config/routes'
 import { APP_CONTEXT_ACTION_EVENT, APP_CONTEXT_ACTIONS } from '@shared/config/appContextActions'
-import { formatLocaleCurrency, formatLocaleDate, formatLocaleDateTime } from '@shared/lib/i18n'
 import { ContentState, GroupedSections, notifyError, notifySuccess } from '@shared/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Card, DatePicker, Divider, Input, InputNumber, Popover, Select, Skeleton, Space, Table, Timeline, Typography } from 'antd'
+import { Button, Card, DatePicker, Divider, Input, InputNumber, Popover, Select, Skeleton, Space, Table, Typography } from 'antd'
 import dayjs, { type Dayjs } from 'dayjs'
 import {
   CheckCircle2,
@@ -31,8 +28,6 @@ import {
   Eye,
   Filter,
   Loader2,
-  LayoutGrid,
-  Table2,
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -44,7 +39,6 @@ import { z } from 'zod'
 
 import {
   BreadcrumbCurrent,
-  FilterField,
   ProjectBreadcrumb,
   ProjectBreadcrumbRight,
   ProjectBreadcrumbRow,
@@ -58,7 +52,6 @@ import {
   InlineEditControl,
   InlineEditText,
   InlineTitleField,
-  TasksFilters,
   TasksTableShell,
   TasksToolbar,
 } from './ProjectPage.styles'
@@ -232,7 +225,6 @@ export const ProjectPage = () => {
     control: projectControl,
     handleSubmit: handleProjectSubmit,
     reset: resetProjectForm,
-    watch: watchProjectForm,
     getValues: getProjectValues,
     formState: {
       errors: projectErrors,
@@ -309,7 +301,7 @@ export const ProjectPage = () => {
     await handleProjectSubmit(onSubmitProjectInline)()
   }
 
-  const startEditField = (field: EditableProjectField, event: React.MouseEvent) => {
+  const startEditField = (field: EditableProjectField) => {
     if (isProjectSubmitting) return
     // if switching fields, try to submit current changes first
     void trySubmitProject()
@@ -627,9 +619,9 @@ export const ProjectPage = () => {
                       void trySubmitProjectStatus().finally(() => stopEditField('status'))
                     }
                   }}
-                  onClick={(e) => {
+                  onClick={() => {
                     if (editingField !== 'status') {
-                      startEditField('status', e as unknown as React.MouseEvent)
+                      startEditField('status')
                       setStatusDropdownOpen(true)
                     }
                   }}
@@ -803,7 +795,7 @@ export const ProjectPage = () => {
                     </>
                   ) : (
                     <InlineTitleField>
-                      <InlineEditText onClick={(e) => startEditField('name', e)} aria-label={t('projects.form.name')}>
+                      <InlineEditText onClick={() => startEditField('name')} aria-label={t('projects.form.name')}>
                         <ProjectPageTitle>{field.value || t('projects.form.namePlaceholder')}</ProjectPageTitle>
                       </InlineEditText>
                     </InlineTitleField>
@@ -845,13 +837,13 @@ export const ProjectPage = () => {
                     </InlineBodyField>
                   ) : field.value ? (
                     <InlineBodyField>
-                      <InlineEditText onClick={(e) => startEditField('description', e)}>
+                      <InlineEditText onClick={() => startEditField('description')}>
                         <ProjectPageDescription>{field.value}</ProjectPageDescription>
                       </InlineEditText>
                     </InlineBodyField>
                   ) : (
                     <InlineBodyField>
-                      <InlineEditText onClick={(e) => startEditField('description', e)}>
+                      <InlineEditText onClick={() => startEditField('description')}>
                         <Typography.Text type="secondary">
                           {t('projects.form.descriptionPlaceholder')}
                         </Typography.Text>

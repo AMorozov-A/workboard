@@ -23,6 +23,7 @@ vi.mock('@shared/ui', async (importOriginal) => {
 const baseProject: Project = {
   id: 'p-edit',
   key: 'crm-2',
+  taskKeyPrefix: 'T',
   name: 'Original',
   client: 'ACME',
   status: 'paused',
