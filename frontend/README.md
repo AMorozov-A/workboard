@@ -38,6 +38,7 @@ Start the backend separately when you need auth and CRUD: `cd ../backend && npm 
 - Login / register on one screen (segmented control).  
 - JWT `accessToken` in `localStorage` + Redux; `Authorization: Bearer` on API calls.  
 - Session bootstrap: `GET /api/v1/auth/me` when a token exists.  
+- “Try Demo Account” button: calls `POST /api/v1/auth/ensure-demo`, then logs in with the demo credentials.  
 - Logout in the app header.  
 - **Change password** modal (`PATCH /api/v1/auth/password`).  
 - Protected routes under `/app`; redirects for guests vs authenticated users.
@@ -46,11 +47,13 @@ Start the backend separately when you need auth and CRUD: `cd ../backend && npm 
 
 - List, create (modal), **edit** (modal), **delete** (confirm).  
 - Mapping: UI **name** ↔ API **title** ([entities/project](src/entities/project)).
+- Project creation includes `taskKeyPrefix` (used for task keys like `T-1`). It cannot be changed after project creation (UI shows it as read-only).
 
 ### Tasks
 
 - List by project; create (modal); **inline** title/description edit in the drawer; status / meta; **delete** with confirmation.  
 - **Kanban** view on the project page (drag-and-drop between status columns where implemented).  
+- Task notes (personal): create/update/delete notes in the task modal (API: `/api/v1/tasks/:taskId/notes`).  
 - Mutations invalidate the correct TanStack Query keys.
 
 ### Comments
@@ -87,8 +90,7 @@ Entry points: [app/router/AppRouter.tsx](src/app/router/AppRouter.tsx), [app/sto
 
 |                |                                                              |
 | -------------- | ------------------------------------------------------------ |
-| Test files     | **14** (files named `*.test.ts` / `*.test.tsx` under `src/`) |
-| Tests (Vitest) | **100**                                                      |
+| Tests (Vitest) | See `npm test` output for current counts                     |
 | Config         | [vite.config.ts](vite.config.ts) (`test` section)            |
 | Setup          | [tests/setup.ts](tests/setup.ts)                             |
 

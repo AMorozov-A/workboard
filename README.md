@@ -99,11 +99,13 @@ npm run test:e2e    # from repo root
 ## What is covered by tests
 
 
-| Suite             | Files         | Tests / scenarios                                                    |
-| ----------------- | ------------- | -------------------------------------------------------------------- |
-| Backend (Vitest)  | 9 test files  | **94** tests (**93** passed, **1** skipped — rate-limit placeholder) |
-| Frontend (Vitest) | 14 test files | **100** tests                                                        |
-| E2E (Playwright)  | 2 spec files  | **15** scenarios (auth + projects/tasks flows)                       |
+Counts change over time — use the latest output of `npm test` (backend/frontend) and `npm run test:e2e`.
+
+| Suite             | What it covers                                  |
+| ----------------- | ---------------------------------------------- |
+| Backend (Vitest)  | Auth, projects, tasks, comments, task notes     |
+| Frontend (Vitest) | UI + hooks + MSW integration                    |
+| E2E (Playwright)  | Auth and projects/tasks flows                   |
 
 
 ## Known limitations
@@ -112,6 +114,7 @@ npm run test:e2e    # from repo root
 - **Backend Tasks API**: full CRUD is implemented; there are **no dedicated HTTP integration tests** for `/tasks` (unlike projects).
 - **Task inline edit** (`TaskTitleInlineEdit`, `TaskDescriptionInlineEdit`): covered indirectly; **no dedicated component test suite** like for delete/create modals.
 - **i18n in e2e**: Playwright `storageState` sets `crm.language` to **ru** so selectors stay on Russian copy while the app default locale is **en**.
+- **Demo login**: frontend uses `POST /api/v1/auth/ensure-demo` to create a demo user + demo workspace on demand.
 - **Portfolio scope**: no production hardening (rate limiting optional, single-user demo data patterns).
 
 ---

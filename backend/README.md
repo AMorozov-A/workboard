@@ -33,6 +33,7 @@ Scripts and dependencies: `package.json`.
 | `src/modules/projects/`  | Project CRUD (owner-only)                                                  |
 | `src/modules/tasks/`     | Task CRUD (within user’s projects)                                         |
 | `src/modules/comments/`  | List / create / delete for a task (nested under `/tasks/:taskId/comments`) |
+| `src/modules/task-notes/`| Task notes CRUD (nested under `/tasks/:taskId/notes`)                      |
 | `prisma/schema.prisma`   | Data model                                                                 |
 | `prisma/migrations/`     | SQL migrations (committed to git)                                          |
 
@@ -60,7 +61,7 @@ cd backend
 npm install
 npm run dev          # tsx watch
 npm run build        # prisma generate + tsc → dist/
-npm start            # node dist/index.js (after build)
+npm start            # prisma migrate deploy + prisma db seed + node dist/index.js
 ```
 
 ### Prisma
@@ -100,6 +101,7 @@ Base URL in examples: `http://localhost:3001`. Paths are relative to `**/api/v1`
 | GET    | `/ping`          | Health: `{ ok: true, message: "pong" }`               |
 | POST   | `/auth/register` | Body: `{ email, password, name? }` → 201 + user + JWT |
 | POST   | `/auth/login`    | Body: `{ email, password }` → 200 + user + JWT        |
+| POST   | `/auth/ensure-demo` | Creates demo user + demo workspace if missing      |
 
 
 ### Auth (JWT: `Authorization: Bearer <token>`)
@@ -118,7 +120,7 @@ Base URL in examples: `http://localhost:3001`. Paths are relative to `**/api/v1`
 | Method | Path            | Description                                                                                    |
 | ------ | --------------- | ---------------------------------------------------------------------------------------------- |
 | GET    | `/projects`     | List projects for the user                                                                     |
-| POST   | `/projects`     | Create (`title` required; optional `description`, `client`, `status`, `budget`, `deadline`, …) |
+| POST   | `/projects`     | Create (`title` required; optional `description`, `client`, `status`, `budget`, `deadline`, `taskKeyPrefix`, …) |
 | GET    | `/projects/:id` | One project (404 if missing or not owned)                                                      |
 | PATCH  | `/projects/:id` | Partial update                                                                                 |
 | DELETE | `/projects/:id` | Delete (**204** empty body)                                                                    |
@@ -146,6 +148,17 @@ Nested under `**/tasks/:taskId/comments`** (see `src/routes/v1/index.ts` — reg
 | POST   | `/tasks/:taskId/comments`            | Body: `{ body: string }` → **201** `{ ok: true, comment }`                    |
 | DELETE | `/tasks/:taskId/comments/:commentId` | **403** if not the comment author; **200** `{ ok: true }` on success          |
 
+### Task notes (JWT; task must belong to the user)
+
+Nested under `**/tasks/:taskId/notes`**.
+
+| Method | Path                              | Description                          |
+| ------ | --------------------------------- | ------------------------------------ |
+| GET    | `/tasks/:taskId/notes`            | `{ ok: true, items: TaskNote[] }`    |
+| POST   | `/tasks/:taskId/notes`            | Body: `{ key, title?, body }` → 201  |
+| PATCH  | `/tasks/:taskId/notes/:noteId`    | Body: `{ title?, body? }` → 200      |
+| DELETE | `/tasks/:taskId/notes/:noteId`    | **200** `{ ok: true }`               |
+
 
 ---
 
@@ -160,10 +173,9 @@ Nested under `**/tasks/:taskId/comments`** (see `src/routes/v1/index.ts` — reg
 ## Tests
 
 
-|                |                                                                                        |
-| -------------- | -------------------------------------------------------------------------------------- |
-| Test files     | **9** (`tests/**/*.test.ts`, `src/**/*.test.ts`)                                       |
-| Tests (Vitest) | **94** total (**93** passed, **1** skipped — rate limit placeholder in register suite) |
+|                |----------------------------------------------|
+| -------------- | -------------------------------------------- |
+| Tests (Vitest) | See `npm test` output for current counts     |
 | Config         | [vitest.config.ts](vitest.config.ts)                                                   |
 | Setup          | [tests/setup.ts](tests/setup.ts)                                                       |
 
