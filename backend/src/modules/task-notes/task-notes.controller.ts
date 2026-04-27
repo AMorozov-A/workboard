@@ -32,5 +32,5 @@ export async function update(req: Request, res: Response): Promise<void> {
 export async function remove(req: Request, res: Response): Promise<void> {
   const { taskId, noteId } = req.params;
   await taskNotesService.deleteNote(taskId, noteId, userId(req));
-  res.status(200).json({ ok: true });
+  res.status(204).send();
 }

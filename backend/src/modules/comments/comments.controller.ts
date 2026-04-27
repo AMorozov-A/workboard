@@ -28,5 +28,5 @@ export async function create(req: Request, res: Response): Promise<void> {
 export async function remove(req: Request, res: Response): Promise<void> {
   const { taskId, commentId } = req.params;
   await commentsService.deleteComment(taskId, commentId, userId(req));
-  res.status(200).json({ ok: true });
+  res.status(204).send();
 }

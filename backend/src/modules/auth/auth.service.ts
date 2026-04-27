@@ -4,13 +4,10 @@ import { prisma } from '../../db/client';
 import { HttpError } from '../../shared/http-error';
 import type { PublicUser } from './user.types';
 import { ensureDemoWorkspace } from './demoSeed';
+import { DEMO_CREDENTIALS } from './demoCredentials';
 
 const BCRYPT_ROUNDS = 10;
 const PASSWORD_MIN_LENGTH = 8;
-
-const DEMO_EMAIL = 'demo@workboard.app';
-const DEMO_PASSWORD = 'demo123';
-const DEMO_NAME = 'Demo User';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -20,21 +17,21 @@ function normalizeEmail(email: string): string {
 
 function assertEmail(email: unknown): string {
   if (typeof email !== 'string' || !EMAIL_RE.test(normalizeEmail(email))) {
-    throw new HttpError(400, 'Укажите корректный email');
+    throw new HttpError(400, 'Please provide a valid email');
   }
   return normalizeEmail(email);
 }
 
 function assertPassword(password: unknown): string {
   if (typeof password !== 'string' || password.length < PASSWORD_MIN_LENGTH) {
-    throw new HttpError(400, `Пароль должен быть не короче ${PASSWORD_MIN_LENGTH} символов`);
+    throw new HttpError(400, `Password must be at least ${PASSWORD_MIN_LENGTH} characters long`);
   }
   return password;
 }
 
 function assertLoginPassword(password: unknown): string {
   if (typeof password !== 'string' || password.length === 0) {
-    throw new HttpError(400, 'Укажите пароль');
+    throw new HttpError(400, 'Please provide a password');
   }
   return password;
 }
@@ -44,7 +41,7 @@ function parseName(name: unknown): string | undefined {
     return undefined;
   }
   if (typeof name !== 'string') {
-    throw new HttpError(400, 'Поле name должно быть строкой');
+    throw new HttpError(400, 'Field "name" must be a string');
   }
   const t = name.trim();
   return t.length === 0 ? undefined : t;
@@ -88,7 +85,7 @@ export async function register(
     return { user: toPublicUser(created) };
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      throw new HttpError(409, 'Этот email уже зарегистрирован');
+      throw new HttpError(409, 'Email is already registered');
     }
     throw e;
   }
@@ -103,12 +100,12 @@ export async function login(email: unknown, password: unknown): Promise<{ user: 
   });
 
   if (!user) {
-    throw new HttpError(401, 'Неверный email или пароль');
+    throw new HttpError(401, 'Invalid email or password');
   }
 
   const match = await bcrypt.compare(plainPassword, user.passwordHash);
   if (!match) {
-    throw new HttpError(401, 'Неверный email или пароль');
+    throw new HttpError(401, 'Invalid email or password');
   }
 
   return { user: toPublicUser(user) };
@@ -119,7 +116,7 @@ export async function getMe(userId: string): Promise<{ user: PublicUser }> {
     where: { id: userId },
   });
   if (!user) {
-    throw new HttpError(404, 'Пользователь не найден');
+    throw new HttpError(404, 'User not found');
   }
   return { user: toPublicUser(user) };
 }
@@ -137,12 +134,12 @@ export async function changePassword(
     select: { id: true, passwordHash: true },
   });
   if (!user) {
-    throw new HttpError(404, 'Пользователь не найден');
+    throw new HttpError(404, 'User not found');
   }
 
   const match = await bcrypt.compare(current, user.passwordHash);
   if (!match) {
-    throw new HttpError(401, 'Неверный текущий пароль');
+    throw new HttpError(401, 'Invalid current password');
   }
 
   const passwordHash = await bcrypt.hash(nextPlain, BCRYPT_ROUNDS);
@@ -154,7 +151,7 @@ export async function changePassword(
 
 export async function ensureDemoUser(): Promise<{ email: string }> {
   const existing = await prisma.user.findUnique({
-    where: { email: DEMO_EMAIL },
+    where: { email: DEMO_CREDENTIALS.email },
     select: { id: true },
   });
 
@@ -163,9 +160,9 @@ export async function ensureDemoUser(): Promise<{ email: string }> {
     : (
         await prisma.user.create({
           data: {
-            email: DEMO_EMAIL,
-            passwordHash: await bcrypt.hash(DEMO_PASSWORD, BCRYPT_ROUNDS),
-            name: DEMO_NAME,
+            email: DEMO_CREDENTIALS.email,
+            passwordHash: await bcrypt.hash(DEMO_CREDENTIALS.password, BCRYPT_ROUNDS),
+            name: DEMO_CREDENTIALS.name,
           },
           select: { id: true },
         })
@@ -173,5 +170,5 @@ export async function ensureDemoUser(): Promise<{ email: string }> {
 
   await ensureDemoWorkspace(prisma, userId);
 
-  return { email: DEMO_EMAIL };
+  return { email: DEMO_CREDENTIALS.email };
 }

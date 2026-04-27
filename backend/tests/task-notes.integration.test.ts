@@ -183,7 +183,7 @@ describe('DELETE /api/v1/tasks/:taskId/notes/:noteId', () => {
     await app
       .delete(`/api/v1/tasks/${taskId}/notes/${note.id}`)
       .set(authHeader(accessToken))
-      .expect(200);
+      .expect(204);
 
     const list = await app
       .get(`/api/v1/tasks/${taskId}/notes`)

@@ -91,7 +91,7 @@ describe('POST /api/v1/auth/register', () => {
         .expect(409);
 
       expect(res.body).toMatchObject({ ok: false });
-      expect(res.body.message).toContain('уже зарегистрирован');
+      expect(res.body.message).toContain('already registered');
     });
 
     it('409 when same email after normalization (case)', async () => {

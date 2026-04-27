@@ -1,12 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { ensureDemoWorkspace } from '../src/modules/auth/demoSeed';
+import { DEMO_CREDENTIALS } from '../src/modules/auth/demoCredentials';
 
 const prisma = new PrismaClient();
 
 async function main() {
   const existingDemo = await prisma.user.findUnique({
-    where: { email: 'demo@workboard.app' },
+    where: { email: DEMO_CREDENTIALS.email },
     select: { id: true },
   });
 
@@ -15,9 +16,9 @@ async function main() {
     : (
         await prisma.user.create({
           data: {
-            email: 'demo@workboard.app',
-            passwordHash: await bcrypt.hash('demo123', 10),
-            name: 'Demo User',
+            email: DEMO_CREDENTIALS.email,
+            passwordHash: await bcrypt.hash(DEMO_CREDENTIALS.password, 10),
+            name: DEMO_CREDENTIALS.name,
           },
           select: { id: true },
         })

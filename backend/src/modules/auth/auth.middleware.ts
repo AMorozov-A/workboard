@@ -4,12 +4,12 @@ import { verifyToken } from './jwt';
 export const requireAuth: RequestHandler = (req, res, next) => {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
-    res.status(401).json({ ok: false, message: 'Требуется авторизация' });
+    res.status(401).json({ ok: false, message: 'Unauthorized' });
     return;
   }
   const raw = header.slice('Bearer '.length).trim();
   if (!raw) {
-    res.status(401).json({ ok: false, message: 'Требуется авторизация' });
+    res.status(401).json({ ok: false, message: 'Unauthorized' });
     return;
   }
   try {
@@ -17,6 +17,6 @@ export const requireAuth: RequestHandler = (req, res, next) => {
     req.user = { userId: payload.sub, email: payload.email };
     next();
   } catch {
-    res.status(401).json({ ok: false, message: 'Недействительный или просроченный токен' });
+    res.status(401).json({ ok: false, message: 'Invalid or expired token' });
   }
 };

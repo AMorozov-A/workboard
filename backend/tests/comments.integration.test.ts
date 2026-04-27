@@ -211,7 +211,7 @@ describe('DELETE /api/v1/tasks/:taskId/comments/:commentId', () => {
     expect(res.body).toMatchObject({ ok: false });
   });
 
-  it('returns 200 when author deletes own comment', async () => {
+  it('returns 204 when author deletes own comment', async () => {
     const { accessToken, user } = await registerUser(`del-200-${Date.now()}@example.com`);
     const { taskId } = await createTaskAndProject(accessToken);
 
@@ -219,12 +219,10 @@ describe('DELETE /api/v1/tasks/:taskId/comments/:commentId', () => {
       data: { taskId, authorId: user.id, body: 'To delete' },
     });
 
-    const res = await app
+    await app
       .delete(`/api/v1/tasks/${taskId}/comments/${created.id}`)
       .set(authHeader(accessToken))
-      .expect(200);
-
-    expect(res.body).toEqual({ ok: true });
+      .expect(204);
 
     const list = await app
       .get(`/api/v1/tasks/${taskId}/comments`)
