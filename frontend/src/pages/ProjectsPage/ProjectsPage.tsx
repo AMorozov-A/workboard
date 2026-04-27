@@ -7,7 +7,6 @@ import {
 import { DeleteProjectButton } from '@features/project/delete'
 import { EditProjectModal, useEditProjectModal } from '@features/project/edit'
 import { routes } from '@shared/config/routes'
-import { APP_CONTEXT_ACTION_EVENT, APP_CONTEXT_ACTIONS } from '@shared/config/appContextActions'
 import { formatLocaleDate } from '@shared/lib/i18n'
 import { useAppSelector } from '@shared/lib/store'
 import { ContentState, GroupedSections } from '@shared/ui'
@@ -80,21 +79,6 @@ export const ProjectsPage = () => {
       navigate(location.pathname, { replace: true, state: {} })
     }
   }, [location.pathname, location.state, navigate, openModal])
-
-  useEffect(() => {
-    const handler = (event: Event) => {
-      const custom = event as CustomEvent<{ key: string }>
-      const key = custom.detail?.key
-      if (!key) return
-
-      if (key === APP_CONTEXT_ACTIONS.projectsCreateProject) {
-        openModal()
-      }
-    }
-
-    window.addEventListener(APP_CONTEXT_ACTION_EVENT, handler as EventListener)
-    return () => window.removeEventListener(APP_CONTEXT_ACTION_EVENT, handler as EventListener)
-  }, [openModal])
 
   const handleCreateProject = async (project: Project) => {
     await createProject(project)

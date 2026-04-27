@@ -65,7 +65,7 @@ describe('EditProjectModal', () => {
 
     expect(screen.getByDisplayValue('Original')).toBeInTheDocument()
     expect(screen.getByDisplayValue('ACME')).toBeInTheDocument()
-    expect(screen.getByText('crm-2')).toBeInTheDocument()
+    expect(screen.getAllByText('crm-2').length).toBeGreaterThanOrEqual(1)
   })
 
   it('показывает ошибку валидации имени после очистки', async () => {
@@ -230,14 +230,14 @@ describe('EditProjectModal', () => {
     )
 
     await waitFor(() => {
-      const loadingBtn = dialog.querySelector('.ant-modal-footer button.ant-btn-loading')
+      const loadingBtn = dialog.querySelector('button.ant-btn-loading')
       expect(loadingBtn).not.toBeNull()
     })
 
     resolveUpdate!()
   })
 
-  it('Cancel вызывает onClose', async () => {
+  it('кнопка закрытия вызывает onClose', async () => {
     const user = userEvent.setup()
     renderWithProviders(
       <EditProjectModal
@@ -248,7 +248,7 @@ describe('EditProjectModal', () => {
       />
     )
 
-    await user.click(screen.getByRole('button', { name: testI18n.t('common.cancel') }))
+    await user.click(screen.getByRole('button', { name: testI18n.t('tasks.detailModal.closeAria') }))
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 })

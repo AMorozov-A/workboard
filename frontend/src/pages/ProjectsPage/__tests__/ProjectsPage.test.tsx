@@ -1,5 +1,4 @@
 import type { Project } from '@entities/project/types'
-import { act } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   renderWithProviders,
@@ -7,10 +6,8 @@ import {
   testI18n,
   userEvent,
   within,
-  waitFor,
 } from '../../../../tests/test-utils'
 import { ProjectsPage } from '../ProjectsPage'
-import { APP_CONTEXT_ACTION_EVENT, APP_CONTEXT_ACTIONS } from '@shared/config/appContextActions'
 
 const mockUseProjectsQuery = vi.fn()
 const mockUseCreateProjectMutation = vi.fn()
@@ -139,30 +136,5 @@ describe('ProjectsPage', () => {
     expect(screen.getByText(testI18n.t('projects.error.title'))).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: testI18n.t('common.retry') }))
     expect(refetch).toHaveBeenCalledTimes(1)
-  })
-
-  it('открывает модалку создания проекта через глобальное контекстное действие', async () => {
-    mockUseProjectsQuery.mockReturnValue({
-      data: [sampleProject],
-      isLoading: false,
-      isError: false,
-      refetch: vi.fn(),
-    })
-
-    renderWithProviders(<ProjectsPage />)
-
-    expect(screen.queryByTestId('create-project-modal')).not.toBeInTheDocument()
-
-    await act(async () => {
-      window.dispatchEvent(
-        new CustomEvent(APP_CONTEXT_ACTION_EVENT, {
-          detail: { key: APP_CONTEXT_ACTIONS.projectsCreateProject },
-        })
-      )
-    })
-
-    await waitFor(() => {
-      expect(screen.getByTestId('create-project-modal')).toBeInTheDocument()
-    })
   })
 })

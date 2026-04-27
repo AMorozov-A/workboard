@@ -6,17 +6,10 @@ import {
   updateProject as updateProjectApi,
 } from '@shared/api/crmV1Service'
 import { isApiError } from '@shared/api/errors'
-import { getDemoListMinDelayMs, withMinDuration } from '@shared/lib/demoListMinDelay'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { mapApiProjectToProject } from './lib/mapApiProject'
 import { projectUiToCreateBody, projectUiToUpdateBody } from './lib/projectToApi'
 import type { Project } from './types'
-
-/** Ждёт сеть + мин. длительность демо-задержки — скелетон на /projects. */
-function fetchProjectsWithOptionalMinDelay(): Promise<Project[]> {
-  const minMs = getDemoListMinDelayMs(import.meta.env.VITE_PROJECTS_LIST_MIN_DELAY_MS)
-  return withMinDuration(minMs, fetchProjects)
-}
 
 export const projectsQueryKey = ['projects'] as const
 
@@ -45,7 +38,7 @@ export async function fetchProjectById(projectId: string): Promise<Project | nul
 export const useProjectsQuery = () =>
   useQuery({
     queryKey: projectsQueryKey,
-    queryFn: fetchProjectsWithOptionalMinDelay,
+    queryFn: fetchProjects,
   })
 
 export const useProjectQuery = (projectId: string | undefined) =>

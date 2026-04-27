@@ -4,7 +4,6 @@ import {
   listTasksByProject,
   updateTask as updateTaskApi,
 } from '@shared/api/crmV1Service'
-import { getDemoListMinDelayMs, withMinDuration } from '@shared/lib/demoListMinDelay'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { mapApiTaskToTask } from './lib/mapApiTask'
 import { taskToCreateBody, taskToUpdateBody } from './lib/taskToApi'
@@ -17,15 +16,10 @@ async function fetchProjectTasks(projectId: string): Promise<Task[]> {
   return items.map(mapApiTaskToTask)
 }
 
-function fetchProjectTasksWithOptionalMinDelay(projectId: string): Promise<Task[]> {
-  const minMs = getDemoListMinDelayMs(import.meta.env.VITE_TASKS_LIST_MIN_DELAY_MS)
-  return withMinDuration(minMs, () => fetchProjectTasks(projectId))
-}
-
 export const useProjectTasksQuery = (projectId: string) =>
   useQuery({
     queryKey: [...projectTasksQueryKey, projectId],
-    queryFn: () => fetchProjectTasksWithOptionalMinDelay(projectId),
+    queryFn: () => fetchProjectTasks(projectId),
     enabled: Boolean(projectId),
   })
 

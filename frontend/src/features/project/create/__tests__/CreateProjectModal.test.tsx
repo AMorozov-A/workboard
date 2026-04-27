@@ -132,17 +132,17 @@ describe('CreateProjectModal', () => {
     expect(onClose).not.toHaveBeenCalled()
   })
 
-  it('Cancel вызывает onClose', async () => {
+  it('кнопка закрытия вызывает onClose', async () => {
     const user = userEvent.setup()
     renderWithProviders(
       <CreateProjectModal open onClose={onClose} onCreate={onCreate} />
     )
 
-    await user.click(screen.getByRole('button', { name: testI18n.t('common.cancel') }))
+    await user.click(screen.getByRole('button', { name: testI18n.t('tasks.detailModal.closeAria') }))
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
-  it('после Cancel при повторном open поля сброшены', async () => {
+  it('после закрытия при повторном open поля сброшены', async () => {
     const user = userEvent.setup()
     const { rerender } = renderWithProviders(
       <CreateProjectModal open onClose={onClose} onCreate={onCreate} />
@@ -152,7 +152,7 @@ describe('CreateProjectModal', () => {
       screen.getByPlaceholderText(testI18n.t('projects.form.namePlaceholder')),
       'Draft'
     )
-    await user.click(screen.getByRole('button', { name: testI18n.t('common.cancel') }))
+    await user.click(screen.getByRole('button', { name: testI18n.t('tasks.detailModal.closeAria') }))
 
     rerender(<CreateProjectModal open={false} onClose={onClose} onCreate={onCreate} />)
     rerender(<CreateProjectModal open onClose={onClose} onCreate={onCreate} />)
