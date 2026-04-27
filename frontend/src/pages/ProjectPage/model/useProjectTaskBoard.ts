@@ -3,8 +3,8 @@ import dayjs from 'dayjs'
 import { useMemo, useState } from 'react'
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 
-type TasksViewMode = 'kanban' | 'table'
-type TasksTableSectionGroup = 'status' | 'priority' | 'sprint'
+export type TasksViewMode = 'kanban' | 'table'
+export type TasksTableSectionGroup = 'status' | 'priority' | 'sprint'
 
 const TASKS_VIEW_STORAGE_KEY = 'crm:projectTasksView'
 const TASKS_TABLE_GROUP_STORAGE_KEY = 'crm:projectTasksTableGroup'

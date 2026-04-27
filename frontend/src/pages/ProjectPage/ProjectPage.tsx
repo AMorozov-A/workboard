@@ -78,7 +78,10 @@ import {
   TasksToolbar,
 } from './ProjectPage.styles'
 import { ProjectKanbanBoard } from './ProjectKanbanBoard'
-import { useProjectTaskBoard } from './model/useProjectTaskBoard'
+import {
+  type TasksTableSectionGroup,
+  useProjectTaskBoard,
+} from './model/useProjectTaskBoard'
 
 type ProjectEditFormValues = {
   name: string
