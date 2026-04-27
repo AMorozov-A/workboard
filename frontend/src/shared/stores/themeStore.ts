@@ -6,15 +6,10 @@ export interface ThemeStore {
   toggle: () => void
 }
 
-const getSystemPrefersDark = (): boolean => {
-  if (typeof window === 'undefined') return false
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-}
-
 export const useThemeStore = create<ThemeStore>()(
   persist(
     (set, get) => ({
-      isDark: getSystemPrefersDark(),
+      isDark: true,
       toggle: () => set({ isDark: !get().isDark }),
     }),
     {
