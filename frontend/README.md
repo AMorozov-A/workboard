@@ -9,11 +9,11 @@ This package is part of the WorkBoard monorepo. Repo overview, screenshots and l
 
 | Screen        | Preview     |
 | ------------- | ----------- |
-| Auth          | Auth        |
-| Projects list | Projects    |
-| Project tasks | Tasks       |
-| Task drawer   | Task drawer |
-| Kanban board  | Kanban      |
+| Auth          | ![Auth](../docs/screenshots/login-7.png)           |
+| Projects list | ![Projects](../docs/screenshots/projects.png)      |
+| Project tasks | ![Tasks](../docs/screenshots/tasks.png)            |
+| Task drawer   | ![Task drawer](../docs/screenshots/taskDrawer.png) |
+| Kanban board  | ![Kanban](../docs/screenshots/kanban.png)          |
 
 
 Interactive flows (recorded in the running app):
