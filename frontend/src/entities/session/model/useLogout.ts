@@ -1,7 +1,7 @@
 import { logout } from '@app/store/authSlice'
 import { logoutRequest } from '../api/authApi'
 import { routes } from '@shared/config/routes'
-import { useAppDispatch } from '@shared/lib/store'
+import { useAppDispatch } from '@app/store/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -21,8 +21,9 @@ export function useLogout() {
 
     void logoutRequest()
       .catch(() => {
-        /* просроченный токен / сеть — всё равно выходим локально */
+        /* expired token / network — local logout is still ok */
       })
       .finally(finish)
   }, [dispatch, navigate, queryClient])
 }
+

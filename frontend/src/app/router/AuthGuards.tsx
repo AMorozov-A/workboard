@@ -3,7 +3,7 @@ import {
   selectSessionPending,
 } from '@app/store/authSlice'
 import { routes } from '@shared/config/routes'
-import { useAppSelector } from '@shared/lib/store'
+import { useAppSelector } from '@app/store/hooks'
 import { Spin } from 'antd'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'

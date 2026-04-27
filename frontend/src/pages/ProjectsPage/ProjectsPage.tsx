@@ -1,16 +1,16 @@
 import { useCreateProjectMutation, useProjectsQuery, useUpdateProjectMutation } from '@entities/project/api'
 import type { Project } from '@entities/project/types'
 import {
-  CreateProjectModal,
   useCreateProjectModal,
 } from '@features/project/create'
 import { DeleteProjectButton } from '@features/project/delete'
-import { EditProjectModal, useEditProjectModal } from '@features/project/edit'
+import { useEditProjectModal } from '@features/project/edit'
 import { routes } from '@shared/config/routes'
 import { formatLocaleDate } from '@shared/lib/i18n'
-import { useAppSelector } from '@shared/lib/store'
+import { useAppSelector } from '@app/store/hooks'
 import { getUserInitials } from '@shared/lib/getUserInitials'
 import { ContentState, GroupedSections } from '@shared/ui'
+import { ProjectModalWidget } from '@widgets/project/ProjectModalWidget'
 import { EditOutlined } from '@ant-design/icons'
 import { Button, Skeleton, Space, Table, Tooltip, Typography } from 'antd'
 import { CheckCircle2, Circle, Info, PauseCircle, PlayCircle, Plus } from 'lucide-react'
@@ -281,12 +281,14 @@ export const ProjectsPage = () => {
           </ProjectsHeaderRight>
         </ProjectsHeaderRow>
         {renderContent()}
-        <CreateProjectModal
+        <ProjectModalWidget
+          mode="create"
           open={isOpen}
           onClose={closeModal}
           onCreate={handleCreateProject}
         />
-        <EditProjectModal
+        <ProjectModalWidget
+          mode="edit"
           project={projectToEdit}
           open={isEditOpen}
           onClose={closeEditModal}

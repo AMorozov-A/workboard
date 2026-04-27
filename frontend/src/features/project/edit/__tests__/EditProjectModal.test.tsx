@@ -8,7 +8,7 @@ import {
   waitFor,
   within,
 } from '../../../../../tests/test-utils'
-import { EditProjectModal } from '../ui/EditProjectModal'
+import { ProjectModalWidget } from '@widgets/project/ProjectModalWidget'
 import type { Project } from '@entities/project/types'
 
 vi.mock('@shared/ui', async (importOriginal) => {
@@ -41,7 +41,8 @@ describe('EditProjectModal', () => {
 
   it('data-testid и заголовок модалки', () => {
     renderWithProviders(
-      <EditProjectModal
+      <ProjectModalWidget
+        mode="edit"
         project={baseProject}
         open
         onClose={onClose}
@@ -55,7 +56,8 @@ describe('EditProjectModal', () => {
 
   it('предзаполняет поля из project', () => {
     renderWithProviders(
-      <EditProjectModal
+      <ProjectModalWidget
+        mode="edit"
         project={baseProject}
         open
         onClose={onClose}
@@ -71,7 +73,8 @@ describe('EditProjectModal', () => {
   it('показывает ошибку валидации имени после очистки', async () => {
     const user = userEvent.setup()
     renderWithProviders(
-      <EditProjectModal
+      <ProjectModalWidget
+        mode="edit"
         project={baseProject}
         open
         onClose={onClose}
@@ -90,7 +93,8 @@ describe('EditProjectModal', () => {
   it('сабмит вызывает onUpdate с обновлёнными полями и закрывает модалку при успехе', async () => {
     const user = userEvent.setup()
     renderWithProviders(
-      <EditProjectModal
+      <ProjectModalWidget
+        mode="edit"
         project={baseProject}
         open
         onClose={onClose}
@@ -132,7 +136,8 @@ describe('EditProjectModal', () => {
       budget: 1000,
     }
     renderWithProviders(
-      <EditProjectModal
+      <ProjectModalWidget
+        mode="edit"
         project={projectWithBudget}
         open
         onClose={onClose}
@@ -178,7 +183,8 @@ describe('EditProjectModal', () => {
     onUpdate.mockRejectedValueOnce(new Error('fail'))
 
     renderWithProviders(
-      <EditProjectModal
+      <ProjectModalWidget
+        mode="edit"
         project={baseProject}
         open
         onClose={onClose}
@@ -210,7 +216,8 @@ describe('EditProjectModal', () => {
 
     const user = userEvent.setup()
     renderWithProviders(
-      <EditProjectModal
+      <ProjectModalWidget
+        mode="edit"
         project={baseProject}
         open
         onClose={onClose}
@@ -240,7 +247,8 @@ describe('EditProjectModal', () => {
   it('кнопка закрытия вызывает onClose', async () => {
     const user = userEvent.setup()
     renderWithProviders(
-      <EditProjectModal
+      <ProjectModalWidget
+        mode="edit"
         project={baseProject}
         open
         onClose={onClose}

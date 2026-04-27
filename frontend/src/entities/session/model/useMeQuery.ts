@@ -1,5 +1,5 @@
 import { logout, setUser } from '@app/store/authSlice'
-import { useAppDispatch, useAppSelector } from '@shared/lib/store'
+import { useAppDispatch, useAppSelector } from '@app/store/hooks'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { fetchMe } from '../api/authApi'
@@ -33,3 +33,4 @@ export function useMeQuery() {
 
   return query
 }
+

@@ -1,4 +1,4 @@
-import { changePasswordRequest } from '@features/auth/session'
+import { changePasswordRequest } from '@entities/session'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isApiError } from '@shared/api/errors'
 import { rhfAntdOnFinish } from '@shared/lib/form/rhfAntdFormSubmit'

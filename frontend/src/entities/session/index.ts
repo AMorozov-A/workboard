@@ -4,11 +4,13 @@ export {
   loginRequest,
   logoutRequest,
   registerRequest,
-} from '@entities/session'
+} from './api/authApi'
 export type {
   ChangePasswordResponse,
   LoginResponse,
   MeResponse,
   RegisterResponse,
-} from '@entities/session'
-export { meQueryKey, useMeQuery, useLogout } from '@entities/session'
+} from './api/authApi'
+export { meQueryKey, useMeQuery } from './model/useMeQuery'
+export { useLogout } from './model/useLogout'
+

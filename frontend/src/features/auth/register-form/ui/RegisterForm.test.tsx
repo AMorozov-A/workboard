@@ -6,7 +6,7 @@ import {
   waitFor,
 } from '../../../../../tests/test-utils'
 import { RegisterForm } from './RegisterForm'
-import * as sessionApi from '@features/auth/session'
+import * as sessionApi from '@entities/session'
 import { ApiError } from '@shared/api/errors'
 import * as notifyModule from '@shared/ui/notify'
 
@@ -24,7 +24,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
   }
 })
 
-vi.mock('@features/auth/session', () => ({
+vi.mock('@entities/session', () => ({
   registerRequest: vi.fn(),
 }))
 

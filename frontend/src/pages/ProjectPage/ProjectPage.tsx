@@ -18,7 +18,7 @@ import type { Task, TaskPriority, TaskStatus } from '@entities/task/model/types'
 import { CreateTaskButton } from '@features/task/create'
 import { routes } from '@shared/config/routes'
 import { getUserInitials } from '@shared/lib/getUserInitials'
-import { useAppSelector } from '@shared/lib/store'
+import { useAppSelector } from '@app/store/hooks'
 import { ContentState, GroupedSections, notifyError, notifySuccess } from '@shared/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, DatePicker, Divider, Input, InputNumber, Popover, Select, Skeleton, Space, Table, Tabs, Typography } from 'antd'
@@ -33,8 +33,6 @@ import {
   useDroppable,
   useSensor,
   useSensors,
-  type DragEndEvent,
-  type DragStartEvent,
 } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import {
@@ -80,58 +78,7 @@ import {
   TasksToolbar,
 } from './ProjectPage.styles'
 import { ProjectKanbanBoard } from './ProjectKanbanBoard'
-
-type TasksViewMode = 'kanban' | 'table'
-
-const TASKS_VIEW_STORAGE_KEY = 'crm:projectTasksView'
-
-const isTasksViewMode = (value: unknown): value is TasksViewMode =>
-  value === 'kanban' || value === 'table'
-
-const readStoredTasksView = (): TasksViewMode | null => {
-  try {
-    const raw = localStorage.getItem(TASKS_VIEW_STORAGE_KEY)
-    return isTasksViewMode(raw) ? raw : null
-  } catch {
-    return null
-  }
-}
-
-const storeTasksView = (value: TasksViewMode) => {
-  try {
-    localStorage.setItem(TASKS_VIEW_STORAGE_KEY, value)
-  } catch (e) {
-    if (import.meta.env.DEV) {
-      console.debug('[ProjectPage] Failed to store tasks view mode', e)
-    }
-  }
-}
-
-type TasksTableSectionGroup = 'status' | 'priority' | 'sprint'
-
-const TASKS_TABLE_GROUP_STORAGE_KEY = 'crm:projectTasksTableGroup'
-
-const isTasksTableSectionGroup = (value: unknown): value is TasksTableSectionGroup =>
-  value === 'status' || value === 'priority' || value === 'sprint'
-
-const readStoredTasksTableGroup = (): TasksTableSectionGroup | null => {
-  try {
-    const raw = localStorage.getItem(TASKS_TABLE_GROUP_STORAGE_KEY)
-    return isTasksTableSectionGroup(raw) ? raw : null
-  } catch {
-    return null
-  }
-}
-
-const storeTasksTableGroup = (value: TasksTableSectionGroup) => {
-  try {
-    localStorage.setItem(TASKS_TABLE_GROUP_STORAGE_KEY, value)
-  } catch (e) {
-    if (import.meta.env.DEV) {
-      console.debug('[ProjectPage] Failed to store tasks table group', e)
-    }
-  }
-}
+import { useProjectTaskBoard } from './model/useProjectTaskBoard'
 
 type ProjectEditFormValues = {
   name: string
@@ -258,22 +205,43 @@ export const ProjectPage = () => {
   const createTaskMutation = useCreateTaskMutation(projectId ?? '')
   const updateTaskMutation = useUpdateTaskMutation(projectId ?? '')
 
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
-  const [taskModalMode, setTaskModalMode] = useState<'create' | 'edit' | null>(null)
-  const isTaskModalOpen = taskModalMode !== null
-  const [statusFilter, setStatusFilter] = useState<Task['status'] | 'all'>('all')
-  const [priorityFilter, setPriorityFilter] = useState<Task['priority'] | 'all'>('all')
-  const [collapsedSectionKeys, setCollapsedSectionKeys] = useState<string[]>([])
-  const [tasksView, setTasksView] = useState<TasksViewMode>(
-    () => readStoredTasksView() ?? 'kanban'
-  )
-  const [tasksTableGroup, setTasksTableGroup] = useState<TasksTableSectionGroup>(
-    () => readStoredTasksTableGroup() ?? 'status'
-  )
+  const {
+    selectedTaskId,
+    selectedTask,
+    taskModalMode,
+    isTaskModalOpen,
+    openCreateTaskModal,
+    handleCreateTask,
+    handleOpenTask,
+    handleCloseTaskModal,
+    statusFilter,
+    setStatusFilter,
+    priorityFilter,
+    setPriorityFilter,
+    collapsedSectionKeys,
+    setCollapsedSectionKeys,
+    tasksView,
+    setTasksViewPersisted,
+    tasksTableGroup,
+    setTasksTableGroupPersisted,
+    handleResetFilters,
+    tableActiveTaskId,
+    isTableDragging,
+    handleTableDragStart,
+    handleTableDragEnd,
+    handleTableDragCancel,
+    handleTaskDeleted,
+  } = useProjectTaskBoard({
+    tasks,
+    onCreateTask: async (task) => {
+      await createTaskMutation.mutateAsync(task)
+    },
+    onUpdateTask: async (task) => {
+      await updateTaskMutation.mutateAsync(task)
+    },
+  })
   const [editingField, setEditingField] = useState<EditableProjectField | null>(null)
 
-  const [tableActiveTaskId, setTableActiveTaskId] = useState<string | null>(null)
-  const [isTableDragging, setIsTableDragging] = useState(false)
   const tableSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   )
@@ -281,107 +249,8 @@ export const ProjectPage = () => {
   const [infoOpen, setInfoOpen] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
-  const setTasksViewPersisted = (next: TasksViewMode) => {
-    setTasksView(next)
-    storeTasksView(next)
-  }
-
-  const openCreateTaskModal = () => {
-    setSelectedTaskId(null)
-    setTaskModalMode('create')
-  }
-
-  const handleCreateTask = async (task: Task) => {
-    await createTaskMutation.mutateAsync(task)
-  }
-
-  const handleOpenTask = (taskId: string) => {
-    setSelectedTaskId(taskId)
-    setTaskModalMode('edit')
-  }
-
-  const handleCloseTaskModal = () => {
-    setTaskModalMode(null)
-  }
-
-  const handleResetFilters = () => {
-    setStatusFilter('all')
-    setPriorityFilter('all')
-  }
-
-  const setTasksTableGroupPersisted = (next: TasksTableSectionGroup) => {
-    setTasksTableGroup(next)
-    storeTasksTableGroup(next)
-
-    if (next === 'status') setStatusFilter('all')
-    if (next === 'priority') setPriorityFilter('all')
-  }
-
-  const handleTableDragStart = (event: DragStartEvent) => {
-    const id = String(event.active.id)
-    setTableActiveTaskId(id)
-    setIsTableDragging(true)
-  }
-
-  const handleTableDragEnd = async (event: DragEndEvent) => {
-    setIsTableDragging(false)
-    setTableActiveTaskId(null)
-
-    const { active, over } = event
-    if (!over) return
-
-    const overId = String(over.id)
-    if (!overId.startsWith('group:')) return
-
-    const taskId = String(active.id)
-    const task = tasks.find((x) => x.id === taskId)
-    if (!task) return
-
-    const groupKey = overId.replace(/^group:/, '')
-
-    try {
-      if (tasksTableGroup === 'status') {
-        const nextStatus = groupKey as Task['status']
-        if (task.status === nextStatus) return
-        await updateTaskMutation.mutateAsync({ ...task, status: nextStatus })
-        return
-      }
-
-      if (tasksTableGroup === 'priority') {
-        const nextPriority = groupKey as Task['priority']
-        if (task.priority === nextPriority) return
-        await updateTaskMutation.mutateAsync({ ...task, priority: nextPriority })
-        return
-      }
-
-      const today = dayjs().startOf('day')
-      const nextDueDate =
-        groupKey === 'overdue'
-          ? today.subtract(1, 'day').format('YYYY-MM-DD')
-          : groupKey === 'this_week'
-            ? today.format('YYYY-MM-DD')
-            : groupKey === 'next_week'
-              ? today.add(7, 'day').format('YYYY-MM-DD')
-              : undefined
-
-      if (task.dueDate === nextDueDate) return
-      await updateTaskMutation.mutateAsync({ ...task, dueDate: nextDueDate })
-    } catch {
-      notifyError(t('common.errorTitle'), t('common.errorDescription'))
-    }
-  }
-
-  const handleTableDragCancel = () => {
-    setIsTableDragging(false)
-    setTableActiveTaskId(null)
-  }
-
   const handleSaveTask = async (updatedTask: Task) => {
     await updateTaskMutation.mutateAsync(updatedTask)
-  }
-
-  const handleTaskDeleted = () => {
-    setSelectedTaskId(null)
   }
 
   const validationSchema = z.object({
@@ -499,7 +368,6 @@ export const ProjectPage = () => {
     await updateTaskMutation.mutateAsync({ ...task, status: newStatus })
   }
 
-  const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? null
   const { filteredTasks, tasksByStatus } = useMemo(() => {
     const filtered = tasks.filter((task) => {
       const isStatusMatched = statusFilter === 'all' || task.status === statusFilter

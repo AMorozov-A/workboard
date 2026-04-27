@@ -62,7 +62,10 @@ export function GroupedSections<TItem, GroupKey extends string>({
     defaultCollapsedKeys ?? [],
   )
 
-  const currentCollapsedKeys = isControlled ? (collapsedKeys ?? []) : internalCollapsedKeys
+  const currentCollapsedKeys = useMemo(
+    () => (isControlled ? (collapsedKeys ?? []) : internalCollapsedKeys),
+    [collapsedKeys, internalCollapsedKeys, isControlled],
+  )
 
   const grouped = useMemo(() => {
     const map = new Map<GroupKey, TItem[]>()

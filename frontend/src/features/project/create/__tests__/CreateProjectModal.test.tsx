@@ -7,7 +7,7 @@ import {
   userEvent,
   waitFor,
 } from '../../../../../tests/test-utils'
-import { CreateProjectModal } from '../ui/CreateProjectModal'
+import { ProjectModalWidget } from '@widgets/project/ProjectModalWidget'
 
 vi.mock('@shared/ui', async (importOriginal) => {
   const mod = await importOriginal<typeof import('@shared/ui')>()
@@ -29,7 +29,7 @@ describe('CreateProjectModal', () => {
 
   it('модалка помечена data-testid для регрессии формы', () => {
     renderWithProviders(
-      <CreateProjectModal open onClose={onClose} onCreate={onCreate} />
+      <ProjectModalWidget mode="create" open onClose={onClose} onCreate={onCreate} />
     )
 
     expect(screen.getByTestId('create-project-modal')).toBeInTheDocument()
@@ -37,7 +37,7 @@ describe('CreateProjectModal', () => {
 
   it('при open рендерит поля формы', () => {
     renderWithProviders(
-      <CreateProjectModal open onClose={onClose} onCreate={onCreate} />
+      <ProjectModalWidget mode="create" open onClose={onClose} onCreate={onCreate} />
     )
 
     expect(screen.getByText(testI18n.t('projects.form.name'))).toBeInTheDocument()
@@ -51,7 +51,7 @@ describe('CreateProjectModal', () => {
 
   it('кнопка Create неактивна пока обязательные поля пусты', () => {
     renderWithProviders(
-      <CreateProjectModal open onClose={onClose} onCreate={onCreate} />
+      <ProjectModalWidget mode="create" open onClose={onClose} onCreate={onCreate} />
     )
 
     expect(screen.getByRole('button', { name: testI18n.t('projects.modal.submit') })).toBeDisabled()
@@ -60,7 +60,7 @@ describe('CreateProjectModal', () => {
   it('показывает ошибку валидации для имени после ввода и очистки', async () => {
     const user = userEvent.setup()
     renderWithProviders(
-      <CreateProjectModal open onClose={onClose} onCreate={onCreate} />
+      <ProjectModalWidget mode="create" open onClose={onClose} onCreate={onCreate} />
     )
 
     const nameInput = screen.getByPlaceholderText(testI18n.t('projects.form.namePlaceholder'))
@@ -75,7 +75,7 @@ describe('CreateProjectModal', () => {
   it('сабмит вызывает onCreate и закрывает модалку при успехе', async () => {
     const user = userEvent.setup()
     renderWithProviders(
-      <CreateProjectModal open onClose={onClose} onCreate={onCreate} />
+      <ProjectModalWidget mode="create" open onClose={onClose} onCreate={onCreate} />
     )
 
     await user.type(
@@ -113,7 +113,7 @@ describe('CreateProjectModal', () => {
     onCreate.mockRejectedValueOnce(new Error('fail'))
 
     renderWithProviders(
-      <CreateProjectModal open onClose={onClose} onCreate={onCreate} />
+      <ProjectModalWidget mode="create" open onClose={onClose} onCreate={onCreate} />
     )
 
     await user.type(
@@ -135,7 +135,7 @@ describe('CreateProjectModal', () => {
   it('кнопка закрытия вызывает onClose', async () => {
     const user = userEvent.setup()
     renderWithProviders(
-      <CreateProjectModal open onClose={onClose} onCreate={onCreate} />
+      <ProjectModalWidget mode="create" open onClose={onClose} onCreate={onCreate} />
     )
 
     await user.click(screen.getByRole('button', { name: testI18n.t('tasks.detailModal.closeAria') }))
@@ -145,7 +145,7 @@ describe('CreateProjectModal', () => {
   it('после закрытия при повторном open поля сброшены', async () => {
     const user = userEvent.setup()
     const { rerender } = renderWithProviders(
-      <CreateProjectModal open onClose={onClose} onCreate={onCreate} />
+      <ProjectModalWidget mode="create" open onClose={onClose} onCreate={onCreate} />
     )
 
     await user.type(
@@ -154,8 +154,8 @@ describe('CreateProjectModal', () => {
     )
     await user.click(screen.getByRole('button', { name: testI18n.t('tasks.detailModal.closeAria') }))
 
-    rerender(<CreateProjectModal open={false} onClose={onClose} onCreate={onCreate} />)
-    rerender(<CreateProjectModal open onClose={onClose} onCreate={onCreate} />)
+    rerender(<ProjectModalWidget mode="create" open={false} onClose={onClose} onCreate={onCreate} />)
+    rerender(<ProjectModalWidget mode="create" open onClose={onClose} onCreate={onCreate} />)
 
     expect(screen.getByPlaceholderText(testI18n.t('projects.form.namePlaceholder'))).toHaveValue('')
   })

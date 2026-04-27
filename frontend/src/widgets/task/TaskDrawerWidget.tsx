@@ -13,7 +13,7 @@ import {
 } from '@features/task/edit'
 import { selectCurrentUser } from '@app/store/authSlice'
 import { formatLocaleDateTime } from '@shared/lib/i18n'
-import { useAppSelector } from '@shared/lib/store'
+import { useAppSelector } from '@app/store/hooks'
 import { ContentState, notifyError, notifySuccess } from '@shared/ui'
 import { Button, Drawer, List, Space, Spin, Tabs, Timeline, Typography } from 'antd'
 import { useState } from 'react'
