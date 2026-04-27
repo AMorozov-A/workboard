@@ -1,8 +1,9 @@
-import type { Prisma, TaskPriority, TaskStatus } from '@prisma/client';
+import type { Prisma, Task, TaskPriority, TaskStatus } from '@prisma/client';
 import { Prisma as PrismaRuntime } from '@prisma/client';
 import { prisma } from '../../db/client';
 import { getProjectForUser } from '../projects/projects.service';
 import { HttpError } from '../../shared/http-error';
+import { parseEnum } from '../../shared/parseEnum';
 import type { CreateTaskInput, UpdateTaskInput } from './task.types';
 
 const TASK_STATUSES: TaskStatus[] = ['todo', 'in_progress', 'review', 'done'];
@@ -16,37 +17,37 @@ function assertTitle(title: unknown): string {
 }
 
 function parseTaskStatus(value: unknown, fallback: TaskStatus): TaskStatus {
-  if (value === undefined || value === null) {
-    return fallback;
-  }
-  if (typeof value === 'string' && TASK_STATUSES.includes(value as TaskStatus)) {
-    return value as TaskStatus;
-  }
-  throw new HttpError(400, 'Некорректный статус задачи');
+  return parseEnum<TaskStatus>(value, TASK_STATUSES, {
+    fallback,
+    throwError: () => {
+      throw new HttpError(400, 'Некорректный статус задачи');
+    },
+  });
 }
 
 function parseTaskStatusRequired(value: unknown): TaskStatus {
-  if (typeof value === 'string' && TASK_STATUSES.includes(value as TaskStatus)) {
-    return value as TaskStatus;
-  }
-  throw new HttpError(400, 'Некорректный статус задачи');
+  return parseEnum<TaskStatus>(value, TASK_STATUSES, {
+    throwError: () => {
+      throw new HttpError(400, 'Некорректный статус задачи');
+    },
+  });
 }
 
 function parseTaskPriority(value: unknown, fallback: TaskPriority): TaskPriority {
-  if (value === undefined || value === null) {
-    return fallback;
-  }
-  if (typeof value === 'string' && TASK_PRIORITIES.includes(value as TaskPriority)) {
-    return value as TaskPriority;
-  }
-  throw new HttpError(400, 'Некорректный приоритет задачи');
+  return parseEnum<TaskPriority>(value, TASK_PRIORITIES, {
+    fallback,
+    throwError: () => {
+      throw new HttpError(400, 'Некорректный приоритет задачи');
+    },
+  });
 }
 
 function parseTaskPriorityRequired(value: unknown): TaskPriority {
-  if (typeof value === 'string' && TASK_PRIORITIES.includes(value as TaskPriority)) {
-    return value as TaskPriority;
-  }
-  throw new HttpError(400, 'Некорректный приоритет задачи');
+  return parseEnum<TaskPriority>(value, TASK_PRIORITIES, {
+    throwError: () => {
+      throw new HttpError(400, 'Некорректный приоритет задачи');
+    },
+  });
 }
 
 function parseOptionalString(value: unknown): string | null | undefined {
@@ -180,7 +181,10 @@ function toLabelsJson(
   return labels;
 }
 
-export async function listTasksForProject(projectRef: string, userId: string) {
+export async function listTasksForProject(
+  projectRef: string,
+  userId: string,
+): Promise<{ projectId: string; rows: Task[] }> {
   const project = await assertProjectOwnedByUser(projectRef, userId);
   const rows = await prisma.task.findMany({
     where: { projectId: project.id },
@@ -189,7 +193,7 @@ export async function listTasksForProject(projectRef: string, userId: string) {
   return { projectId: project.id, rows };
 }
 
-export async function createTask(userId: string, input: CreateTaskInput) {
+export async function createTask(userId: string, input: CreateTaskInput): Promise<Task> {
   await assertProjectOwnedByUser(input.projectId, userId);
   const key = await nextTaskKeyForProject(input.projectId);
   return prisma.task.create({
@@ -206,7 +210,7 @@ export async function createTask(userId: string, input: CreateTaskInput) {
   });
 }
 
-export async function getTaskForUser(taskId: string, userId: string) {
+export async function getTaskForUser(taskId: string, userId: string): Promise<Task> {
   const task = await prisma.task.findFirst({
     where: {
       id: taskId,
@@ -219,7 +223,11 @@ export async function getTaskForUser(taskId: string, userId: string) {
   return task;
 }
 
-export async function updateTask(taskId: string, userId: string, input: UpdateTaskInput) {
+export async function updateTask(
+  taskId: string,
+  userId: string,
+  input: UpdateTaskInput,
+): Promise<Task> {
   const existing = await getTaskForUser(taskId, userId);
   const data: Prisma.TaskUpdateInput = {};
   if (input.title !== undefined) {

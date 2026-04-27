@@ -7,11 +7,17 @@ export type ApiRequestOptions = {
   skipAuth?: boolean
 }
 
-export const apiRequest = async <T>(
+export async function apiRequest(path: string, init: RequestInit, options?: ApiRequestOptions): Promise<void>
+export async function apiRequest<T>(
+  path: string,
+  init?: RequestInit,
+  options?: ApiRequestOptions
+): Promise<T>
+export async function apiRequest<T>(
   path: string,
   init: RequestInit = {},
   options: ApiRequestOptions = {}
-): Promise<T> => {
+): Promise<T> {
   const headers = new Headers(init.headers ?? undefined)
 
   const tokenForRequest = options.skipAuth ? null : getAuthToken()
@@ -35,7 +41,7 @@ export const apiRequest = async <T>(
   }
 
   if (response.status === 204 || response.status === 205) {
-    return undefined as T
+    return undefined as unknown as T
   }
 
   if (!response.ok) {
@@ -52,5 +58,5 @@ export const apiRequest = async <T>(
     throw new ApiError(response.status, message, errorText)
   }
 
-  return response.json() as Promise<T>
+  return (await response.json()) as T
 }

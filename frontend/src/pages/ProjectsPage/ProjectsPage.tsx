@@ -9,6 +9,7 @@ import { EditProjectModal, useEditProjectModal } from '@features/project/edit'
 import { routes } from '@shared/config/routes'
 import { formatLocaleDate } from '@shared/lib/i18n'
 import { useAppSelector } from '@shared/lib/store'
+import { getUserInitials } from '@shared/lib/getUserInitials'
 import { ContentState, GroupedSections } from '@shared/ui'
 import { EditOutlined } from '@ant-design/icons'
 import { Button, Skeleton, Space, Table, Tooltip, Typography } from 'antd'
@@ -26,16 +27,6 @@ import {
   ProjectsHeaderRow,
   ProjectsTableShell,
 } from './ProjectsPage.styles'
-
-const getUserInitials = (nameOrEmail: string | null | undefined): string => {
-  const raw = (nameOrEmail ?? '').trim()
-  if (!raw) return '?'
-  const parts = raw.split(/\s+/).filter(Boolean)
-  if (parts.length >= 2) {
-    return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase()
-  }
-  return parts[0]?.slice(0, 2).toUpperCase() ?? '?'
-}
 
 const hasOpenCreateProjectFlag = (
   state: unknown

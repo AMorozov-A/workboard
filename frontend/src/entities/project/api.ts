@@ -44,7 +44,12 @@ export const useProjectsQuery = () =>
 export const useProjectQuery = (projectId: string | undefined) =>
   useQuery({
     queryKey: projectDetailQueryKey(projectId ?? ''),
-    queryFn: () => fetchProjectById(projectId!),
+    queryFn: () => {
+      if (!projectId) {
+        throw new Error('Project id is required for project query')
+      }
+      return fetchProjectById(projectId)
+    },
     enabled: Boolean(projectId),
   })
 

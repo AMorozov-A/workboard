@@ -17,6 +17,7 @@ import { getTaskSprintBucket, SPRINT_BUCKET_ORDER } from '@entities/task/lib/spr
 import type { Task, TaskPriority, TaskStatus } from '@entities/task/model/types'
 import { CreateTaskButton } from '@features/task/create'
 import { routes } from '@shared/config/routes'
+import { getUserInitials } from '@shared/lib/getUserInitials'
 import { useAppSelector } from '@shared/lib/store'
 import { ContentState, GroupedSections, notifyError, notifySuccess } from '@shared/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -180,19 +181,6 @@ function getSprintHeaderMeta(bucket: (typeof SPRINT_BUCKET_ORDER)[number]): {
   if (bucket === 'this_week') return { color: 'var(--color-primary)', Icon: Calendar }
   if (bucket === 'next_week') return { color: 'var(--color-warning)', Icon: CalendarDays }
   return { color: 'var(--color-text-muted)', Icon: Clock }
-}
-
-function getUserInitials(nameOrEmail: string | null | undefined): string {
-  const raw = (nameOrEmail ?? '').trim()
-  if (!raw) return '?'
-
-  const parts = raw.split(/\s+/).filter(Boolean)
-  if (parts.length >= 2) {
-    return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase()
-  }
-
-  const word = parts[0] ?? raw
-  return word.slice(0, 2).toUpperCase()
 }
 
 function DroppableGroupBody({

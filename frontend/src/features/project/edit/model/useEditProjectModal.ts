@@ -1,16 +1,16 @@
 import type { Project } from '@entities/project/types'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 
 export const useEditProjectModal = () => {
   const [project, setProject] = useState<Project | null>(null)
 
-  const openModal = useCallback((p: Project) => {
+  const openModal = (p: Project) => {
     setProject(p)
-  }, [])
+  }
 
-  const closeModal = useCallback(() => {
+  const closeModal = () => {
     setProject(null)
-  }, [])
+  }
 
   return {
     projectToEdit: project,

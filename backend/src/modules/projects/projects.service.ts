@@ -1,6 +1,7 @@
-import type { Prisma, ProjectStatus } from '@prisma/client';
+import type { Prisma, Project, ProjectStatus } from '@prisma/client';
 import { prisma } from '../../db/client';
 import { HttpError } from '../../shared/http-error';
+import { parseEnum } from '../../shared/parseEnum';
 import type { CreateProjectInput, UpdateProjectInput } from './project.types';
 
 const PROJECT_STATUSES: ProjectStatus[] = ['active', 'paused', 'done'];
@@ -85,20 +86,20 @@ function assertClient(value: unknown): string {
 }
 
 function parseStatus(value: unknown, fallback: ProjectStatus): ProjectStatus {
-  if (value === undefined || value === null) {
-    return fallback;
-  }
-  if (typeof value === 'string' && PROJECT_STATUSES.includes(value as ProjectStatus)) {
-    return value as ProjectStatus;
-  }
-  throw new HttpError(400, 'Некорректный статус проекта');
+  return parseEnum<ProjectStatus>(value, PROJECT_STATUSES, {
+    fallback,
+    throwError: () => {
+      throw new HttpError(400, 'Некорректный статус проекта');
+    },
+  });
 }
 
 function parseStatusRequired(value: unknown): ProjectStatus {
-  if (typeof value === 'string' && PROJECT_STATUSES.includes(value as ProjectStatus)) {
-    return value as ProjectStatus;
-  }
-  throw new HttpError(400, 'Некорректный статус проекта');
+  return parseEnum<ProjectStatus>(value, PROJECT_STATUSES, {
+    throwError: () => {
+      throw new HttpError(400, 'Некорректный статус проекта');
+    },
+  });
 }
 
 function parseOptionalString(value: unknown): string | null | undefined {
@@ -197,14 +198,14 @@ export function parseUpdateProjectBody(body: unknown): UpdateProjectInput {
   return out;
 }
 
-export async function listProjectsForUser(userId: string) {
+export async function listProjectsForUser(userId: string): Promise<Project[]> {
   return prisma.project.findMany({
     where: { userId },
     orderBy: { updatedAt: 'desc' },
   });
 }
 
-export async function getProjectForUser(projectRef: string, userId: string) {
+export async function getProjectForUser(projectRef: string, userId: string): Promise<Project> {
   if (UUID_RE.test(projectRef)) {
     const p = await prisma.project.findFirst({
       where: { id: projectRef, userId },
@@ -223,7 +224,7 @@ export async function getProjectForUser(projectRef: string, userId: string) {
   return p;
 }
 
-export async function createProject(userId: string, input: CreateProjectInput) {
+export async function createProject(userId: string, input: CreateProjectInput): Promise<Project> {
   const prefix = input.keyPrefix ?? 'proj';
   const key = await nextProjectKeyForUser(userId, prefix);
   return prisma.project.create({
@@ -241,7 +242,11 @@ export async function createProject(userId: string, input: CreateProjectInput) {
   });
 }
 
-export async function updateProject(projectId: string, userId: string, input: UpdateProjectInput) {
+export async function updateProject(
+  projectId: string,
+  userId: string,
+  input: UpdateProjectInput,
+): Promise<Project> {
   const existing = await getProjectForUser(projectId, userId);
   const data: Prisma.ProjectUpdateInput = {};
   if (input.title !== undefined) {
