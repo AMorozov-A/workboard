@@ -4,6 +4,7 @@
     "close": "Закрыть",
     "save": "Сохранить",
     "cancel": "Отмена",
+    "back": "Назад",
     "retry": "Повторить",
     "resetFilters": "Сбросить фильтры",
     "you": "Вы",
@@ -26,6 +27,7 @@
     "soloWorkspace": "Личное пространство",
     "profilePlaceholder": "Аккаунт",
     "openSettings": "Настройки аккаунта",
+    "profile": "Профиль / Настройки",
     "sidebar": {
       "createProject": "Новый проект"
     },
@@ -37,6 +39,22 @@
     "menu": {
       "projects": "Проекты",
       "projectsSection": "Проекты"
+    }
+  },
+  "profile": {
+    "title": "Профиль",
+    "subtitle": "Настройки аккаунта, язык, тема и безопасность.",
+    "loading": "Загружаем профиль…",
+    "backToProjects": "К проектам",
+    "sections": {
+      "account": "Аккаунт",
+      "security": "Безопасность",
+      "preferences": "Предпочтения"
+    },
+    "fields": {
+      "name": "Имя",
+      "email": "Email",
+      "createdAt": "Создан"
     }
   },
   "auth": {
@@ -110,7 +128,7 @@
   "projects": {
     "title": "Проекты",
     "breadcrumb": {
-      "workspace": "Рабочая область",
+      "workspace": "WorkBoard",
       "current": "Проекты"
     },
     "description": "Управляйте клиентами, бюджетами и сроками проектов.",

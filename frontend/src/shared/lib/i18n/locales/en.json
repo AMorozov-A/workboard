@@ -4,6 +4,7 @@
     "close": "Close",
     "save": "Save",
     "cancel": "Cancel",
+    "back": "Back",
     "retry": "Retry",
     "resetFilters": "Reset filters",
     "you": "You",
@@ -26,6 +27,7 @@
     "soloWorkspace": "Solo workspace",
     "profilePlaceholder": "Account",
     "openSettings": "Account settings",
+    "profile": "Profile / Settings",
     "sidebar": {
       "createProject": "New project"
     },
@@ -37,6 +39,22 @@
     "menu": {
       "projects": "Projects",
       "projectsSection": "Projects"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Manage your account preferences and security settings.",
+    "loading": "Loading profile…",
+    "backToProjects": "Back to projects",
+    "sections": {
+      "account": "Account",
+      "security": "Security",
+      "preferences": "Preferences"
+    },
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "createdAt": "Created"
     }
   },
   "auth": {
@@ -110,7 +128,7 @@
   "projects": {
     "title": "Projects",
     "breadcrumb": {
-      "workspace": "Workspace",
+      "workspace": "WorkBoard",
       "current": "Projects"
     },
     "description": "Manage your active clients, budgets, and project timelines.",

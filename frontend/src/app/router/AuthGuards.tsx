@@ -85,7 +85,7 @@ export function WildcardRedirect() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to={routes.app} replace />
+    return <Navigate to={routes.projects} replace />
   }
 
   return <Navigate to={routes.login} replace />

@@ -1,7 +1,7 @@
 export const routes = {
   root: '/',
   login: '/login',
-  app: '/app',
-  projects: '/app/projects',
-  project: (projectRef: string) => `/app/projects/${encodeURIComponent(projectRef)}`,
+  projects: '/projects',
+  project: (projectRef: string) => `/projects/${encodeURIComponent(projectRef)}`,
+  profile: '/profile',
 }

@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { LoginPage } from '@pages/LoginPage/LoginPage'
+import { ProfilePage } from '@pages/ProfilePage/ProfilePage'
 import { ProjectsPage } from '@pages/ProjectsPage/ProjectsPage'
 import { ProjectPage } from '@pages/ProjectPage/ProjectPage'
 import { AppLayout } from '@widgets/AppLayout/AppLayout'
@@ -12,7 +13,7 @@ const router = createBrowserRouter([
     path: '/',
     element: <AuthRoot />,
     children: [
-      { index: true, element: <Navigate to={routes.app} replace /> },
+      { index: true, element: <Navigate to={routes.projects} replace /> },
       {
         path: 'login',
         element: (
@@ -22,17 +23,25 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'app',
+        path: 'projects',
         element: (
           <RequireAuth>
             <AppLayout />
           </RequireAuth>
         ),
         children: [
-          { index: true, element: <Navigate to={routes.projects} replace /> },
-          { path: 'projects', element: <ProjectsPage /> },
-          { path: 'projects/:projectId', element: <ProjectPage /> },
+          { index: true, element: <ProjectsPage /> },
+          { path: ':projectId', element: <ProjectPage /> },
         ],
+      },
+      {
+        path: 'profile',
+        element: (
+          <RequireAuth>
+            <AppLayout />
+          </RequireAuth>
+        ),
+        children: [{ index: true, element: <ProfilePage /> }],
       },
       { path: '*', element: <WildcardRedirect /> },
     ],

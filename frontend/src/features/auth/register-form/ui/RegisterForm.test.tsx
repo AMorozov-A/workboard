@@ -158,7 +158,7 @@ describe('RegisterForm', () => {
       })
     })
     await waitFor(() => {
-      expect(navigateMock).toHaveBeenCalledWith('/app/projects')
+      expect(navigateMock).toHaveBeenCalledWith('/projects')
     })
   })
 

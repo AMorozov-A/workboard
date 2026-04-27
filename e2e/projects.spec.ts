@@ -119,7 +119,7 @@ test.describe('Projects: полный флоу', () => {
     await createProjectViaUi(page, projectTitle)
 
     await page.locator('tbody').getByRole('row').filter({ hasText: projectTitle }).click()
-    await expect(page).toHaveURL(/\/app\/projects\/[^/]+$/)
+    await expect(page).toHaveURL(/\/projects\/[^/]+$/)
     await expect(page.getByRole('heading', { name: projectTitle, level: 1 })).toBeVisible({
       timeout: 15_000,
     })
@@ -162,7 +162,7 @@ test.describe('Projects: полный флоу', () => {
 
     await page.locator('tbody').getByRole('row').filter({ hasText: projectTitle }).click()
 
-    await expect(page).toHaveURL(/\/app\/projects\/[^/]+$/)
+    await expect(page).toHaveURL(/\/projects\/[^/]+$/)
     await expect(page.getByRole('heading', { name: projectTitle, level: 1 })).toBeVisible({
       timeout: 15_000,
     })

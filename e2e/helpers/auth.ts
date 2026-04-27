@@ -74,6 +74,6 @@ export async function registerAndLogin(
       string,
     ]
   )
-  await page.goto('/app/projects')
-  await page.waitForURL(/\/app\/projects/)
+  await page.goto('/projects')
+  await page.waitForURL(/\/projects\/?$/)
 }

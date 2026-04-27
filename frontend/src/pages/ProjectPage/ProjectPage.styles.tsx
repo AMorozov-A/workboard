@@ -68,6 +68,7 @@ export const ProjectHeaderRow = styled.div`
   justify-content: space-between;
   gap: var(--space-6);
   flex-wrap: wrap;
+  margin-bottom: var(--space-4);
 `
 
 export const ProjectTitleBlock = styled.div`
@@ -356,10 +357,12 @@ export const KanbanColumn = styled.div<{ $isDropOver?: boolean }>`
   gap: var(--space-3);
   min-width: 0;
   background: ${({ $isDropOver }) =>
-    $isDropOver ? 'var(--color-primary-bg)' : 'var(--color-surface-alt)'};
+    $isDropOver
+      ? 'color-mix(in srgb, var(--color-primary-bg) 55%, transparent)'
+      : 'color-mix(in srgb, var(--color-surface-alt) 45%, transparent)'};
   border-radius: var(--radius-lg);
   padding: var(--space-3);
-  border: 1px solid var(--color-border-subtle);
+  border: none;
   transition: background var(--duration-mid) var(--ease-default);
 `
 
@@ -369,7 +372,7 @@ export const KanbanColumnHeader = styled.div`
   justify-content: space-between;
   gap: var(--space-2);
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: none;
 `
 
 export const KanbanColumnTitle = styled.span`

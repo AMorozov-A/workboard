@@ -1,13 +1,8 @@
-import { ChangePasswordModal } from '@features/auth/change-password'
-import { useLogout } from '@features/auth/session'
 import { routes } from '@shared/config/routes'
 import { APP_CONTEXT_ACTION_EVENT, APP_CONTEXT_ACTIONS } from '@shared/config/appContextActions'
-import { normalizeLanguage, setAppLanguage } from '@shared/lib/i18n'
-import { useThemeStore } from '@shared/stores/themeStore'
 import type { MenuProps } from 'antd'
 import { Dropdown } from 'antd'
-import { Moon, Sun } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
@@ -19,80 +14,13 @@ import {
 } from './AppLayout.styles'
 
 export const AppLayout = () => {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
-  const logout = useLogout()
-  const [changePasswordOpen, setChangePasswordOpen] = useState(false)
-  const language = normalizeLanguage(i18n.resolvedLanguage ?? i18n.language)
-  const isDark = useThemeStore((s) => s.isDark)
-  const toggleTheme = useThemeStore((s) => s.toggle)
 
-  const settingsMenuItems = useMemo((): NonNullable<MenuProps['items']> => {
-    return [
-      {
-        key: 'change-password',
-        label: t('layout.changePassword'),
-        onClick: () => setChangePasswordOpen(true),
-      },
-      {
-        key: 'theme',
-        label: t('layout.theme'),
-        children: [
-          {
-            key: 'theme-light',
-            icon: <Sun size={14} strokeWidth={2} aria-hidden />,
-            label: t('layout.themeLight'),
-            disabled: !isDark,
-            onClick: () => {
-              if (isDark) toggleTheme()
-            },
-          },
-          {
-            key: 'theme-dark',
-            icon: <Moon size={14} strokeWidth={2} aria-hidden />,
-            label: t('layout.themeDark'),
-            disabled: isDark,
-            onClick: () => {
-              if (!isDark) toggleTheme()
-            },
-          },
-        ],
-      },
-      {
-        key: 'language',
-        label: t('layout.language'),
-        children: [
-          {
-            key: 'lang-ru',
-            label: t('common.languages.ru'),
-            disabled: language === 'ru',
-            onClick: () => {
-              void setAppLanguage('ru')
-            },
-          },
-          {
-            key: 'lang-en',
-            label: t('common.languages.en'),
-            disabled: language === 'en',
-            onClick: () => {
-              void setAppLanguage('en')
-            },
-          },
-        ],
-      },
-      { type: 'divider' },
-      {
-        key: 'logout',
-        label: t('layout.logout'),
-        danger: true,
-        onClick: () => logout(),
-      },
-    ]
-  }, [isDark, language, logout, t, toggleTheme])
+  const isProfilePage = location.pathname === routes.profile
 
   const appContextMenuItems = useMemo((): NonNullable<MenuProps['items']> => {
-    const isProjectPage = location.pathname.startsWith(`${routes.projects}/`)
     const isProjectsListPage = location.pathname === routes.projects
 
     return [
@@ -106,29 +34,28 @@ export const AppLayout = () => {
             { key: APP_CONTEXT_ACTIONS.projectsCreateProject, label: t('projects.actions.create') },
           ] satisfies NonNullable<MenuProps['items']>)
         : []),
-      ...(isProjectPage
-        ? ([
-            { type: 'divider' as const },
-            {
-              key: 'projectView',
-              type: 'group' as const,
-              label: 'View',
-              children: [
-                { key: APP_CONTEXT_ACTIONS.projectViewKanban, label: t('projectDetails.tasksSection.viewKanban') },
-                { key: APP_CONTEXT_ACTIONS.projectViewTable, label: t('projectDetails.tasksSection.viewTable') },
-              ],
-            },
-            { key: APP_CONTEXT_ACTIONS.projectCreateTask, label: t('tasks.actions.create') },
-          ] satisfies NonNullable<MenuProps['items']>)
-        : []),
       { type: 'divider' },
       {
-        key: 'settings',
-        label: t('layout.openSettings'),
-        children: settingsMenuItems,
+        key: 'profile',
+        label: t('layout.profile'),
+        onClick: () => navigate(routes.profile),
       },
     ]
-  }, [location.pathname, settingsMenuItems, t])
+  }, [location.pathname, navigate, t])
+
+  if (isProfilePage) {
+    return (
+      <ShellLayout>
+        <MainColumn>
+          <AppContent>
+            <ContentShell>
+              <Outlet />
+            </ContentShell>
+          </AppContent>
+        </MainColumn>
+      </ShellLayout>
+    )
+  }
 
   return (
     <Dropdown
@@ -164,10 +91,6 @@ export const AppLayout = () => {
             </ContentShell>
           </AppContent>
         </MainColumn>
-        <ChangePasswordModal
-          open={changePasswordOpen}
-          onClose={() => setChangePasswordOpen(false)}
-        />
       </ShellLayout>
     </Dropdown>
   )

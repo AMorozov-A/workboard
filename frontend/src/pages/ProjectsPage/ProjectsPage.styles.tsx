@@ -17,6 +17,33 @@ export const BreadcrumbCurrent = styled.span.attrs(() => ({
   color: var(--color-text-faint);
 `
 
+export const ProjectsHeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: nowrap;
+  min-width: 0;
+`
+
+export const ProjectsHeaderLeft = styled.div`
+  flex: 1 1 auto;
+  min-width: 0;
+
+  .ant-breadcrumb {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`
+
+export const ProjectsHeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+`
+
 export const ProjectsTableShell = styled.div`
   /* mimic tasks table compact layout */
   .ant-table {

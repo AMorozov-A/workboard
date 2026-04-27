@@ -33,7 +33,6 @@ import {
   KanbanColumnHeader,
   KanbanColumnTitle,
   TaskCardButton,
-  TaskCardDesc,
   TaskCardFooter,
   TaskCardKey,
   TaskCardLabels,
@@ -115,9 +114,6 @@ function DraggableTaskCard({
         <span style={{ lineHeight: 1 }}>{getTaskPriorityTag(task.priority)}</span>
       </TaskCardTop>
       <TaskCardTitle>{task.title}</TaskCardTitle>
-      <TaskCardDesc>
-        {task.description ?? t('projectDetails.tasksSection.descriptionFallback')}
-      </TaskCardDesc>
       <TaskCardFooter>
         <TaskCardMeta>
           <Calendar size={14} strokeWidth={2} aria-hidden />
@@ -134,8 +130,6 @@ function DraggableTaskCard({
 }
 
 function TaskDragPreview({ task, projectKey }: { task: Task; projectKey: string }) {
-  const { t } = useTranslation()
-
   return (
     <TaskCardButton
       type="button"
@@ -148,9 +142,6 @@ function TaskDragPreview({ task, projectKey }: { task: Task; projectKey: string 
         <span style={{ lineHeight: 1 }}>{getTaskPriorityTag(task.priority)}</span>
       </TaskCardTop>
       <TaskCardTitle>{task.title}</TaskCardTitle>
-      <TaskCardDesc>
-        {task.description ?? t('projectDetails.tasksSection.descriptionFallback')}
-      </TaskCardDesc>
     </TaskCardButton>
   )
 }

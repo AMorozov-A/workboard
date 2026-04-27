@@ -12,7 +12,7 @@ import { formatLocaleDate } from '@shared/lib/i18n'
 import { ContentState, GroupedSections } from '@shared/ui'
 import { EditOutlined } from '@ant-design/icons'
 import { Button, Skeleton, Space, Table, Tooltip, Typography } from 'antd'
-import { CheckCircle2, Circle, Info, PauseCircle, PlayCircle } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Circle, Info, PauseCircle, PlayCircle, Plus } from 'lucide-react'
 import type { ComponentType } from 'react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,6 +21,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   BreadcrumbCurrent,
   ProjectsBreadcrumb,
+  ProjectsHeaderLeft,
+  ProjectsHeaderRight,
+  ProjectsHeaderRow,
   ProjectsTableShell,
 } from './ProjectsPage.styles'
 
@@ -80,6 +83,8 @@ export const ProjectsPage = () => {
     window.addEventListener(APP_CONTEXT_ACTION_EVENT, handler as EventListener)
     return () => window.removeEventListener(APP_CONTEXT_ACTION_EVENT, handler as EventListener)
   }, [openModal])
+
+  const canGoBack = location.key !== 'default'
 
   const handleCreateProject = async (project: Project) => {
     await createProject(project)
@@ -248,24 +253,46 @@ export const ProjectsPage = () => {
   return (
     <div data-testid="projects-page-root">
       <Space orientation="vertical" size={24} style={{ display: 'flex', width: '100%' }}>
-        <ProjectsBreadcrumb
-          items={[
-            {
-              title: (
-                <Link to={routes.app}>
-                  {t('projects.breadcrumb.workspace')}
-                </Link>
-              ),
-            },
-            {
-              title: (
-                <BreadcrumbCurrent>
-                  {t('projects.breadcrumb.current')}
-                </BreadcrumbCurrent>
-              ),
-            },
-          ]}
-        />
+        <ProjectsHeaderRow>
+          <ProjectsHeaderLeft>
+            <ProjectsBreadcrumb
+              items={[
+                {
+                  title: (
+                    <Space size={6}>
+                      {canGoBack ? (
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<ArrowLeft size={14} aria-hidden />}
+                          aria-label={t('common.back')}
+                          onClick={() => navigate(-1)}
+                        />
+                      ) : null}
+                      <Link to={routes.projects}>{t('projects.breadcrumb.workspace')}</Link>
+                    </Space>
+                  ),
+                },
+                {
+                  title: (
+                    <BreadcrumbCurrent>
+                      {t('projects.breadcrumb.current')}
+                    </BreadcrumbCurrent>
+                  ),
+                },
+              ]}
+            />
+          </ProjectsHeaderLeft>
+          <ProjectsHeaderRight>
+            <Button
+              type="text"
+              size="small"
+              icon={<Plus size={14} aria-hidden />}
+              aria-label={t('projects.actions.create')}
+              onClick={() => openModal()}
+            />
+          </ProjectsHeaderRight>
+        </ProjectsHeaderRow>
         {renderContent()}
         <CreateProjectModal
           open={isOpen}

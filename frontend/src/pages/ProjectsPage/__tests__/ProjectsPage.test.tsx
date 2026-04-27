@@ -87,9 +87,8 @@ describe('ProjectsPage', () => {
     renderWithProviders(<ProjectsPage />)
 
     expect(screen.getByText(testI18n.t('projects.empty.title'))).toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: testI18n.t('projects.actions.create') })
-    ).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: testI18n.t('projects.actions.create') }))
+      .toBeInTheDocument()
   })
 
   it('при непустом списке показывает проекты и навигацию (без columnheader и без кнопки создания)', () => {
@@ -102,9 +101,8 @@ describe('ProjectsPage', () => {
 
     renderWithProviders(<ProjectsPage />)
 
-    expect(
-      screen.queryByRole('button', { name: testI18n.t('projects.actions.create') })
-    ).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: testI18n.t('projects.actions.create') }))
+      .toBeInTheDocument()
     expect(screen.getByText('proj-1')).toBeInTheDocument()
     expect(screen.getByText('Alpha CRM')).toBeInTheDocument()
     expect(screen.queryByRole('columnheader')).not.toBeInTheDocument()

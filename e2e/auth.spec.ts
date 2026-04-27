@@ -26,7 +26,7 @@ test.describe('Auth flow', () => {
     await page.getByPlaceholder('Повторите пароль').fill(password)
     await page.getByRole('button', { name: 'Создать аккаунт' }).click()
 
-    await expect(page).toHaveURL(/\/app\/projects/)
+    await expect(page).toHaveURL(/\/projects\/?$/)
     await expect(page.getByText('WorkBoard')).toBeVisible()
     await expect(page.getByRole('menuitem', { name: 'Проекты', exact: true })).toBeVisible()
   })
@@ -44,7 +44,7 @@ test.describe('Auth flow', () => {
     await page.getByPlaceholder('Повторите пароль').fill(password)
     await page.getByRole('button', { name: 'Создать аккаунт' }).click()
 
-    await expect(page).toHaveURL(/\/app\/projects/)
+    await expect(page).toHaveURL(/\/projects\/?$/)
     await expect(page.getByText('Relogin User', { exact: true })).toBeVisible({ timeout: 10_000 })
 
     await page.getByRole('button', { name: /Account settings|Настройки аккаунта/ }).click()
@@ -55,7 +55,7 @@ test.describe('Auth flow', () => {
     await page.getByPlaceholder('••••••').fill(password)
     await page.getByRole('button', { name: 'Войти' }).click()
 
-    await expect(page).toHaveURL(/\/app\/projects/)
+    await expect(page).toHaveURL(/\/projects\/?$/)
     await expect(page.getByText('Relogin User', { exact: true })).toBeVisible({ timeout: 10_000 })
   })
 
@@ -71,12 +71,12 @@ test.describe('Auth flow', () => {
     await page.getByPlaceholder('••••••').fill(password)
     await page.getByRole('button', { name: 'Войти' }).click()
 
-    await expect(page).toHaveURL(/\/app\/projects/)
+    await expect(page).toHaveURL(/\/projects\/?$/)
     await expect(page.getByText('WorkBoard')).toBeVisible()
   })
 
   test('redirects to login when not authenticated', async ({ page }) => {
-    await page.goto('/app/projects')
+    await page.goto('/projects')
     await page.waitForURL(/\/login$/)
   })
 
@@ -97,7 +97,7 @@ test.describe('Auth flow', () => {
     await page.getByPlaceholder('Повторите пароль').fill(password)
     await page.getByRole('button', { name: 'Создать аккаунт' }).click()
 
-    await expect(page).not.toHaveURL(/\/app\/projects/)
+    await expect(page).not.toHaveURL(/\/projects\/?$/)
     await expect(page.getByText('Этот email уже зарегистрирован')).toBeVisible({ timeout: 10_000 })
   })
 

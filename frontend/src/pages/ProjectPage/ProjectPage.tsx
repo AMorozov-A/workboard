@@ -16,23 +16,26 @@ import { KANBAN_STATUS_ORDER } from '@entities/task/lib/kanbanStatusOrder'
 import type { Task, TaskStatus } from '@entities/task/model/types'
 import { CreateTaskButton } from '@features/task/create'
 import { routes } from '@shared/config/routes'
-import { APP_CONTEXT_ACTION_EVENT, APP_CONTEXT_ACTIONS } from '@shared/config/appContextActions'
 import { ContentState, GroupedSections, notifyError, notifySuccess } from '@shared/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Card, DatePicker, Divider, Input, InputNumber, Popover, Select, Skeleton, Space, Table, Typography } from 'antd'
+import { Button, DatePicker, Divider, Input, InputNumber, Popover, Select, Skeleton, Space, Table, Typography } from 'antd'
 import dayjs, { type Dayjs } from 'dayjs'
 import {
+  ArrowLeft,
   CheckCircle2,
   Circle,
   CircleAlert,
   Eye,
   Filter,
+  LayoutGrid,
   Loader2,
+  Plus,
+  Table2,
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { TaskModalWidget } from '@widgets/task/TaskModalWidget'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -115,6 +118,8 @@ function getStatusHeaderMeta(status: TaskStatus): {
 export const ProjectPage = () => {
   const { t } = useTranslation()
   const { projectId } = useParams()
+  const navigate = useNavigate()
+  const location = useLocation()
   const {
     data: project,
     isLoading: isProjectLoading,
@@ -146,36 +151,12 @@ export const ProjectPage = () => {
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
   const [infoOpen, setInfoOpen] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const canGoBack = location.key !== 'default'
 
   const setTasksViewPersisted = (next: TasksViewMode) => {
     setTasksView(next)
     storeTasksView(next)
   }
-
-  useEffect(() => {
-    const handler = (event: Event) => {
-      const custom = event as CustomEvent<{ key: string }>
-      const key = custom.detail?.key
-      if (!key) return
-
-      if (key === APP_CONTEXT_ACTIONS.projectCreateTask) {
-        openCreateTaskModal()
-        return
-      }
-
-      if (key === APP_CONTEXT_ACTIONS.projectViewKanban) {
-        setTasksViewPersisted('kanban')
-        return
-      }
-
-      if (key === APP_CONTEXT_ACTIONS.projectViewTable) {
-        setTasksViewPersisted('table')
-      }
-    }
-
-    window.addEventListener(APP_CONTEXT_ACTION_EVENT, handler as EventListener)
-    return () => window.removeEventListener(APP_CONTEXT_ACTION_EVENT, handler as EventListener)
-  }, [])
 
   const openCreateTaskModal = () => {
     setSelectedTaskId(null)
@@ -347,17 +328,9 @@ export const ProjectPage = () => {
   const renderTasksContent = () => {
     if (isTasksLoading) {
       return (
-        <Space orientation="vertical" size={16} style={{ display: 'flex' }}>
-          <div>
-            <Typography.Text strong>
-              {t('projectDetails.tasksSection.loadingTitle')}
-            </Typography.Text>
-            <Typography.Paragraph type="secondary" style={{ margin: '4px 0 0' }}>
-              {t('projectDetails.tasksSection.loadingDescription')}
-            </Typography.Paragraph>
-          </div>
-          <Skeleton active title={{ width: '32%' }} paragraph={{ rows: 5 }} />
-        </Space>
+        <div style={{ width: '100%', paddingTop: 'var(--space-2)' }}>
+          <Skeleton active title={false} paragraph={{ rows: 6, width: '100%' }} />
+        </div>
       )
     }
 
@@ -522,23 +495,23 @@ export const ProjectPage = () => {
 
   if (isProjectLoading) {
     return (
-      <Card>
-        <Space orientation="vertical" size={16} style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', paddingTop: 12 }}>
+        <Space orientation="vertical" size={24} style={{ display: 'flex' }}>
           <div>
             <Typography.Text strong>{t('projectDetails.loadingTitle')}</Typography.Text>
             <Typography.Paragraph type="secondary" style={{ margin: '4px 0 0' }}>
               {t('projectDetails.loadingDescription')}
             </Typography.Paragraph>
           </div>
-          <Skeleton active title={{ width: '32%' }} paragraph={{ rows: 6 }} />
+          <Skeleton active title={false} paragraph={{ rows: 6, width: '100%' }} />
         </Space>
-      </Card>
+      </div>
     )
   }
 
   if (isProjectError) {
     return (
-      <Card>
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', paddingTop: 12 }}>
         <ContentState
           variant="error"
           title={t('projects.error.title')}
@@ -549,19 +522,19 @@ export const ProjectPage = () => {
             </Button>
           }
         />
-      </Card>
+      </div>
     )
   }
 
   if (!project) {
     return (
-      <Card>
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', paddingTop: 12 }}>
         <ContentState
           variant="empty"
           title={t('projectDetails.notFoundTitle')}
           description={t('projectDetails.notFoundDescription')}
         />
-      </Card>
+      </div>
     )
   }
 
@@ -573,9 +546,18 @@ export const ProjectPage = () => {
             items={[
               {
                 title: (
-                  <Link to={routes.app}>
-                    {t('projects.breadcrumb.workspace')}
-                  </Link>
+                  <Space size={6}>
+                    {canGoBack ? (
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<ArrowLeft size={14} aria-hidden />}
+                        aria-label={t('common.back')}
+                        onClick={() => navigate(-1)}
+                      />
+                    ) : null}
+                    <Link to={routes.projects}>{t('projects.breadcrumb.workspace')}</Link>
+                  </Space>
                 ),
               },
               {
@@ -751,7 +733,13 @@ export const ProjectPage = () => {
       <ProjectHeaderRow>
         <ProjectTitleBlock>
           <ProjectTitleRow>
-            <div style={{ display: 'grid', gap: 8, width: '100%' }}>
+            <div
+              style={{
+                display: 'grid',
+                rowGap: 'var(--space-4)',
+                width: '100%',
+              }}
+            >
               <Controller
                 name="name"
                 control={projectControl}
@@ -857,94 +845,118 @@ export const ProjectPage = () => {
         </ProjectTitleBlock>
       </ProjectHeaderRow>
 
-      {tasks.length > 0 || isTasksLoading ? (
+      {tasks.length > 0 ? (
         <>
           <div style={{ marginTop: 8 }}>
             <TasksToolbar>
               <div />
-              <Popover
-                open={filtersOpen}
-                trigger="click"
-                placement="bottomRight"
-                arrow={false}
-                onOpenChange={(open) => setFiltersOpen(open)}
-                content={
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      gap: 8,
-                      padding: 2,
-                    }}
-                  >
-                    <Select
-                      value={statusFilter}
-                      onChange={(value) => setStatusFilter(value)}
-                      style={{ width: 'fit-content', maxWidth: 240 }}
-                      size="small"
-                      variant="borderless"
-                      dropdownMatchSelectWidth={false}
-                      dropdownStyle={{ minWidth: 180 }}
-                      className="project-page-filter-select"
-                      options={[
-                        {
-                          value: 'all',
-                          label: t('projectDetails.tasksSection.allStatuses'),
-                        },
-                        ...getTaskStatusOptions(),
-                      ]}
-                    />
-                    <Select
-                      value={priorityFilter}
-                      onChange={(value) => setPriorityFilter(value)}
-                      style={{ width: 'fit-content', maxWidth: 240 }}
-                      size="small"
-                      variant="borderless"
-                      dropdownMatchSelectWidth={false}
-                      dropdownStyle={{ minWidth: 180 }}
-                      className="project-page-filter-select"
-                      options={[
-                        {
-                          value: 'all',
-                          label: t('projectDetails.tasksSection.allPriorities'),
-                        },
-                        ...getTaskPriorityOptions(),
-                      ]}
-                    />
-                    {hasActiveFilters ? (
-                      <Button
-                        type="text"
-                        size="small"
-                        onClick={() => {
-                          handleResetFilters()
-                          setFiltersOpen(false)
-                        }}
-                        icon={<X size={16} aria-hidden />}
-                        style={{ justifySelf: 'end' }}
-                      >
-                        {t('common.resetFilters')}
-                      </Button>
-                    ) : null}
-                  </div>
-                }
-              >
+              <Space size={2}>
                 <Button
                   type="text"
                   size="small"
-                  icon={<Filter size={14} aria-hidden />}
-                  aria-label="Filters"
+                  icon={<Plus size={14} aria-hidden />}
+                  aria-label={t('tasks.actions.create')}
+                  onClick={openCreateTaskModal}
+                />
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<LayoutGrid size={14} aria-hidden />}
+                  aria-label={t('projectDetails.tasksSection.viewKanban')}
+                  aria-pressed={tasksView === 'kanban'}
+                  onClick={() => setTasksViewPersisted('kanban')}
+                  style={tasksView === 'kanban' ? { color: 'var(--color-primary)' } : undefined}
+                />
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<Table2 size={14} aria-hidden />}
+                  aria-label={t('projectDetails.tasksSection.viewTable')}
+                  aria-pressed={tasksView === 'table'}
+                  onClick={() => setTasksViewPersisted('table')}
+                  style={tasksView === 'table' ? { color: 'var(--color-primary)' } : undefined}
+                />
+                <Popover
+                  open={filtersOpen}
+                  trigger="click"
+                  placement="bottomRight"
+                  arrow={false}
+                  onOpenChange={(open) => setFiltersOpen(open)}
+                  content={
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        gap: 8,
+                        padding: 2,
+                      }}
+                    >
+                      <Select
+                        value={statusFilter}
+                        onChange={(value) => setStatusFilter(value)}
+                        style={{ width: 'fit-content', maxWidth: 240 }}
+                        size="small"
+                        variant="borderless"
+                        dropdownMatchSelectWidth={false}
+                        dropdownStyle={{ minWidth: 180 }}
+                        className="project-page-filter-select"
+                        options={[
+                          {
+                            value: 'all',
+                            label: t('projectDetails.tasksSection.allStatuses'),
+                          },
+                          ...getTaskStatusOptions(),
+                        ]}
+                      />
+                      <Select
+                        value={priorityFilter}
+                        onChange={(value) => setPriorityFilter(value)}
+                        style={{ width: 'fit-content', maxWidth: 240 }}
+                        size="small"
+                        variant="borderless"
+                        dropdownMatchSelectWidth={false}
+                        dropdownStyle={{ minWidth: 180 }}
+                        className="project-page-filter-select"
+                        options={[
+                          {
+                            value: 'all',
+                            label: t('projectDetails.tasksSection.allPriorities'),
+                          },
+                          ...getTaskPriorityOptions(),
+                        ]}
+                      />
+                      {hasActiveFilters ? (
+                        <Button
+                          type="text"
+                          size="small"
+                          onClick={() => {
+                            handleResetFilters()
+                            setFiltersOpen(false)
+                          }}
+                          icon={<X size={16} aria-hidden />}
+                          style={{ justifySelf: 'end' }}
+                        >
+                          {t('common.resetFilters')}
+                        </Button>
+                      ) : null}
+                    </div>
+                  }
                 >
-                </Button>
-              </Popover>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<Filter size={14} aria-hidden />}
+                    aria-label="Filters"
+                  />
+                </Popover>
+              </Space>
             </TasksToolbar>
           </div>
           <Divider style={{ margin: '12px 0' }} />
-          {renderTasksContent()}
         </>
-      ) : (
-        renderTasksContent()
-      )}
+      ) : null}
+      {renderTasksContent()}
 
       <TaskModalWidget
         open={isTaskModalOpen}
