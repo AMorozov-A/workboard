@@ -18,8 +18,8 @@ This package is part of the WorkBoard monorepo. Repo overview, screenshots and l
 
 Interactive flows (recorded in the running app):
 
-- Task table interactions: [../docs/screenshots/actions_table.gif](../docs/screenshots/actions_table.gif)
-- Task filtering: [../docs/screenshots/filter.gif](../docs/screenshots/filter.gif)
+- Task table interactions: ![../docs/screenshots/actions_table.gif](../docs/screenshots/actions_table.gif)
+- Task filtering: ![../docs/screenshots/filter.gif](../docs/screenshots/filter.gif)
 
 ## What the frontend demonstrates
 

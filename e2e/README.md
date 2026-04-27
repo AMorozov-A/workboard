@@ -13,12 +13,12 @@ This package is part of the WorkBoard monorepo. The product overview and screens
 
 The suite touches the same screens shown in the product tour:
 
-- Demo login flow: [../docs/screenshots/login_demo.gif](../docs/screenshots/login_demo.gif)
-- Projects list: [../docs/screenshots/projects.png](../docs/screenshots/projects.png)
-- Task table: [../docs/screenshots/tasks.png](../docs/screenshots/tasks.png)
-- Task filtering: [../docs/screenshots/filter.gif](../docs/screenshots/filter.gif)
-- Kanban view: [../docs/screenshots/kanban.png](../docs/screenshots/kanban.png)
-- Task drawer: [../docs/screenshots/taskDrawer.png](../docs/screenshots/taskDrawer.png)
+- Demo login flow: ![../docs/screenshots/login_demo.gif](../docs/screenshots/login_demo.gif)
+- Projects list: ![../docs/screenshots/projects.png](../docs/screenshots/projects.png)
+- Task table: ![../docs/screenshots/tasks.png](../docs/screenshots/tasks.png)
+- Task filtering: ![../docs/screenshots/filter.gif](../docs/screenshots/filter.gif)
+- Kanban view: ![../docs/screenshots/kanban.png](../docs/screenshots/kanban.png)
+- Task drawer: ![../docs/screenshots/taskDrawer.png](../docs/screenshots/taskDrawer.png)
 
 ## Why this package matters
 
