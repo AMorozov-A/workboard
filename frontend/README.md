@@ -41,7 +41,7 @@ Start the backend separately when you need auth and CRUD: `cd ../backend && npm 
 - “Try Demo Account” button: calls `POST /api/v1/auth/ensure-demo`, then logs in with the demo credentials.  
 - Logout in the app header.  
 - **Change password** modal (`PATCH /api/v1/auth/password`).  
-- Protected routes under `/app`; redirects for guests vs authenticated users.
+- Protected routes under `/projects` and `/profile`; redirects for guests vs authenticated users.
 
 ### Projects
 
@@ -74,7 +74,7 @@ Start the backend separately when you need auth and CRUD: `cd ../backend && npm 
 | Layer          | Role                                                                                   |
 | -------------- | -------------------------------------------------------------------------------------- |
 | `src/app`      | Providers, Redux store, router, auth guards                                            |
-| `src/pages`    | Login, projects list, project detail                                                   |
+| `src/pages`    | Login, projects list, project detail, profile                                          |
 | `src/widgets`  | App shell, task drawer                                                                 |
 | `src/features` | Auth forms, change password, project CRUD modals, task create/delete, task inline edit |
 | `src/entities` | Types, query/mutation hooks, API mappers                                               |

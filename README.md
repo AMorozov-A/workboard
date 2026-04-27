@@ -4,6 +4,16 @@ A portfolio-grade demo of a small **freelance project workspace**: sign in, brow
 
 The goal is a clean, interactive showcase (React + Express + Prisma) with automated tests—not a production SaaS.
 
+## Live demo (replace before publishing)
+
+- **Frontend (Netlify)**: `https://workboard-demo.netlify.app`
+- **Backend (Render)**: `https://workboard-api.onrender.com`
+
+## Screenshots (add before publishing)
+
+- `docs/screenshots/login.png`
+- `docs/screenshots/project.png`
+
 ## Stack
 
 
@@ -84,6 +94,20 @@ cd backend && npm test
 cd frontend && npm test
 npm run test:e2e    # from repo root
 ```
+
+## Deploy (short)
+
+- **Frontend**: Netlify (base directory: `frontend/`). Make sure SPA routing is configured (`frontend/public/_redirects`).
+- **Backend**: Render. On start run migrations + seed (`npm start` does `prisma migrate deploy` + `prisma db seed`). Set env: `DATABASE_URL`, `JWT_SECRET`, `ALLOWED_ORIGINS`.
+
+## Demo credentials
+
+- **Email**: `demo@workboard.app`
+- **Password**: `demo123`
+
+## License
+
+MIT — see `LICENSE`.
 
 ## Repo layout (top level)
 

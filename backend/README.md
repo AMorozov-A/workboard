@@ -146,7 +146,7 @@ Nested under `**/tasks/:taskId/comments`** (see `src/routes/v1/index.ts` — reg
 | ------ | ------------------------------------ | ----------------------------------------------------------------------------- |
 | GET    | `/tasks/:taskId/comments`            | `{ ok: true, items: Comment[] }` — each item includes `author: { id, email }` |
 | POST   | `/tasks/:taskId/comments`            | Body: `{ body: string }` → **201** `{ ok: true, comment }`                    |
-| DELETE | `/tasks/:taskId/comments/:commentId` | **403** if not the comment author; **200** `{ ok: true }` on success          |
+| DELETE | `/tasks/:taskId/comments/:commentId` | **403** if not the comment author; **204** empty body on success              |
 
 ### Task notes (JWT; task must belong to the user)
 
@@ -157,7 +157,7 @@ Nested under `**/tasks/:taskId/notes`**.
 | GET    | `/tasks/:taskId/notes`            | `{ ok: true, items: TaskNote[] }`    |
 | POST   | `/tasks/:taskId/notes`            | Body: `{ key, title?, body }` → 201  |
 | PATCH  | `/tasks/:taskId/notes/:noteId`    | Body: `{ title?, body? }` → 200      |
-| DELETE | `/tasks/:taskId/notes/:noteId`    | **200** `{ ok: true }`               |
+| DELETE | `/tasks/:taskId/notes/:noteId`    | **204** empty body                   |
 
 
 ---
@@ -173,7 +173,7 @@ Nested under `**/tasks/:taskId/notes`**.
 ## Tests
 
 
-|                |----------------------------------------------|
+|                |                                              |
 | -------------- | -------------------------------------------- |
 | Tests (Vitest) | See `npm test` output for current counts     |
 | Config         | [vitest.config.ts](vitest.config.ts)                                                   |
