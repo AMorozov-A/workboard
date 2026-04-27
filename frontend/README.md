@@ -1,74 +1,63 @@
 # WorkBoard — Frontend
 
-Portfolio demo (not a production CRM). Main flow: **login / register** → **workspace** → **projects list** → **project page** → **tasks** (table **or kanban** + drawer). Data for projects, tasks, and comments comes from the backend API.
+React + TypeScript app that powers the WorkBoard demo. It owns the entire user-facing flow: authentication, projects list, project detail with task table or kanban view, and a side drawer for task details with persisted comments and personal notes.
 
-## Stack
+This package is part of the WorkBoard monorepo. Repo overview, screenshots and live demo links live in the [root README](../README.md).
 
-- React, TypeScript, Vite  
-- Ant Design  
-- TanStack Query (server state)  
-- Redux Toolkit (session / token)  
-- i18next (en / ru)  
-- React Router  
-- React Hook Form + Zod  
-- Architecture: **Feature-Sliced Design** — `app`, `pages`, `widgets`, `features`, `entities`, `shared`
+## UI preview
 
-## API & env
 
-- HTTP base: `VITE_API_BASE_URL`; if unset, `**/api`** (same origin).  
-- In **dev**, [vite.config.ts](vite.config.ts) proxies `/api` to the backend (default `http://localhost:3001`).  
-- Restart the backend after API changes to avoid stale 404s.
+| Screen        | Preview     |
+| ------------- | ----------- |
+| Auth          | Auth        |
+| Projects list | Projects    |
+| Project tasks | Tasks       |
+| Task drawer   | Task drawer |
+| Kanban board  | Kanban      |
 
-## Run
 
-```bash
-cd frontend
-npm install
-npm run dev
+Interactive flows (recorded in the running app):
+
+- Task table interactions: [../docs/screenshots/actions_table.gif](../docs/screenshots/actions_table.gif)
+- Task filtering: [../docs/screenshots/filter.gif](../docs/screenshots/filter.gif)
+
+## What the frontend demonstrates
+
+- Clean Feature-Sliced Design layout (`app`, `pages`, `widgets`, `features`, `entities`, `shared`).
+- TanStack Query for server state (projects, tasks, comments, task notes) with proper invalidation on mutations.
+- Redux Toolkit for session / token state only — no over-engineered global store.
+- Forms built with React Hook Form + Zod validation.
+- Two parallel views of the same task list: a sortable / filterable table and a drag-and-drop kanban board.
+- Task drawer with inline title and description editing, status changes, persisted comments and personal task notes.
+- i18n (English / Russian) wired through all main screens.
+- Unit tests with Vitest, with API mocked through MSW.
+
+## Tech stack
+
+- React 19, TypeScript, Vite
+- Ant Design
+- TanStack Query (server state)
+- Redux Toolkit (session / token)
+- React Router
+- React Hook Form + Zod
+- i18next (en / ru)
+- MSW for unit-test API mocks
+- Architecture: Feature-Sliced Design
+
+## App flow
+
 ```
-
-Start the backend separately when you need auth and CRUD: `cd ../backend && npm run dev`.
-
----
-
-## Features
-
-### Auth
-
-- Login / register on one screen (segmented control).  
-- JWT `accessToken` in `localStorage` + Redux; `Authorization: Bearer` on API calls.  
-- Session bootstrap: `GET /api/v1/auth/me` when a token exists.  
-- “Try Demo Account” button: calls `POST /api/v1/auth/ensure-demo`, then logs in with the demo credentials.  
-- Logout in the app header.  
-- **Change password** modal (`PATCH /api/v1/auth/password`).  
-- Protected routes under `/projects` and `/profile`; redirects for guests vs authenticated users.
-
-### Projects
-
-- List, create (modal), **edit** (modal), **delete** (confirm).  
-- Mapping: UI **name** ↔ API **title** ([entities/project](src/entities/project)).
-- Project creation includes `taskKeyPrefix` (used for task keys like `T-1`). It cannot be changed after project creation (UI shows it as read-only).
-
-### Tasks
-
-- List by project; create (modal); **inline** title/description edit in the drawer; status / meta; **delete** with confirmation.  
-- **Kanban** view on the project page (drag-and-drop between status columns where implemented).  
-- Task notes (personal): create/update/delete notes in the task modal (API: `/api/v1/tasks/:taskId/notes`).  
-- Mutations invalidate the correct TanStack Query keys.
-
-### Comments
-
-- **TanStack Query** hooks in `@entities/comment` load, create, and delete comments for the open task (`GET/POST/DELETE` → `/api/v1/tasks/:taskId/comments`).  
-- Comments are **persisted** in the database; the drawer shows **author** (from the API).
-
-### Other
-
-- i18n for auth, layout, projects, tasks, notifications.  
-- MSW used in unit tests ([src/mocks](src/mocks)).
-
----
-
-## FSD layout
+/login (login + register tabs, "Try Demo Account")
+   │
+   ▼
+/projects (list, create / edit / delete)
+   │
+   ▼
+/projects/:id (table or kanban view)
+   │
+   ├── Task drawer (inline edits, comments, notes)
+   └── Profile / change password
+```
 
 
 | Layer          | Role                                                                                   |
@@ -81,33 +70,34 @@ Start the backend separately when you need auth and CRUD: `cd ../backend && npm 
 | `src/shared`   | UI helpers, i18n, HTTP client, API service                                             |
 
 
-Entry points: [app/router/AppRouter.tsx](src/app/router/AppRouter.tsx), [app/store](src/app/store).
+Entry points: [src/app/router/AppRouter.tsx](src/app/router/AppRouter.tsx), [src/app/store](src/app/store).
 
----
-
-## Tests
-
-
-|                |                                                              |
-| -------------- | ------------------------------------------------------------ |
-| Tests (Vitest) | See `npm test` output for current counts                     |
-| Config         | [vite.config.ts](vite.config.ts) (`test` section)            |
-| Setup          | [tests/setup.ts](tests/setup.ts)                             |
-
+## Development
 
 ```bash
 cd frontend
-npm test              # once
-npm run test:watch
-npm run test:ui
-npm run test:coverage
+npm install
+npm run dev
 ```
 
----
+App: [http://localhost:5173](http://localhost:5173).
 
-## Known limitations
 
-- **Comments**: no **edit** (PATCH) in the API or UI yet.  
-- **Task editing**: inline editors are not covered by a large dedicated test file (unlike delete/create flows).  
-- **E2E** lives in the root `e2e/` package (Russian UI selectors).
+| What          | Command                 |
+| ------------- | ----------------------- |
+| Dev server    | `npm run dev`           |
+| Lint          | `npm run lint`          |
+| Build         | `npm run build`         |
+| Tests (once)  | `npm test`              |
+| Tests (watch) | `npm run test:watch`    |
+| Test UI       | `npm run test:ui`       |
+| Coverage      | `npm run test:coverage` |
 
+
+Backend pairing:
+
+- HTTP base: `VITE_API_BASE_URL` if set, otherwise `/api` (same origin).
+- In dev, [vite.config.ts](vite.config.ts) proxies `/api` to the backend (default `http://localhost:3001`).
+- Start the backend separately when you need auth and CRUD: `cd ../backend && npm run dev`.
+
+Test config and setup live in [vite.config.ts](vite.config.ts) (`test` section) and [tests/setup.ts](tests/setup.ts).
