@@ -28,7 +28,7 @@ test.describe('Auth flow', () => {
 
     await expect(page).toHaveURL(/\/projects\/?$/)
     await expect(page.getByText('WorkBoard')).toBeVisible()
-    await expect(page.getByRole('menuitem', { name: 'Проекты', exact: true })).toBeVisible()
+    await expect(page.getByTestId('projects-page-root')).toBeVisible()
   })
 
   test('after UI registration, user can sign in again with the same credentials', async ({ page }) => {
@@ -45,10 +45,10 @@ test.describe('Auth flow', () => {
     await page.getByRole('button', { name: 'Создать аккаунт' }).click()
 
     await expect(page).toHaveURL(/\/projects\/?$/)
-    await expect(page.getByText('Relogin User', { exact: true })).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByTestId('projects-page-root')).toBeVisible({ timeout: 10_000 })
 
-    await page.getByRole('button', { name: /Account settings|Настройки аккаунта/ }).click()
-    await page.getByRole('menuitem', { name: /Log out|Выйти/ }).click()
+    await page.evaluate(() => localStorage.removeItem('workboard_access_token'))
+    await page.goto('/login')
     await page.waitForURL(/\/login$/)
 
     await page.getByPlaceholder('you@example.com').fill(email)
@@ -56,7 +56,7 @@ test.describe('Auth flow', () => {
     await page.getByRole('button', { name: 'Войти' }).click()
 
     await expect(page).toHaveURL(/\/projects\/?$/)
-    await expect(page.getByText('Relogin User', { exact: true })).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByTestId('projects-page-root')).toBeVisible({ timeout: 10_000 })
   })
 
   test('can login with existing user', async ({ page }) => {

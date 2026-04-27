@@ -57,7 +57,7 @@ export const ProfilePage = () => {
 
   if (!user) {
     return (
-      <div style={{ paddingTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Spin size="large" tip={t('profile.loading')} />
       </div>
     )
@@ -66,7 +66,7 @@ export const ProfilePage = () => {
   const canGoBack = location.key !== 'default'
 
   return (
-    <div style={{ width: '100%', paddingTop: 12 }}>
+    <div style={{ width: '100%' }}>
       <Space direction="vertical" size={16} style={{ display: 'flex' }}>
         <Breadcrumb
           items={[

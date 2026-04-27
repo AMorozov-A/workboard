@@ -42,22 +42,44 @@ export const ProjectsHeaderRight = styled.div`
   align-items: center;
   gap: 3px;
   flex: 0 0 auto;
+
+  .projects-page-user-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    width: 28px;
+    height: 28px;
+  }
+
+  .projects-page-user-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-text);
+    background: color-mix(in srgb, var(--color-primary-bg) 55%, var(--color-surface));
+    border: 1px solid var(--color-border-subtle);
+    user-select: none;
+  }
 `
 
 export const ProjectsTableShell = styled.div`
-  /* mimic tasks table compact layout */
   .ant-table {
     background: transparent;
   }
 
-  /* keep fixed columns transparent but preserve row hover */
   .ant-table-cell-fix,
   .ant-table-cell-fix-left,
   .ant-table-cell-fix-right {
     background: transparent !important;
   }
 
-  /* AntD technical row for width measurements */
   .ant-table-tbody > tr.ant-table-measure-row {
     height: 0 !important;
     pointer-events: none;
@@ -74,7 +96,6 @@ export const ProjectsTableShell = styled.div`
     background: transparent !important;
   }
 
-  /* 2px gap between rows without top "empty row" */
   .ant-table-tbody > tr + tr > td {
     border-top: 2px solid transparent;
     background-clip: padding-box;

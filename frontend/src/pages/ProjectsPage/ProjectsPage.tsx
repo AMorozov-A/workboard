@@ -9,10 +9,11 @@ import { EditProjectModal, useEditProjectModal } from '@features/project/edit'
 import { routes } from '@shared/config/routes'
 import { APP_CONTEXT_ACTION_EVENT, APP_CONTEXT_ACTIONS } from '@shared/config/appContextActions'
 import { formatLocaleDate } from '@shared/lib/i18n'
+import { useAppSelector } from '@shared/lib/store'
 import { ContentState, GroupedSections } from '@shared/ui'
 import { EditOutlined } from '@ant-design/icons'
 import { Button, Skeleton, Space, Table, Tooltip, Typography } from 'antd'
-import { ArrowLeft, CheckCircle2, Circle, Info, PauseCircle, PlayCircle, Plus } from 'lucide-react'
+import { CheckCircle2, Circle, Info, PauseCircle, PlayCircle, Plus } from 'lucide-react'
 import type { ComponentType } from 'react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -26,6 +27,16 @@ import {
   ProjectsHeaderRow,
   ProjectsTableShell,
 } from './ProjectsPage.styles'
+
+const getUserInitials = (nameOrEmail: string | null | undefined): string => {
+  const raw = (nameOrEmail ?? '').trim()
+  if (!raw) return '?'
+  const parts = raw.split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) {
+    return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase()
+  }
+  return parts[0]?.slice(0, 2).toUpperCase() ?? '?'
+}
 
 const hasOpenCreateProjectFlag = (
   state: unknown
@@ -51,6 +62,7 @@ export const ProjectsPage = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
+  const currentUser = useAppSelector((s) => s.auth.user)
   const { data = [], isLoading, isError, refetch } = useProjectsQuery()
   const { mutateAsync: createProject } = useCreateProjectMutation()
   const { mutateAsync: updateProject } = useUpdateProjectMutation()
@@ -83,8 +95,6 @@ export const ProjectsPage = () => {
     window.addEventListener(APP_CONTEXT_ACTION_EVENT, handler as EventListener)
     return () => window.removeEventListener(APP_CONTEXT_ACTION_EVENT, handler as EventListener)
   }, [openModal])
-
-  const canGoBack = location.key !== 'default'
 
   const handleCreateProject = async (project: Project) => {
     await createProject(project)
@@ -260,15 +270,6 @@ export const ProjectsPage = () => {
                 {
                   title: (
                     <Space size={6}>
-                      {canGoBack ? (
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={<ArrowLeft size={14} aria-hidden />}
-                          aria-label={t('common.back')}
-                          onClick={() => navigate(-1)}
-                        />
-                      ) : null}
                       <Link to={routes.projects}>{t('projects.breadcrumb.workspace')}</Link>
                     </Space>
                   ),
@@ -291,6 +292,17 @@ export const ProjectsPage = () => {
               aria-label={t('projects.actions.create')}
               onClick={() => openModal()}
             />
+            <Button
+              type="text"
+              size="small"
+              className="projects-page-user-button"
+              aria-label={t('layout.openSettings')}
+              onClick={() => navigate(routes.profile)}
+            >
+              <span className="projects-page-user-avatar" aria-hidden>
+                {getUserInitials(currentUser?.name || currentUser?.email)}
+              </span>
+            </Button>
           </ProjectsHeaderRight>
         </ProjectsHeaderRow>
         {renderContent()}

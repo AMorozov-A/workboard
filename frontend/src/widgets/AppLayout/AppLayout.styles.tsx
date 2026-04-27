@@ -199,7 +199,7 @@ export const AppContent = styled(Layout.Content)`
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 24px;
+  padding: 8px 12px;
   background: var(--app-bg-gradient);
 `
 

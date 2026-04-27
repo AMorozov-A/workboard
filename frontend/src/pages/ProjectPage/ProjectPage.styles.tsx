@@ -2,12 +2,32 @@ import { Breadcrumb, Card, Tabs } from 'antd'
 import styled from 'styled-components'
 
 export const ProjectBreadcrumb = styled(Breadcrumb)`
+  .ant-breadcrumb ol,
+  .ant-breadcrumb li {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+  }
+
   .ant-breadcrumb-link {
     color: var(--color-text-muted);
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+  }
+
+  .ant-breadcrumb-link a {
+    display: inline-flex;
+    align-items: center;
   }
 
   .ant-breadcrumb-separator {
     color: var(--color-text-faint);
+    vertical-align: middle;
+  }
+
+  .ant-space {
+    align-items: center;
   }
 `
 
@@ -24,7 +44,6 @@ export const ProjectBreadcrumbLeft = styled.div`
   flex: 1 1 auto;
   min-width: 0;
 
-  /* prevent the right controls from wrapping under description */
   .ant-breadcrumb {
     white-space: nowrap;
     overflow: hidden;
@@ -42,7 +61,6 @@ export const ProjectBreadcrumbRight = styled.div`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    line-height: 1;
     padding: 0;
     width: 24px;
     height: 24px;
@@ -52,7 +70,31 @@ export const ProjectBreadcrumbRight = styled.div`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    line-height: 1;
+  }
+
+  .project-page-user-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    width: 28px;
+    height: 28px;
+  }
+
+  .project-page-user-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-text);
+    background: color-mix(in srgb, var(--color-primary-bg) 55%, var(--color-surface));
+    border: 1px solid var(--color-border-subtle);
+    user-select: none;
   }
 `
 
@@ -142,7 +184,6 @@ export const InlineEditText = styled.div`
 `
 
 export const InlineTitleField = styled.div`
-  /* keep layout stable when switching text <-> input */
   min-height: calc(var(--font-size-h2) * 1.25);
 `
 
@@ -155,7 +196,6 @@ export const InlineSummaryField = styled.div`
 `
 
 export const InlineEditControl = styled.div`
-  /* AntD input */
   .ant-input-affix-wrapper,
   .ant-input {
     padding: 0 !important;
@@ -165,7 +205,6 @@ export const InlineEditControl = styled.div`
     outline: none !important;
   }
 
-  /* AntD textarea */
   textarea.ant-input {
     padding: 0 !important;
     border: none !important;
@@ -176,7 +215,6 @@ export const InlineEditControl = styled.div`
     min-height: calc(var(--font-size-body) * 1.6);
   }
 
-  /* AntD select */
   .ant-select-selector {
     padding: 0 !important;
     border: none !important;
@@ -185,7 +223,6 @@ export const InlineEditControl = styled.div`
     outline: none !important;
   }
 
-  /* AntD date picker */
   .ant-picker {
     padding: 0 !important;
     border: none !important;
@@ -194,7 +231,6 @@ export const InlineEditControl = styled.div`
     outline: none !important;
   }
 
-  /* AntD input number */
   .ant-input-number {
     padding: 0 !important;
     border: none !important;
@@ -210,7 +246,6 @@ export const InlineEditControl = styled.div`
     outline: none !important;
   }
 
-  /* keep focus styles from changing layout */
   .ant-input:focus,
   .ant-input:focus-visible,
   .ant-input-affix-wrapper:focus,
@@ -300,7 +335,6 @@ export const TasksFilters = styled.div`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    line-height: 1;
     color: inherit !important;
   }
 `
@@ -450,7 +484,6 @@ export const TaskCardKey = styled.span`
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
   letter-spacing: 0.02em;
-  line-height: 1;
 `
 
 export const TaskCardTitle = styled.div`
@@ -502,7 +535,6 @@ export const TaskCardLabels = styled.div`
 `
 
 export const TasksTableShell = styled.div`
-  /* more minimal table look */
   .ant-table {
     background: transparent;
   }
@@ -529,14 +561,22 @@ export const TasksTableShell = styled.div`
 
   .ant-table-tbody > tr > td {
     padding: 8px 0 !important;
-    border-bottom: none !important; /* remove dividers between rows */
+    border-bottom: none !important;
+  }
+
+  .ant-table-tbody > tr[data-dragging='true'] > td {
+    background: color-mix(in srgb, var(--color-primary-bg) 28%, transparent) !important;
+    background-clip: padding-box;
+  }
+
+  .ant-table-tbody > tr[data-dragging='true'] > td > * {
+    opacity: 0;
   }
 
   .ant-table-cell {
     vertical-align: top;
   }
 
-  /* ensure table hugs container edges */
   .ant-table-tbody > tr > td:first-child {
     padding-left: 0 !important;
   }
@@ -545,10 +585,9 @@ export const TasksTableShell = styled.div`
     padding-right: 0 !important;
   }
 
-  /* tighten horizontal gaps between specific columns */
   .ant-table-tbody > tr > td.crm-task-table-col-key {
     padding-left: 4px !important;
-    padding-right: 12px !important; /* key -> title gap */
+    padding-right: 12px !important;
   }
 
   .ant-table-tbody > tr > td.crm-task-table-col-title {
@@ -559,17 +598,25 @@ export const TasksTableShell = styled.div`
   .ant-table-tbody > tr > td.crm-task-table-col-status {
     padding-left: 6px !important;
     padding-right: 6px !important;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: keep-all;
   }
 
   .ant-table-tbody > tr > td.crm-task-table-col-priority {
     padding-left: 6px !important;
     padding-right: 6px !important;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: keep-all;
   }
 
   .ant-table-tbody > tr > td.crm-task-table-col-deadline {
     padding-left: 6px !important;
     padding-right: 4px !important;
     text-align: left !important;
+    min-width: 60px;
+    width: 60px;
     white-space: nowrap;
     overflow-wrap: normal;
     word-break: keep-all;

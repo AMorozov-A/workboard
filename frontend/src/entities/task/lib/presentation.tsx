@@ -31,20 +31,20 @@ export const getTaskPriorityLabel = (priority?: TaskPriority) =>
   i18n.t('common.notSpecified')
 
 export const getTaskStatusTag = (status?: TaskStatus) => {
-  if (status === 'todo') return <Tag>{i18n.t('tasks.status.todo')}</Tag>
-  if (status === 'in_progress') return <Tag color="blue">{i18n.t('tasks.status.in_progress')}</Tag>
-  if (status === 'review') return <Tag color="gold">{i18n.t('tasks.status.review')}</Tag>
-  if (status === 'done') return <Tag color="green">{i18n.t('tasks.status.done')}</Tag>
+  if (status === 'todo') return <Tag className="crm-tag-fixed">{i18n.t('tasks.status.todo')}</Tag>
+  if (status === 'in_progress') return <Tag className="crm-tag-fixed" color="blue">{i18n.t('tasks.status.in_progress')}</Tag>
+  if (status === 'review') return <Tag className="crm-tag-fixed" color="gold">{i18n.t('tasks.status.review')}</Tag>
+  if (status === 'done') return <Tag className="crm-tag-fixed" color="green">{i18n.t('tasks.status.done')}</Tag>
 
-  return <Tag>{i18n.t('common.notSpecified')}</Tag>
+  return <Tag className="crm-tag-fixed">{i18n.t('common.notSpecified')}</Tag>
 }
 
 export const getTaskPriorityTag = (priority?: TaskPriority) => {
-  if (priority === 'low') return <Tag>{i18n.t('tasks.priority.low')}</Tag>
-  if (priority === 'medium') return <Tag color="gold">{i18n.t('tasks.priority.medium')}</Tag>
-  if (priority === 'high') return <Tag color="red">{i18n.t('tasks.priority.high')}</Tag>
+  if (priority === 'low') return <Tag className="crm-tag-fixed">{i18n.t('tasks.priority.low')}</Tag>
+  if (priority === 'medium') return <Tag className="crm-tag-fixed" color="gold">{i18n.t('tasks.priority.medium')}</Tag>
+  if (priority === 'high') return <Tag className="crm-tag-fixed" color="red">{i18n.t('tasks.priority.high')}</Tag>
 
-  return <Tag>{i18n.t('common.notSpecified')}</Tag>
+  return <Tag className="crm-tag-fixed">{i18n.t('common.notSpecified')}</Tag>
 }
 
 export const formatTaskDate = (value?: string) =>

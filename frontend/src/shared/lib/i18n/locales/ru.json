@@ -250,6 +250,15 @@
       "description": "Управляйте текущими задачами, сроками и приоритетами в одном рабочем списке.",
       "viewKanban": "Канбан",
       "viewTable": "Таблица",
+      "groupByStatus": "Статус",
+      "groupByPriority": "Приоритет",
+      "groupBySprint": "Спринт",
+      "sprintBuckets": {
+        "overdue": "Просрочено",
+        "this_week": "На этой неделе",
+        "next_week": "На следующей неделе",
+        "later_or_no_date": "Позже / без даты"
+      },
       "filterStatus": "Статус:",
       "filterPriority": "Приоритет:",
       "allStatuses": "Все статусы",

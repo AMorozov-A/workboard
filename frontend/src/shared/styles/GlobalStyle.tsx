@@ -28,4 +28,32 @@ export const GlobalStyle = createGlobalStyle`
   #root {
     min-height: 100vh;
   }
+
+  .crm-tag-fixed {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 76px;
+    text-align: center;
+  }
+
+  :where(.css-dev-only-do-not-override-p45i5k).ant-popover.project-page-filters-popover-overlay .ant-popover-container {
+    padding: 0 !important;
+  }
+
+  :where(.css-dev-only-do-not-override-p45i5k).ant-popover.project-page-filters-popover-overlay .ant-popover-inner {
+    padding: 0 !important;
+  }
+
+  :where(.css-dev-only-do-not-override-p45i5k).ant-popover.project-page-filters-popover-overlay
+    :where(.css-dev-only-do-not-override-p45i5k).ant-tabs
+    .ant-tabs-nav {
+    margin: 0 0 8px 0 !important;
+  }
+
+  :where(.css-dev-only-do-not-override-p45i5k).ant-popover.project-page-filters-popover-overlay
+    :where(.css-dev-only-do-not-override-p45i5k).ant-tabs
+    .ant-tabs-tab + .ant-tabs-tab {
+    margin: 0 0 0 16px !important;
+  }
 `

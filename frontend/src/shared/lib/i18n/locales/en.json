@@ -250,6 +250,15 @@
       "description": "Manage tasks, deadlines, and priorities in one place.",
       "viewKanban": "Kanban",
       "viewTable": "Table",
+      "groupByStatus": "Status",
+      "groupByPriority": "Priority",
+      "groupBySprint": "Sprint",
+      "sprintBuckets": {
+        "overdue": "Overdue",
+        "this_week": "This week",
+        "next_week": "Next week",
+        "later_or_no_date": "Later / no date"
+      },
       "filterStatus": "Status:",
       "filterPriority": "Priority:",
       "allStatuses": "All statuses",

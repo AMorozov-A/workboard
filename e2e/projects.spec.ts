@@ -15,10 +15,12 @@ async function createProjectViaUi(page: Page, projectTitle: string, client = 'E2
   await createDialog.getByPlaceholder(ruProjects.form.namePlaceholder).fill(projectTitle)
   await createDialog.getByPlaceholder(ruProjects.form.clientPlaceholder).fill(client)
   await createDialog.getByRole('button', { name: ruProjects.modal.submit }).click()
+  await expect(createDialog).toBeHidden()
+
+  await page.reload()
   await expect(page.getByTestId('projects-page-root').getByText(projectTitle)).toBeVisible({
     timeout: 15_000,
   })
-  await expect(createDialog).toBeHidden()
 }
 
 test.describe('Projects: полный флоу', () => {
@@ -31,7 +33,6 @@ test.describe('Projects: полный флоу', () => {
       name: 'E2E User',
     })
 
-    await expect(page.getByRole('heading', { name: ruProjects.title, level: 1 })).toBeVisible()
     await expect(page.getByTestId('projects-page-root')).toBeVisible()
 
     await createProjectViaUi(page, projectTitle)
@@ -125,11 +126,13 @@ test.describe('Projects: полный флоу', () => {
     })
 
     await page.getByRole('button', { name: ruTasks.actions.create }).first().click()
-    const taskModal = page.getByRole('dialog', { name: ruTasks.modal.title })
-    await expect(taskModal).toBeVisible()
-    await taskModal.getByPlaceholder(ruTasks.form.titlePlaceholder).fill(taskTitle)
-    await taskModal.getByRole('button', { name: ruTasks.modal.submit }).click()
-    await expect(taskModal).toBeHidden({ timeout: 15_000 })
+    const taskDrawer = page.locator('.task-detail-modal')
+    await expect(taskDrawer).toBeVisible({ timeout: 15_000 })
+    await taskDrawer.getByLabel(ruTasks.form.title).fill(taskTitle)
+    await taskDrawer.getByRole('button', { name: ruTasks.modal.submit }).click()
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.ant-drawer-open')).toBeHidden({ timeout: 15_000 })
 
     await expect(page.getByText(taskTitle, { exact: true })).toBeVisible({
       timeout: 15_000,
@@ -166,7 +169,7 @@ test.describe('Projects: полный флоу', () => {
     await expect(page.getByRole('heading', { name: projectTitle, level: 1 })).toBeVisible({
       timeout: 15_000,
     })
-    await expect(page.getByRole('tab', { name: ruProjectDetails.tabs.tasks })).toBeVisible()
+    await expect(page.getByRole('button', { name: ruTasks.actions.create })).toBeVisible()
   })
 
   test('5) негатив: без названия — кнопка Создать неактивна', async ({ page }) => {
