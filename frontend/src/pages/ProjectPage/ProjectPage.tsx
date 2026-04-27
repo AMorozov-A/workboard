@@ -99,7 +99,10 @@ const readStoredTasksView = (): TasksViewMode | null => {
 const storeTasksView = (value: TasksViewMode) => {
   try {
     localStorage.setItem(TASKS_VIEW_STORAGE_KEY, value)
-  } catch {
+  } catch (e) {
+    if (import.meta.env.DEV) {
+      console.debug('[ProjectPage] Failed to store tasks view mode', e)
+    }
   }
 }
 
@@ -122,7 +125,10 @@ const readStoredTasksTableGroup = (): TasksTableSectionGroup | null => {
 const storeTasksTableGroup = (value: TasksTableSectionGroup) => {
   try {
     localStorage.setItem(TASKS_TABLE_GROUP_STORAGE_KEY, value)
-  } catch {
+  } catch (e) {
+    if (import.meta.env.DEV) {
+      console.debug('[ProjectPage] Failed to store tasks table group', e)
+    }
   }
 }
 

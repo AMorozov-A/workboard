@@ -12,13 +12,19 @@ export function readStoredAccessToken(): string | null {
 export function writeStoredAccessToken(token: string): void {
   try {
     localStorage.setItem(ACCESS_TOKEN_KEY, token)
-  } catch {
+  } catch (e) {
+    if (import.meta.env.DEV) {
+      console.debug('[tokenStorage] Failed to persist access token', e)
+    }
   }
 }
 
 export function clearStoredAccessToken(): void {
   try {
     localStorage.removeItem(ACCESS_TOKEN_KEY)
-  } catch {
+  } catch (e) {
+    if (import.meta.env.DEV) {
+      console.debug('[tokenStorage] Failed to clear access token', e)
+    }
   }
 }

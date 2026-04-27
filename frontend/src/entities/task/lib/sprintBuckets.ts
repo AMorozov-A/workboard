@@ -1,7 +1,7 @@
 import dayjs, { type Dayjs } from 'dayjs'
 import type { Task } from '@entities/task/model/types'
 
-export const SPRINT_DAYS = 14 as const
+const SPRINT_DAYS = 14 as const
 
 export type SprintBucketKey = 'overdue' | 'this_week' | 'next_week' | 'later_or_no_date'
 

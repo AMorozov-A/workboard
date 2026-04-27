@@ -4,8 +4,8 @@ import { server } from '../src/mocks/server'
 import { testI18nInitPromise } from './i18n'
 
 const originalGetComputedStyle = window.getComputedStyle.bind(window)
-window.getComputedStyle = ((elt: Element, _pseudoElt?: string | null) =>
-  originalGetComputedStyle(elt)) as typeof window.getComputedStyle
+window.getComputedStyle = ((...args: Parameters<typeof window.getComputedStyle>) =>
+  originalGetComputedStyle(args[0])) as typeof window.getComputedStyle
 
 Object.defineProperty(document, 'elementFromPoint', {
   configurable: true,

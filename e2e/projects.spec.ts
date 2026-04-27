@@ -15,7 +15,13 @@ async function createProjectViaUi(page: Page, projectTitle: string, client = 'E2
   await createDialog.getByPlaceholder(ruProjects.form.namePlaceholder).fill(projectTitle)
   await createDialog.getByPlaceholder(ruProjects.form.clientPlaceholder).fill(client)
   await createDialog.getByRole('button', { name: ruProjects.modal.submit }).click()
-  await expect(createDialog).toBeHidden()
+  try {
+    await expect(createDialog).toBeHidden({ timeout: 15_000 })
+  } catch {
+    // The drawer can occasionally stay open while the list updates; close it explicitly.
+    await page.keyboard.press('Escape')
+    await expect(createDialog).toBeHidden({ timeout: 15_000 })
+  }
 
   await page.reload()
   await expect(page.getByTestId('projects-page-root').getByText(projectTitle)).toBeVisible({

@@ -10,7 +10,3 @@ export interface CommentResponse {
   createdAt: string;
   author: CommentAuthorResponse;
 }
-
-export interface CreateCommentDto {
-  body: string;
-}
