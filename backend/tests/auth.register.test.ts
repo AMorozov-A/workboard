@@ -234,6 +234,7 @@ describe('POST /api/v1/auth/register', () => {
       expect(res.status).toBeLessThan(500);
     });
 
+    // Demo backend does not enable rate limiting by default.
     it.skip('returns 429 when rate limiting is enabled on /auth/register', async () => {
       await getTestApp()
         .post('/api/v1/auth/register')

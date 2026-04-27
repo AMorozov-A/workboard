@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { registerViaAPI } from './helpers/auth'
+import { ruAuth, ruLayout } from './i18n-ru'
 
 test.describe('Auth flow', () => {
   test.describe.configure({ mode: 'serial' })
@@ -7,7 +8,9 @@ test.describe('Auth flow', () => {
   test('shows login page by default', async ({ page }) => {
     await page.goto('/')
     await page.waitForURL(/\/login$/)
-    await expect(page.getByRole('heading', { name: 'Вход', level: 3 })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: ruAuth.page.titleLogin, level: 3 })
+    ).toBeVisible()
   })
 
   test('can register a new user and land on workspace', async ({ page }) => {
@@ -16,18 +19,26 @@ test.describe('Auth flow', () => {
     const password = 'password12'
 
     await page.goto('/login')
-    await expect(page.getByRole('heading', { name: 'Вход', level: 3 })).toBeVisible()
-    await page.locator('.ant-segmented-item').filter({ hasText: 'Зарегистрироваться' }).click()
-    await expect(page.getByRole('heading', { name: 'Регистрация', level: 3 })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: ruAuth.page.titleLogin, level: 3 })
+    ).toBeVisible()
 
-    await page.getByPlaceholder('you@example.com').fill(email)
-    await page.getByPlaceholder('Например: Алексей').fill('E2E User')
-    await page.getByPlaceholder('Не менее 8 символов').fill(password)
-    await page.getByPlaceholder('Повторите пароль').fill(password)
-    await page.getByRole('button', { name: 'Создать аккаунт' }).click()
+    await page
+      .locator('.ant-segmented-item')
+      .filter({ hasText: ruAuth.page.tabRegister })
+      .click()
+    await expect(
+      page.getByRole('heading', { name: ruAuth.page.titleRegister, level: 3 })
+    ).toBeVisible()
+
+    await page.getByPlaceholder(ruAuth.registerForm.emailPlaceholder).fill(email)
+    await page.getByPlaceholder(ruAuth.registerForm.namePlaceholder).fill('E2E User')
+    await page.getByPlaceholder(ruAuth.registerForm.passwordPlaceholder).fill(password)
+    await page.getByPlaceholder(ruAuth.registerForm.passwordConfirmationPlaceholder).fill(password)
+    await page.getByRole('button', { name: ruAuth.registerForm.submit }).click()
 
     await expect(page).toHaveURL(/\/projects\/?$/)
-    await expect(page.getByText('WorkBoard')).toBeVisible()
+    await expect(page.getByText(ruLayout.brand)).toBeVisible()
     await expect(page.getByTestId('projects-page-root')).toBeVisible()
   })
 
@@ -37,12 +48,15 @@ test.describe('Auth flow', () => {
     const password = 'password12'
 
     await page.goto('/login')
-    await page.locator('.ant-segmented-item').filter({ hasText: 'Зарегистрироваться' }).click()
-    await page.getByPlaceholder('you@example.com').fill(email)
-    await page.getByPlaceholder('Например: Алексей').fill('Relogin User')
-    await page.getByPlaceholder('Не менее 8 символов').fill(password)
-    await page.getByPlaceholder('Повторите пароль').fill(password)
-    await page.getByRole('button', { name: 'Создать аккаунт' }).click()
+    await page
+      .locator('.ant-segmented-item')
+      .filter({ hasText: ruAuth.page.tabRegister })
+      .click()
+    await page.getByPlaceholder(ruAuth.registerForm.emailPlaceholder).fill(email)
+    await page.getByPlaceholder(ruAuth.registerForm.namePlaceholder).fill('Relogin User')
+    await page.getByPlaceholder(ruAuth.registerForm.passwordPlaceholder).fill(password)
+    await page.getByPlaceholder(ruAuth.registerForm.passwordConfirmationPlaceholder).fill(password)
+    await page.getByRole('button', { name: ruAuth.registerForm.submit }).click()
 
     await expect(page).toHaveURL(/\/projects\/?$/)
     await expect(page.getByTestId('projects-page-root')).toBeVisible({ timeout: 10_000 })
@@ -51,9 +65,9 @@ test.describe('Auth flow', () => {
     await page.goto('/login')
     await page.waitForURL(/\/login$/)
 
-    await page.getByPlaceholder('you@example.com').fill(email)
-    await page.getByPlaceholder('••••••').fill(password)
-    await page.getByRole('button', { name: 'Войти' }).click()
+    await page.getByPlaceholder(ruAuth.form.emailPlaceholder).fill(email)
+    await page.getByPlaceholder(ruAuth.form.passwordPlaceholder).fill(password)
+    await page.getByRole('button', { name: ruAuth.form.submit }).click()
 
     await expect(page).toHaveURL(/\/projects\/?$/)
     await expect(page.getByTestId('projects-page-root')).toBeVisible({ timeout: 10_000 })
@@ -67,12 +81,12 @@ test.describe('Auth flow', () => {
     await registerViaAPI(page.request, { email, password, name: 'Existing' })
 
     await page.goto('/login')
-    await page.getByPlaceholder('you@example.com').fill(email)
-    await page.getByPlaceholder('••••••').fill(password)
-    await page.getByRole('button', { name: 'Войти' }).click()
+    await page.getByPlaceholder(ruAuth.form.emailPlaceholder).fill(email)
+    await page.getByPlaceholder(ruAuth.form.passwordPlaceholder).fill(password)
+    await page.getByRole('button', { name: ruAuth.form.submit }).click()
 
     await expect(page).toHaveURL(/\/projects\/?$/)
-    await expect(page.getByText('WorkBoard')).toBeVisible()
+    await expect(page.getByText(ruLayout.brand)).toBeVisible()
   })
 
   test('redirects to login when not authenticated', async ({ page }) => {
@@ -88,29 +102,46 @@ test.describe('Auth flow', () => {
     await registerViaAPI(page.request, { email, password, name: 'Existing' })
 
     await page.goto('/login')
-    await page.locator('.ant-segmented-item').filter({ hasText: 'Зарегистрироваться' }).click()
-    await expect(page.getByRole('heading', { name: 'Регистрация', level: 3 })).toBeVisible()
+    await page
+      .locator('.ant-segmented-item')
+      .filter({ hasText: ruAuth.page.tabRegister })
+      .click()
+    await expect(
+      page.getByRole('heading', { name: ruAuth.page.titleRegister, level: 3 })
+    ).toBeVisible()
 
-    await page.getByPlaceholder('you@example.com').fill(email)
-    await page.getByPlaceholder('Например: Алексей').fill('Dup User')
-    await page.getByPlaceholder('Не менее 8 символов').fill(password)
-    await page.getByPlaceholder('Повторите пароль').fill(password)
-    await page.getByRole('button', { name: 'Создать аккаунт' }).click()
+    await page.getByPlaceholder(ruAuth.registerForm.emailPlaceholder).fill(email)
+    await page.getByPlaceholder(ruAuth.registerForm.namePlaceholder).fill('Dup User')
+    await page.getByPlaceholder(ruAuth.registerForm.passwordPlaceholder).fill(password)
+    await page.getByPlaceholder(ruAuth.registerForm.passwordConfirmationPlaceholder).fill(password)
+    await page.getByRole('button', { name: ruAuth.registerForm.submit }).click()
 
     await expect(page).not.toHaveURL(/\/projects\/?$/)
-    await expect(page.getByText('Этот email уже зарегистрирован')).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText(ruAuth.errors.emailTaken)).toBeVisible({ timeout: 10_000 })
   })
 
   test('can switch between login and register tabs', async ({ page }) => {
     await page.goto('/login')
-    await expect(page.getByRole('heading', { name: 'Вход', level: 3 })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: ruAuth.page.titleLogin, level: 3 })
+    ).toBeVisible()
 
-    await page.locator('.ant-segmented-item').filter({ hasText: 'Зарегистрироваться' }).click()
-    await expect(page.getByRole('heading', { name: 'Регистрация', level: 3 })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Создать аккаунт' })).toBeVisible()
+    await page
+      .locator('.ant-segmented-item')
+      .filter({ hasText: ruAuth.page.tabRegister })
+      .click()
+    await expect(
+      page.getByRole('heading', { name: ruAuth.page.titleRegister, level: 3 })
+    ).toBeVisible()
+    await expect(page.getByRole('button', { name: ruAuth.registerForm.submit })).toBeVisible()
 
-    await page.locator('.ant-segmented-item').filter({ hasText: 'Войти' }).click()
-    await expect(page.getByRole('heading', { name: 'Вход', level: 3 })).toBeVisible()
-    await expect(page.getByPlaceholder('you@example.com')).toBeVisible()
+    await page
+      .locator('.ant-segmented-item')
+      .filter({ hasText: ruAuth.page.tabLogin })
+      .click()
+    await expect(
+      page.getByRole('heading', { name: ruAuth.page.titleLogin, level: 3 })
+    ).toBeVisible()
+    await expect(page.getByPlaceholder(ruAuth.form.emailPlaceholder)).toBeVisible()
   })
 })
