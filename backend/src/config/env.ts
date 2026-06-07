@@ -22,10 +22,23 @@ function parsePort(value: string | undefined, fallback: number): number {
   return parsed;
 }
 
+const DEFAULT_ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'https://workboard-five.vercel.app',
+];
+
+function parseAllowedOrigins(value: string | undefined): string[] {
+  const fromEnv = value
+    ? value.split(',').map((s) => s.trim()).filter(Boolean)
+    : [];
+  return [...new Set([...DEFAULT_ALLOWED_ORIGINS, ...fromEnv])];
+}
+
 export const env = {
   NODE_ENV: nodeEnv,
   PORT: parsePort(process.env.PORT, defaultPort),
   BACKEND_ROOT: path.resolve(__dirname, '../..'),
+  ALLOWED_ORIGINS: parseAllowedOrigins(process.env.ALLOWED_ORIGINS),
   DATABASE_URL: requireEnv('DATABASE_URL', 'file:./dev.db'),
   JWT_SECRET: requireEnv(
     'JWT_SECRET',

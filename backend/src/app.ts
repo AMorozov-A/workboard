@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import { env } from './config/env';
 import { requestLogger } from './middleware/requestLogger';
 import { errorHandler } from './middleware/errorHandler';
 import { v1Router } from './routes/v1';
@@ -7,13 +8,9 @@ import { v1Router } from './routes/v1';
 export function createApp(): express.Application {
   const app = express();
 
-  const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean)
-    : ['http://localhost:5173'];
-
   app.use(
     cors({
-      origin: allowedOrigins,
+      origin: env.ALLOWED_ORIGINS,
       credentials: true,
     })
   );
