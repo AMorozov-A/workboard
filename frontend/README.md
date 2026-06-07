@@ -107,7 +107,7 @@ Backend pairing:
 | Frontend | [workboard-five.vercel.app](https://workboard-five.vercel.app/login) |
 | Backend  | [workboard-vdp2.onrender.com](https://workboard-vdp2.onrender.com/api/v1/ping) |
 
-- **Vercel** (frontend): set env `VITE_API_BASE_URL=https://workboard-vdp2.onrender.com/api`. SPA routing: [vercel.json](vercel.json).
+- **Vercel** (frontend): `VITE_API_BASE_URL` задаётся в [`.env.production`](.env.production) и дублируется в [`vercel.json`](vercel.json) для build. Локально переменную не задавай — работает proxy из [vite.config.ts](vite.config.ts).
 - **Render** (backend): set `ALLOWED_ORIGINS` to include `https://workboard-five.vercel.app`. Template: [../backend/.env.example](../backend/.env.example).
 
 Test config and setup live in [vite.config.ts](vite.config.ts) (`test` section) and [tests/setup.ts](tests/setup.ts).
