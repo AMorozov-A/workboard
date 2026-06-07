@@ -164,6 +164,10 @@
       "taskKeyPrefixHint": "Used for task keys like T-1, T-2 inside this project. Cannot be changed later.",
       "client": "Client",
       "clientPlaceholder": "For example: Bright Agency",
+      "tags": "Tags",
+      "tagsPlaceholder": "Choose or create tags",
+      "priority": "Priority",
+      "health": "Health",
       "status": "Status",
       "budget": "Budget",
       "budgetPlaceholder": "For example: 120000",
@@ -221,6 +225,17 @@
       "paused": "Paused",
       "done": "Completed",
       "empty": "No status"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "health": {
+      "on_track": "On track",
+      "at_risk": "At risk",
+      "off_track": "Off track"
     }
   },
   "projectDetails": {
@@ -320,10 +335,12 @@
       "labels": "Labels",
       "createdAt": "Created",
       "updatedAt": "Updated",
+      "tags": "Tags",
       "titlePlaceholder": "For example: Prepare screen structure",
       "descriptionPlaceholder": "Add context, agreements, and important details",
       "deadlinePlaceholder": "Select a date",
       "labelsPlaceholder": "Choose one or more labels",
+      "tagsPlaceholder": "Choose or create tags",
       "descriptionEmpty": "Add a description",
       "titleEmpty": "Untitled"
     },
@@ -403,6 +420,49 @@
       "delete": {
         "action": "Delete task"
       }
+    }
+    ,
+    "checklist": {
+      "title": "Checklist",
+      "add": "Add",
+      "newPlaceholder": "Add an item…",
+      "empty": "No checklist items yet.",
+      "emptyMeta": "No items"
+    }
+  }
+  ,
+  "tags": {
+    "title": "Tags",
+    "subtitle": "Create and reuse labels across tasks and projects.",
+    "loading": "Loading tags…",
+    "empty": "No tags yet. Create the first one to categorize your work.",
+    "actions": {
+      "create": "Create tag",
+      "edit": "Edit",
+      "delete": "Delete",
+      "manage": "Manage tags"
+    },
+    "modal": {
+      "createTitle": "New tag",
+      "editTitle": "Edit tag"
+    },
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "For example: Urgent",
+      "color": "Color"
+    },
+    "validation": {
+      "nameRequired": "Enter a tag name"
+    },
+    "delete": {
+      "confirmTitle": "Delete this tag?",
+      "confirmDescription": "This action cannot be undone. Tag: {{name}}",
+      "confirmOk": "Delete"
+    },
+    "picker": {
+      "createTitle": "Create tag",
+      "namePlaceholder": "Tag name",
+      "createButton": "Create"
     }
   }
 }

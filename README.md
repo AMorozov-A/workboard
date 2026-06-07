@@ -6,9 +6,12 @@ This is a monorepo without a root `node_modules`: each package (`frontend/`, `ba
 
 ## Live demo
 
-[appworkboard.netlify.app](https://appworkboard.netlify.app/login)
+| Service  | URL |
+| -------- | --- |
+| Frontend | [workboard-five.vercel.app/login](https://workboard-five.vercel.app/login) |
+| Backend  | [workboard-vdp2.onrender.com](https://workboard-vdp2.onrender.com/api/v1/ping) |
 
-> The backend runs on a free hosting tier and sleeps when idle. The first request after a pause may take a few seconds to wake up.
+> The backend runs on Render free tier and sleeps when idle. The first request after a pause may take a few seconds to wake up.
 
 ## Product tour
 

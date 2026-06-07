@@ -4,10 +4,13 @@ import { prisma } from '../../db/client';
 import { getProjectForUser } from '../projects/projects.service';
 import { HttpError } from '../../shared/http-error';
 import { parseEnum } from '../../shared/parseEnum';
+import { assertTagsOwnedByUser, ensureTagsByNames } from '../tags/tags.service';
 import type { CreateTaskInput, UpdateTaskInput } from './task.types';
 
 const TASK_STATUSES: TaskStatus[] = ['todo', 'in_progress', 'review', 'done'];
 const TASK_PRIORITIES: TaskPriority[] = ['low', 'medium', 'high'];
+
+type TaskWithTags = Prisma.TaskGetPayload<{ include: { tags: true } }>;
 
 function assertTitle(title: unknown): string {
   if (typeof title !== 'string' || title.trim().length === 0) {
@@ -94,6 +97,14 @@ function parseLabels(value: unknown): string[] | null | undefined {
   return value.length === 0 ? null : value;
 }
 
+function parseTagIds(value: unknown): string[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || !value.every((x) => typeof x === 'string')) {
+    throw new HttpError(400, 'tagIds должен быть массивом строк');
+  }
+  return Array.from(new Set(value.map((s) => s.trim()).filter(Boolean)));
+}
+
 async function nextTaskKeyForProject(projectId: string): Promise<string> {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
@@ -139,6 +150,7 @@ export function parseCreateTaskBody(body: unknown): CreateTaskInput {
     priority: parseTaskPriority(b.priority, 'medium'),
     dueDate: parseOptionalDate(b.dueDate) ?? null,
     labels: parseLabels(b.labels) ?? null,
+    tagIds: parseTagIds((b as Record<string, unknown>).tagIds),
   };
 }
 
@@ -166,6 +178,9 @@ export function parseUpdateTaskBody(body: unknown): UpdateTaskInput {
   if ('labels' in b) {
     out.labels = parseLabels(b.labels) ?? null;
   }
+  if ('tagIds' in b) {
+    out.tagIds = parseTagIds(b.tagIds) ?? [];
+  }
   return out;
 }
 
@@ -184,18 +199,25 @@ function toLabelsJson(
 export async function listTasksForProject(
   projectRef: string,
   userId: string,
-): Promise<{ projectId: string; rows: Task[] }> {
+): Promise<{ projectId: string; rows: TaskWithTags[] }> {
   const project = await assertProjectOwnedByUser(projectRef, userId);
   const rows = await prisma.task.findMany({
     where: { projectId: project.id },
     orderBy: { updatedAt: 'desc' },
+    include: { tags: true },
   });
   return { projectId: project.id, rows };
 }
 
-export async function createTask(userId: string, input: CreateTaskInput): Promise<Task> {
+export async function createTask(userId: string, input: CreateTaskInput): Promise<TaskWithTags> {
   await assertProjectOwnedByUser(input.projectId, userId);
   const key = await nextTaskKeyForProject(input.projectId);
+  const tags =
+    input.tagIds && input.tagIds.length > 0
+      ? await assertTagsOwnedByUser(input.tagIds, userId)
+      : input.labels && input.labels.length > 0
+        ? await ensureTagsByNames(userId, input.labels)
+        : [];
   return prisma.task.create({
     data: {
       key,
@@ -206,16 +228,19 @@ export async function createTask(userId: string, input: CreateTaskInput): Promis
       priority: input.priority ?? 'medium',
       dueDate: input.dueDate ?? null,
       labels: toLabelsJson(input.labels ?? null) ?? PrismaRuntime.JsonNull,
+      tags: tags.length > 0 ? { connect: tags.map((t) => ({ id: t.id })) } : undefined,
     },
+    include: { tags: true },
   });
 }
 
-export async function getTaskForUser(taskId: string, userId: string): Promise<Task> {
+export async function getTaskForUser(taskId: string, userId: string): Promise<TaskWithTags> {
   const task = await prisma.task.findFirst({
     where: {
       id: taskId,
       project: { userId },
     },
+    include: { tags: true },
   });
   if (!task) {
     throw new HttpError(404, 'Задача не найдена');
@@ -227,7 +252,7 @@ export async function updateTask(
   taskId: string,
   userId: string,
   input: UpdateTaskInput,
-): Promise<Task> {
+): Promise<TaskWithTags> {
   const existing = await getTaskForUser(taskId, userId);
   const data: Prisma.TaskUpdateInput = {};
   if (input.title !== undefined) {
@@ -248,12 +273,17 @@ export async function updateTask(
   if (input.labels !== undefined) {
     data.labels = toLabelsJson(input.labels) ?? PrismaRuntime.JsonNull;
   }
+  if (input.tagIds !== undefined) {
+    const tags = await assertTagsOwnedByUser(input.tagIds, userId);
+    data.tags = { set: tags.map((t) => ({ id: t.id })) };
+  }
   if (Object.keys(data).length === 0) {
     return existing;
   }
   return prisma.task.update({
     where: { id: taskId },
     data,
+    include: { tags: true },
   });
 }
 

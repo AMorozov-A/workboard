@@ -11,7 +11,9 @@ import type {
   ProjectMutationResponse,
   ProjectsListResponse,
   RegisterResponse,
+  TagMutationResponse,
   TaskMutationResponse,
+  TagsListResponse,
   TasksByProjectResponse,
   UpdateProjectBody,
   UpdateTaskBody,
@@ -152,5 +154,34 @@ export async function deleteTask(taskId: string): Promise<void> {
   await apiRequest<void>(`${V1}/tasks/${encodeURIComponent(taskId)}`, {
     method: 'DELETE',
   })
+}
+
+/** GET /api/v1/tags */
+export async function listTags(): Promise<TagsListResponse> {
+  return apiRequest<TagsListResponse>(`${V1}/tags`, { method: 'GET' })
+}
+
+/** POST /api/v1/tags → 201 */
+export async function createTag(body: { name: string; color: string }): Promise<TagMutationResponse> {
+  return apiRequest<TagMutationResponse>(`${V1}/tags`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
+
+/** PATCH /api/v1/tags/:id */
+export async function updateTag(
+  tagId: string,
+  body: Partial<{ name: string; color: string }>
+): Promise<TagMutationResponse> {
+  return apiRequest<TagMutationResponse>(`${V1}/tags/${encodeURIComponent(tagId)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  })
+}
+
+/** DELETE /api/v1/tags/:id → 204 */
+export async function deleteTag(tagId: string): Promise<void> {
+  await apiRequest<void>(`${V1}/tags/${encodeURIComponent(tagId)}`, { method: 'DELETE' })
 }
 

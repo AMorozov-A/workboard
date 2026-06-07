@@ -164,6 +164,10 @@
       "taskKeyPrefixHint": "Используется для ключей задач вида T-1, T-2 в рамках проекта. После создания изменить нельзя.",
       "client": "Клиент",
       "clientPlaceholder": "Например: Bright Agency",
+      "tags": "Теги",
+      "tagsPlaceholder": "Выберите или создайте теги",
+      "priority": "Приоритет",
+      "health": "Состояние",
       "status": "Статус",
       "budget": "Бюджет",
       "budgetPlaceholder": "Например: 120000",
@@ -221,6 +225,17 @@
       "paused": "На паузе",
       "done": "Завершён",
       "empty": "Без статуса"
+    },
+    "priority": {
+      "low": "Низкий",
+      "medium": "Средний",
+      "high": "Высокий",
+      "critical": "Критичный"
+    },
+    "health": {
+      "on_track": "В графике",
+      "at_risk": "Есть риск",
+      "off_track": "Срыв сроков"
     }
   },
   "projectDetails": {
@@ -320,10 +335,12 @@
       "labels": "Метки",
       "createdAt": "Создана",
       "updatedAt": "Обновлена",
+      "tags": "Теги",
       "titlePlaceholder": "Например: Подготовить структуру экрана",
       "descriptionPlaceholder": "Добавьте контекст, договорённости и важные детали",
       "deadlinePlaceholder": "Выберите дату",
       "labelsPlaceholder": "Выберите одну или несколько меток",
+      "tagsPlaceholder": "Выберите или создайте теги",
       "descriptionEmpty": "Добавьте описание",
       "titleEmpty": "Без названия"
     },
@@ -403,6 +420,49 @@
       "delete": {
         "action": "Удалить задачу"
       }
+    }
+    ,
+    "checklist": {
+      "title": "Чек-лист",
+      "add": "Добавить",
+      "newPlaceholder": "Добавьте пункт…",
+      "empty": "Пунктов пока нет.",
+      "emptyMeta": "Нет пунктов"
+    }
+  }
+  ,
+  "tags": {
+    "title": "Теги",
+    "subtitle": "Создавайте метки и используйте их в задачах и проектах.",
+    "loading": "Загружаем теги…",
+    "empty": "Пока нет тегов. Создайте первый, чтобы быстрее ориентироваться в работе.",
+    "actions": {
+      "create": "Создать тег",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "manage": "Управление тегами"
+    },
+    "modal": {
+      "createTitle": "Новый тег",
+      "editTitle": "Редактирование тега"
+    },
+    "form": {
+      "name": "Название",
+      "namePlaceholder": "Например: Срочно",
+      "color": "Цвет"
+    },
+    "validation": {
+      "nameRequired": "Введите название тега"
+    },
+    "delete": {
+      "confirmTitle": "Удалить тег?",
+      "confirmDescription": "Действие нельзя отменить. Тег: {{name}}",
+      "confirmOk": "Удалить"
+    },
+    "picker": {
+      "createTitle": "Создать тег",
+      "namePlaceholder": "Название тега",
+      "createButton": "Создать"
     }
   }
 }

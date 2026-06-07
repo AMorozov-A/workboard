@@ -15,8 +15,11 @@ export function projectUiToCreateBody(p: Project): CreateProjectBody {
     description: p.description?.trim() ?? null,
     client: p.client?.trim() ?? null,
     status: p.status ?? 'active',
+    priority: p.priority ?? 'medium',
+    health: p.health ?? 'on_track',
     budget: p.budget ?? null,
     deadline: p.deadline ? `${p.deadline}T00:00:00.000Z` : null,
+    tagIds: p.tagIds?.length ? p.tagIds : undefined,
   }
 }
 
@@ -26,7 +29,10 @@ export function projectUiToUpdateBody(p: Project): UpdateProjectBody {
     description: p.description?.trim() ?? null,
     client: p.client?.trim() ?? null,
     status: p.status ?? 'active',
+    priority: p.priority ?? 'medium',
+    health: p.health ?? 'on_track',
     budget: p.budget ?? null,
     deadline: p.deadline ? `${p.deadline}T00:00:00.000Z` : null,
+    tagIds: p.tagIds?.length ? p.tagIds : [],
   }
 }

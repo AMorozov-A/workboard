@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { mapApiTaskToTask } from './lib/mapApiTask'
 import { taskToCreateBody, taskToUpdateBody } from './lib/taskToApi'
 import type { Task } from './model/types'
+import { projectDetailQueryKey } from '@entities/project/api'
 
 export const projectTasksQueryKey = ['project-tasks'] as const
 
@@ -33,6 +34,8 @@ export const useCreateTaskMutation = (projectId: string) => {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: [...projectTasksQueryKey, projectId] })
+      void queryClient.invalidateQueries({ queryKey: projectDetailQueryKey(projectId) })
+      void queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
   })
 }
@@ -47,6 +50,8 @@ export const useUpdateTaskMutation = (tasksQueryKey: string) => {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: [...projectTasksQueryKey, tasksQueryKey] })
+      void queryClient.invalidateQueries({ queryKey: projectDetailQueryKey(tasksQueryKey) })
+      void queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
   })
 }
@@ -65,6 +70,8 @@ export const useDeleteTaskMutation = () => {
         (prev) => (prev ?? []).filter((t) => t.id !== variables.taskId)
       )
       void queryClient.invalidateQueries({ queryKey: [...projectTasksQueryKey, tasksQueryKey] })
+      void queryClient.invalidateQueries({ queryKey: projectDetailQueryKey(tasksQueryKey) })
+      void queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
   })
 }

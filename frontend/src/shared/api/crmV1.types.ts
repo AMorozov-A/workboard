@@ -40,6 +40,14 @@ export type EnsureDemoResponse = {
   ok: true
 }
 
+export type ApiTag = {
+  id: string
+  name: string
+  color: string
+  createdAt: string
+  updatedAt: string
+}
+
 export type ApiProject = {
   id: string
   key: string
@@ -51,8 +59,14 @@ export type ApiProject = {
   description?: string | null
   client?: string | null
   status?: 'active' | 'paused' | 'done'
+  priority?: 'low' | 'medium' | 'high' | 'critical'
+  health?: 'on_track' | 'at_risk' | 'off_track'
   budget?: number | null
   deadline?: string | null
+  tags?: ApiTag[]
+  tasksCount?: number
+  tasksDoneCount?: number
+  progress?: number
 }
 
 /** GET /v1/projects */
@@ -74,8 +88,11 @@ export type CreateProjectBody = {
   description?: string | null
   client?: string | null
   status?: 'active' | 'paused' | 'done'
+  priority?: 'low' | 'medium' | 'high' | 'critical'
+  health?: 'on_track' | 'at_risk' | 'off_track'
   budget?: number | null
   deadline?: string | null
+  tagIds?: string[]
 }
 
 export type UpdateProjectBody = Partial<CreateProjectBody>
@@ -99,6 +116,7 @@ export type ApiTask = {
   priority?: 'low' | 'medium' | 'high'
   dueDate?: string | null
   labels?: string[] | null
+  tags?: ApiTag[]
 }
 
 export type TasksByProjectResponse = {
@@ -115,6 +133,7 @@ export type CreateTaskBody = {
   priority?: 'low' | 'medium' | 'high'
   dueDate?: string | null
   labels?: string[] | null
+  tagIds?: string[]
 }
 
 export type UpdateTaskBody = Partial<
@@ -125,5 +144,17 @@ export type UpdateTaskBody = Partial<
 export type TaskMutationResponse = {
   ok: true
   task: ApiTask
+}
+
+/** GET /v1/tags */
+export type TagsListResponse = {
+  ok: true
+  items: ApiTag[]
+}
+
+/** POST /v1/tags → 201, PATCH /v1/tags/:id → 200 */
+export type TagMutationResponse = {
+  ok: true
+  tag: ApiTag
 }
 

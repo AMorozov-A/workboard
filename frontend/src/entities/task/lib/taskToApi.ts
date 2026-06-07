@@ -14,7 +14,8 @@ export function taskToCreateBody(task: Task): CreateTaskBody {
     status: task.status,
     priority: task.priority,
     dueDate: dueDateToIso(task.dueDate),
-    labels: task.labels?.length ? task.labels : null,
+    tagIds: task.tagIds?.length ? task.tagIds : undefined,
+    labels: null,
   }
 }
 
@@ -25,6 +26,7 @@ export function taskToUpdateBody(task: Task): UpdateTaskBody {
     status: task.status,
     priority: task.priority,
     dueDate: dueDateToIso(task.dueDate),
-    labels: task.labels?.length ? task.labels : null,
+    tagIds: task.tagIds?.length ? task.tagIds : [],
+    labels: null,
   }
 }

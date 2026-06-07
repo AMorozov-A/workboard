@@ -1,6 +1,6 @@
-import type { Prisma } from '@prisma/client';
-import type { Task as PrismaTask } from '@prisma/client';
+import type { Prisma, Tag as PrismaTag, Task as PrismaTask } from '@prisma/client';
 import type { TaskJson } from './task.types';
+import { mapTagToJson } from '../tags/tags.mapper';
 
 function labelsFromJson(value: Prisma.JsonValue | null): string[] | null {
   if (value === null || value === undefined) {
@@ -12,7 +12,14 @@ function labelsFromJson(value: Prisma.JsonValue | null): string[] | null {
   return null;
 }
 
-export function mapTaskToJson(t: PrismaTask): TaskJson {
+type TaskWithTags = PrismaTask & { tags?: PrismaTag[] };
+
+function labelsFromTags(tags: PrismaTag[] | undefined): string[] | null {
+  if (!tags || tags.length === 0) return null;
+  return tags.map((t) => t.name);
+}
+
+export function mapTaskToJson(t: TaskWithTags): TaskJson {
   return {
     id: t.id,
     key: t.key,
@@ -21,7 +28,8 @@ export function mapTaskToJson(t: PrismaTask): TaskJson {
     status: t.status,
     priority: t.priority,
     dueDate: t.dueDate ? t.dueDate.toISOString() : null,
-    labels: labelsFromJson(t.labels),
+    labels: labelsFromTags(t.tags) ?? labelsFromJson(t.labels),
+    tags: (t.tags ?? []).map(mapTagToJson),
     projectId: t.projectId,
     createdAt: t.createdAt.toISOString(),
     updatedAt: t.updatedAt.toISOString(),

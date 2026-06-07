@@ -1,5 +1,6 @@
-import { getProjectStatusOptions } from '@entities/project/lib/presentation'
+import { getProjectHealthOptions, getProjectPriorityOptions, getProjectStatusOptions } from '@entities/project/lib/presentation'
 import type { Project } from '@entities/project/types'
+import { TagPicker } from '@entities/tag'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { rhfAntdOnFinish, textAreaCtrlEnterSubmit } from '@shared/lib/form/rhfAntdFormSubmit'
 import { getDateInputFormat } from '@shared/lib/i18n'
@@ -64,6 +65,8 @@ const buildCreateSchema = (t: (k: string) => string) =>
       }),
     client: z.string().min(1, t('projects.validation.clientRequired')),
     status: z.enum(['active', 'paused', 'done']),
+    priority: z.enum(['low', 'medium', 'high', 'critical']),
+    health: z.enum(['on_track', 'at_risk', 'off_track']),
     budget: z.union([
       z.number().nonnegative(t('projects.validation.budgetNonNegative')),
       z.null(),
@@ -73,6 +76,7 @@ const buildCreateSchema = (t: (k: string) => string) =>
       .custom<Dayjs | null>((value) => value == null || dayjs.isDayjs(value))
       .optional(),
     description: z.string().optional(),
+    tagIds: z.array(z.string()).optional(),
   })
 
 type CreateFormValues = z.infer<ReturnType<typeof buildCreateSchema>>
@@ -82,6 +86,8 @@ const buildEditSchema = (t: (k: string) => string) =>
     name: z.string().min(1, t('projects.validation.nameRequired')),
     client: z.string().min(1, t('projects.validation.clientRequired')),
     status: z.enum(['active', 'paused', 'done']),
+    priority: z.enum(['low', 'medium', 'high', 'critical']),
+    health: z.enum(['on_track', 'at_risk', 'off_track']),
     budget: z.union([
       z.number().nonnegative(t('projects.validation.budgetNonNegative')),
       z.null(),
@@ -91,6 +97,7 @@ const buildEditSchema = (t: (k: string) => string) =>
       .custom<Dayjs | null>((value) => value == null || dayjs.isDayjs(value))
       .optional(),
     description: z.string().optional(),
+    tagIds: z.array(z.string()).optional(),
   })
 
 type EditFormValues = z.infer<ReturnType<typeof buildEditSchema>>
@@ -110,7 +117,8 @@ const ProjectCreateBody = ({ open, onClose, onCreate }: ProjectCreateModalProps)
     control,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting, isValid },
+    watch,
+    formState: { errors, isSubmitting },
   } = useForm<CreateFormValues>({
     resolver: zodResolver(createSchema),
     mode: 'onChange',
@@ -120,9 +128,12 @@ const ProjectCreateBody = ({ open, onClose, onCreate }: ProjectCreateModalProps)
       taskKeyPrefix: 'T',
       client: '',
       status: 'active',
+      priority: 'medium',
+      health: 'on_track',
       budget: null,
       deadline: null,
       description: '',
+      tagIds: [],
     },
   })
 
@@ -148,9 +159,12 @@ const ProjectCreateBody = ({ open, onClose, onCreate }: ProjectCreateModalProps)
           name: values.name.trim(),
           client: values.client.trim(),
           status: values.status,
+          priority: values.priority,
+          health: values.health,
           budget: values.budget ?? undefined,
           deadline: values.deadline?.format ? values.deadline.format('YYYY-MM-DD') : undefined,
           description: values.description?.trim() || undefined,
+          tagIds: values.tagIds ?? [],
         })
       )
       notifySuccess(
@@ -166,7 +180,13 @@ const ProjectCreateBody = ({ open, onClose, onCreate }: ProjectCreateModalProps)
     }
   }
 
-  const isSaveDisabled = !isValid || isSubmitting
+  const createName = watch('name')
+  const createClient = watch('client')
+  const isSaveDisabled =
+    isSubmitting ||
+    !createName?.trim() ||
+    !createClient?.trim() ||
+    Object.keys(errors).length > 0
 
   return (
     <TaskDrawerStyled
@@ -267,6 +287,22 @@ const ProjectCreateBody = ({ open, onClose, onCreate }: ProjectCreateModalProps)
               </MainColumn>
               <SideColumn>
                 <MetaField>
+                  <MetaFieldLabel id={`${formDomId}-tags`}>{t('projects.form.tags')}</MetaFieldLabel>
+                  <Controller
+                    name="tagIds"
+                    control={control}
+                    render={({ field }) => (
+                      <TagPicker
+                        ariaLabelledBy={`${formDomId}-tags`}
+                        value={field.value ?? []}
+                        onChange={field.onChange}
+                        placeholder={t('projects.form.tagsPlaceholder')}
+                        disabled={isSubmitting}
+                      />
+                    )}
+                  />
+                </MetaField>
+                <MetaField>
                   <MetaFieldLabel id={`${formDomId}-keyPrefix`}>
                     {t('projects.form.keyPrefix')}
                   </MetaFieldLabel>
@@ -350,6 +386,36 @@ const ProjectCreateBody = ({ open, onClose, onCreate }: ProjectCreateModalProps)
                   />
                 </MetaField>
                 <MetaField>
+                  <MetaFieldLabel id={`${formDomId}-pr`}>{t('projects.form.priority')}</MetaFieldLabel>
+                  <Controller
+                    name="priority"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        aria-labelledby={`${formDomId}-pr`}
+                        {...field}
+                        options={getProjectPriorityOptions()}
+                        style={{ width: '100%' }}
+                      />
+                    )}
+                  />
+                </MetaField>
+                <MetaField>
+                  <MetaFieldLabel id={`${formDomId}-hl`}>{t('projects.form.health')}</MetaFieldLabel>
+                  <Controller
+                    name="health"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        aria-labelledby={`${formDomId}-hl`}
+                        {...field}
+                        options={getProjectHealthOptions()}
+                        style={{ width: '100%' }}
+                      />
+                    )}
+                  />
+                </MetaField>
+                <MetaField>
                   <MetaFieldLabel id={`${formDomId}-bud`}>{t('projects.form.budget')}</MetaFieldLabel>
                   <Form.Item
                     validateStatus={errors.budget ? 'error' : ''}
@@ -415,7 +481,8 @@ const ProjectEditBody = ({ project, open, onClose, onUpdate }: ProjectEditBodyPr
     control,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting, isValid },
+    watch,
+    formState: { errors, isSubmitting },
   } = useForm<EditFormValues>({
     resolver: zodResolver(buildEditSchema(t)),
     mode: 'onChange',
@@ -423,9 +490,12 @@ const ProjectEditBody = ({ project, open, onClose, onUpdate }: ProjectEditBodyPr
       name: project.name,
       client: project.client ?? '',
       status: project.status ?? 'active',
+      priority: project.priority ?? 'medium',
+      health: project.health ?? 'on_track',
       budget: project.budget ?? null,
       deadline: project.deadline ? dayjs(project.deadline) : null,
       description: project.description ?? '',
+      tagIds: project.tagIds ?? [],
     },
   })
 
@@ -435,9 +505,12 @@ const ProjectEditBody = ({ project, open, onClose, onUpdate }: ProjectEditBodyPr
       name: project.name,
       client: project.client ?? '',
       status: project.status ?? 'active',
+      priority: project.priority ?? 'medium',
+      health: project.health ?? 'on_track',
       budget: project.budget ?? null,
       deadline: project.deadline ? dayjs(project.deadline) : null,
       description: project.description ?? '',
+      tagIds: project.tagIds ?? [],
     })
   }, [open, project, reset])
 
@@ -453,9 +526,12 @@ const ProjectEditBody = ({ project, open, onClose, onUpdate }: ProjectEditBodyPr
           name: values.name.trim(),
           client: values.client.trim(),
           status: values.status,
+          priority: values.priority,
+          health: values.health,
           budget: values.budget ?? undefined,
           deadline: values.deadline?.format ? values.deadline.format('YYYY-MM-DD') : undefined,
           description: values.description?.trim() || undefined,
+          tagIds: values.tagIds ?? [],
         })
       )
       notifySuccess(
@@ -471,7 +547,13 @@ const ProjectEditBody = ({ project, open, onClose, onUpdate }: ProjectEditBodyPr
     }
   }
 
-  const isSaveDisabled = !isValid || isSubmitting
+  const editName = watch('name')
+  const editClient = watch('client')
+  const isSaveDisabled =
+    isSubmitting ||
+    !editName?.trim() ||
+    !editClient?.trim() ||
+    Object.keys(errors).length > 0
 
   return (
     <TaskDrawerStyled
@@ -571,6 +653,22 @@ const ProjectEditBody = ({ project, open, onClose, onUpdate }: ProjectEditBodyPr
               </MainColumn>
               <SideColumn>
                 <MetaField>
+                  <MetaFieldLabel id={`${formDomId}-e-tags`}>{t('projects.form.tags')}</MetaFieldLabel>
+                  <Controller
+                    name="tagIds"
+                    control={control}
+                    render={({ field }) => (
+                      <TagPicker
+                        ariaLabelledBy={`${formDomId}-e-tags`}
+                        value={field.value ?? []}
+                        onChange={field.onChange}
+                        placeholder={t('projects.form.tagsPlaceholder')}
+                        disabled={isSubmitting}
+                      />
+                    )}
+                  />
+                </MetaField>
+                <MetaField>
                   <MetaFieldLabel>{t('projects.editModal.keyLabel')}</MetaFieldLabel>
                   <Typography.Text code copyable={{ text: project.key }}>
                     {project.key}
@@ -613,6 +711,36 @@ const ProjectEditBody = ({ project, open, onClose, onUpdate }: ProjectEditBodyPr
                         aria-labelledby={`${formDomId}-e-st`}
                         {...field}
                         options={getProjectStatusOptions()}
+                        style={{ width: '100%' }}
+                      />
+                    )}
+                  />
+                </MetaField>
+                <MetaField>
+                  <MetaFieldLabel id={`${formDomId}-e-pr`}>{t('projects.form.priority')}</MetaFieldLabel>
+                  <Controller
+                    name="priority"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        aria-labelledby={`${formDomId}-e-pr`}
+                        {...field}
+                        options={getProjectPriorityOptions()}
+                        style={{ width: '100%' }}
+                      />
+                    )}
+                  />
+                </MetaField>
+                <MetaField>
+                  <MetaFieldLabel id={`${formDomId}-e-hl`}>{t('projects.form.health')}</MetaFieldLabel>
+                  <Controller
+                    name="health"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        aria-labelledby={`${formDomId}-e-hl`}
+                        {...field}
+                        options={getProjectHealthOptions()}
                         style={{ width: '100%' }}
                       />
                     )}

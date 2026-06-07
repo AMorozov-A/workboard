@@ -1,6 +1,7 @@
 import { formatBoardTaskKey } from '@entities/task/lib/boardTaskKey'
 import { KANBAN_STATUS_ORDER } from '@entities/task/lib/kanbanStatusOrder'
 import type { Task, TaskStatus } from '@entities/task/model/types'
+import { TagBadge } from '@entities/tag'
 import {
   DndContext,
   DragOverlay,
@@ -14,11 +15,9 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { Tag } from 'antd'
 import { Calendar } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import {
   formatTaskDate,
   getTaskPriorityTag,
@@ -86,7 +85,6 @@ function DraggableTaskCard({
   isSelected: boolean
   onOpen: (taskId: string) => void
 }) {
-  const { t } = useTranslation()
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
     data: { type: 'task', task } as const,
@@ -120,8 +118,8 @@ function DraggableTaskCard({
           <span>{formatTaskDate(task.dueDate)}</span>
         </TaskCardMeta>
         <TaskCardLabels>
-          {(task.labels ?? []).slice(0, 4).map((label) => (
-            <Tag key={label}>{t(`tasks.labels.${label}`, { defaultValue: label })}</Tag>
+          {(task.tags ?? []).slice(0, 4).map((tag) => (
+            <TagBadge key={tag.id} tag={tag} />
           ))}
         </TaskCardLabels>
       </TaskCardFooter>

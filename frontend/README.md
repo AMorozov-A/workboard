@@ -100,4 +100,14 @@ Backend pairing:
 - In dev, [vite.config.ts](vite.config.ts) proxies `/api` to the backend (default `http://localhost:3001`).
 - Start the backend separately when you need auth and CRUD: `cd ../backend && npm run dev`.
 
+## Deployment
+
+| Service  | URL |
+| -------- | --- |
+| Frontend | [workboard-five.vercel.app](https://workboard-five.vercel.app/login) |
+| Backend  | [workboard-vdp2.onrender.com](https://workboard-vdp2.onrender.com/api/v1/ping) |
+
+- **Vercel** (frontend): set env `VITE_API_BASE_URL=https://workboard-vdp2.onrender.com/api`. SPA routing: [vercel.json](vercel.json).
+- **Render** (backend): set `ALLOWED_ORIGINS` to include `https://workboard-five.vercel.app`. Template: [../backend/.env.example](../backend/.env.example).
+
 Test config and setup live in [vite.config.ts](vite.config.ts) (`test` section) and [tests/setup.ts](tests/setup.ts).

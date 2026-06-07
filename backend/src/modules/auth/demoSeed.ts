@@ -1,4 +1,4 @@
-import { ProjectStatus, TaskPriority, TaskStatus, type PrismaClient } from '@prisma/client';
+import { ProjectHealth, ProjectPriority, ProjectStatus, TaskPriority, TaskStatus, type PrismaClient } from '@prisma/client';
 
 type DemoProjectSeed = {
   key: string;
@@ -6,6 +6,8 @@ type DemoProjectSeed = {
   title: string;
   description: string;
   status: ProjectStatus;
+  priority: ProjectPriority;
+  health: ProjectHealth;
   tasks: Array<{
     key: string;
     title: string;
@@ -22,6 +24,8 @@ const projectsSeed: DemoProjectSeed[] = [
     title: 'E-commerce redesign',
     description: 'Refresh storefront UX, improve conversion, and modernize the UI kit.',
     status: ProjectStatus.active,
+    priority: ProjectPriority.high,
+    health: ProjectHealth.at_risk,
     tasks: [
       {
         key: 'T-1',
@@ -66,6 +70,8 @@ const projectsSeed: DemoProjectSeed[] = [
     title: 'Mobile app MVP',
     description: 'Ship the first usable version with auth, core flows, and analytics.',
     status: ProjectStatus.active,
+    priority: ProjectPriority.critical,
+    health: ProjectHealth.on_track,
     tasks: [
       {
         key: 'T-1',
@@ -103,6 +109,8 @@ const projectsSeed: DemoProjectSeed[] = [
     title: 'API integration',
     description: 'Connect external provider, add retries, and harden error handling.',
     status: ProjectStatus.paused,
+    priority: ProjectPriority.medium,
+    health: ProjectHealth.off_track,
     tasks: [
       {
         key: 'T-1',
@@ -157,6 +165,8 @@ export async function ensureDemoWorkspace(prisma: PrismaClient, userId: string):
           title: p.title,
           description: p.description,
           status: p.status,
+          priority: p.priority,
+          health: p.health,
           tasks: {
             create: p.tasks.map((t) => ({
               key: t.key,
@@ -171,6 +181,14 @@ export async function ensureDemoWorkspace(prisma: PrismaClient, userId: string):
                       Date.now() + 1000 * 60 * 60 * 24 * (t.priority === TaskPriority.high ? 3 : 10),
                     ),
               labels: t.priority === TaskPriority.high ? ['urgent', 'demo'] : ['demo'],
+              tags: {
+                connectOrCreate: (t.priority === TaskPriority.high ? ['urgent', 'demo'] : ['demo']).map(
+                  (name) => ({
+                    where: { userId_name: { userId, name } },
+                    create: { userId, name, color: '#8c8c8c' },
+                  }),
+                ),
+              },
             })),
           },
         },
@@ -222,6 +240,24 @@ export async function ensureDemoWorkspace(prisma: PrismaClient, userId: string):
         key: 'retry-strategy',
         title: 'Retry strategy',
         body: 'Use exponential backoff with jitter. Only retry on 429/5xx and network timeouts.',
+      },
+    ],
+  });
+
+  // Checklist demo: add a couple of items for one task
+  await prisma.checklistItem.createMany({
+    data: [
+      {
+        taskId: pickTask('ECOM', 'T-1').id,
+        text: 'Capture funnel metrics export',
+        done: true,
+        position: 0,
+      },
+      {
+        taskId: pickTask('ECOM', 'T-1').id,
+        text: 'Review drop-offs by device',
+        done: false,
+        position: 1,
       },
     ],
   });

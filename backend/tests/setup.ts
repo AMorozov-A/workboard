@@ -19,8 +19,11 @@ beforeAll(() => {
 
 beforeEach(async () => {
   await prisma.comment.deleteMany();
+  await prisma.checklistItem.deleteMany();
+  await prisma.taskNote.deleteMany();
   await prisma.task.deleteMany();
   await prisma.project.deleteMany();
+  await prisma.tag.deleteMany();
   await prisma.user.deleteMany();
 });
 

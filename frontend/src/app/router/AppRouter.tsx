@@ -3,6 +3,7 @@ import { LoginPage } from '@pages/LoginPage/LoginPage'
 import { ProfilePage } from '@pages/ProfilePage/ProfilePage'
 import { ProjectsPage } from '@pages/ProjectsPage/ProjectsPage'
 import { ProjectPage } from '@pages/ProjectPage/ProjectPage'
+import { TagsSettingsPage } from '@pages/TagsSettingsPage/TagsSettingsPage'
 import { AppLayout } from '@widgets/AppLayout/AppLayout'
 import { routes } from '@shared/config/routes'
 import { AuthRoot } from './AuthRoot'
@@ -33,6 +34,15 @@ const router = createBrowserRouter([
           { index: true, element: <ProjectsPage /> },
           { path: ':projectId', element: <ProjectPage /> },
         ],
+      },
+      {
+        path: 'tags',
+        element: (
+          <RequireAuth>
+            <AppLayout />
+          </RequireAuth>
+        ),
+        children: [{ index: true, element: <TagsSettingsPage /> }],
       },
       {
         path: 'profile',

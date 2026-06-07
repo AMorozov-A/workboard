@@ -1,5 +1,5 @@
 import { useProjectQuery, useUpdateProjectMutation } from '@entities/project/api'
-import { getProjectStatusOptions, getProjectStatusTag } from '@entities/project/lib/presentation'
+import { getProjectHealthTag, getProjectPriorityTag, getProjectStatusOptions, getProjectStatusTag } from '@entities/project/lib/presentation'
 import {
   useCreateTaskMutation,
   useProjectTasksQuery,
@@ -15,13 +15,14 @@ import {
 import { KANBAN_STATUS_ORDER } from '@entities/task/lib/kanbanStatusOrder'
 import { getTaskSprintBucket, SPRINT_BUCKET_ORDER } from '@entities/task/lib/sprintBuckets'
 import type { Task, TaskPriority, TaskStatus } from '@entities/task/model/types'
+import { TagBadge } from '@entities/tag'
 import { CreateTaskButton } from '@features/task/create'
 import { routes } from '@shared/config/routes'
 import { getUserInitials } from '@shared/lib/getUserInitials'
 import { useAppSelector } from '@app/store/hooks'
 import { ContentState, GroupedSections, notifyError, notifySuccess } from '@shared/ui'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, DatePicker, Divider, Input, InputNumber, Popover, Select, Skeleton, Space, Table, Tabs, Typography } from 'antd'
+import { Button, DatePicker, Divider, Input, InputNumber, Popover, Progress, Select, Skeleton, Space, Table, Tabs, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs, { type Dayjs } from 'dayjs'
 import {
@@ -203,6 +204,13 @@ export const ProjectPage = () => {
     isError: isTasksError,
     refetch: refetchTasks,
   } = useProjectTasksQuery(projectId ?? '')
+
+  const derivedProgress = useMemo(() => {
+    const total = tasks.length
+    if (total === 0) return null
+    const done = tasks.filter((t) => t.status === 'done').length
+    return Math.round((done / total) * 100)
+  }, [tasks])
 
   const { mutateAsync: updateProject } = useUpdateProjectMutation()
   const createTaskMutation = useCreateTaskMutation(projectId ?? '')
@@ -499,6 +507,13 @@ export const ProjectPage = () => {
           render: (_: unknown, task: Task) => (
             <Space orientation="vertical" size={2}>
               <Typography.Text strong>{task.title}</Typography.Text>
+              {task.tags && task.tags.length > 0 ? (
+                <Space size={4} wrap>
+                  {task.tags.slice(0, 4).map((tag) => (
+                    <TagBadge key={tag.id} tag={tag} />
+                  ))}
+                </Space>
+              ) : null}
             </Space>
           ),
         },
@@ -751,6 +766,20 @@ export const ProjectPage = () => {
               </InlineEditControl>
             )}
           />
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            {getProjectPriorityTag(project.priority)}
+            {getProjectHealthTag(project.health)}
+          </div>
+          {typeof derivedProgress === 'number' ? (
+            <div style={{ width: 140 }}>
+              <Progress
+                percent={derivedProgress}
+                size="small"
+                showInfo={false}
+                status={derivedProgress === 100 ? 'success' : 'active'}
+              />
+            </div>
+          ) : null}
           <Popover
             open={infoOpen}
             trigger="click"

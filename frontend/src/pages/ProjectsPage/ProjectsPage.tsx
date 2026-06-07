@@ -1,5 +1,6 @@
 import { useCreateProjectMutation, useProjectsQuery, useUpdateProjectMutation } from '@entities/project/api'
 import type { Project } from '@entities/project/types'
+import { getProjectHealthTag, getProjectPriorityTag } from '@entities/project/lib/presentation'
 import {
   useCreateProjectModal,
 } from '@features/project/create'
@@ -11,8 +12,9 @@ import { useAppSelector } from '@app/store/hooks'
 import { getUserInitials } from '@shared/lib/getUserInitials'
 import { ContentState, GroupedSections } from '@shared/ui'
 import { ProjectModalWidget } from '@widgets/project/ProjectModalWidget'
+import { TagBadge } from '@entities/tag'
 import { EditOutlined } from '@ant-design/icons'
-import { Button, Skeleton, Space, Table, Tooltip, Typography } from 'antd'
+import { Button, Progress, Skeleton, Space, Table, Tooltip, Typography } from 'antd'
 import { CheckCircle2, Circle, Info, PauseCircle, PlayCircle, Plus } from 'lucide-react'
 import type { ComponentType } from 'react'
 import { useEffect } from 'react'
@@ -162,7 +164,7 @@ export const ProjectsPage = () => {
                     width: '100%',
                     className: 'crm-project-table-col-title',
                     render: (_, project) => (
-                      <Space size={10} align="center">
+                      <Space size={10} align="start">
                         <Typography.Text
                           style={{
                             fontFamily: 'var(--font-mono)',
@@ -170,13 +172,36 @@ export const ProjectsPage = () => {
                             color: 'var(--color-text-muted)',
                             whiteSpace: 'nowrap',
                             fontSize: 'var(--font-size-caption)',
+                            paddingTop: 2,
                           }}
                         >
                           {project.key || '—'}
                         </Typography.Text>
-                        <Typography.Text strong style={{ fontSize: 'var(--font-size-sm)' }}>
-                          {project.name}
-                        </Typography.Text>
+                        <Space direction="vertical" size={2}>
+                          <Typography.Text strong style={{ fontSize: 'var(--font-size-sm)' }}>
+                            {project.name}
+                          </Typography.Text>
+                          <Space size={6} wrap>
+                            {getProjectPriorityTag(project.priority)}
+                            {getProjectHealthTag(project.health)}
+                          </Space>
+                          {typeof project.progress === 'number' ? (
+                            <Progress
+                              percent={project.progress}
+                              size="small"
+                              style={{ maxWidth: 240, margin: '2px 0 0' }}
+                              status={project.progress === 100 ? 'success' : 'active'}
+                              showInfo={false}
+                            />
+                          ) : null}
+                          {project.tags && project.tags.length > 0 ? (
+                            <Space size={4} wrap>
+                              {project.tags.slice(0, 4).map((tag) => (
+                                <TagBadge key={tag.id} tag={tag} />
+                              ))}
+                            </Space>
+                          ) : null}
+                        </Space>
                       </Space>
                     ),
                   },

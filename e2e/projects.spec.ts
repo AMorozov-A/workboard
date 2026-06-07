@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { ruCommon, ruProjectDetails, ruProjects, ruTasks } from './i18n-ru'
+import { ruCommon, ruLayout, ruProjectDetails, ruProjects, ruTags, ruTasks } from './i18n-ru'
 import { registerAndLogin } from './helpers/auth'
 import { stubProjectsCreateFailure } from './helpers/projects'
 
@@ -131,10 +131,27 @@ test.describe('Projects: полный флоу', () => {
       timeout: 15_000,
     })
 
+    // create a tag via settings page (more stable than dropdown form in CI)
+    const projectUrl = page.url()
+    await page.getByRole('button', { name: ruLayout.openSettings }).click()
+    await page.getByRole('button', { name: ruTags.actions.manage }).click()
+    await page.getByRole('button', { name: ruTags.actions.create }).click()
+    const createTagModal = page.getByRole('dialog', { name: ruTags.modal.createTitle })
+    await expect(createTagModal).toBeVisible()
+    await createTagModal.getByPlaceholder(ruTags.form.namePlaceholder).fill('E2E')
+    await createTagModal.getByRole('button', { name: ruCommon.save }).click()
+    await expect(createTagModal).toBeHidden()
+    await page.goto(projectUrl)
+
     await page.getByRole('button', { name: ruTasks.actions.create }).first().click()
     const taskDrawer = page.locator('.task-detail-modal')
     await expect(taskDrawer).toBeVisible({ timeout: 15_000 })
     await taskDrawer.getByLabel(ruTasks.form.title).fill(taskTitle)
+
+    // select existing tag in task picker
+    await taskDrawer.getByLabel(ruTasks.form.tags).click()
+    await page.getByText('E2E', { exact: true }).click()
+
     await taskDrawer.getByRole('button', { name: ruTasks.modal.submit }).click()
 
     await page.keyboard.press('Escape')
@@ -143,6 +160,7 @@ test.describe('Projects: полный флоу', () => {
     await expect(page.getByText(taskTitle, { exact: true })).toBeVisible({
       timeout: 15_000,
     })
+    await expect(page.getByText('E2E', { exact: true }).first()).toBeVisible()
 
     await page.getByText(taskTitle, { exact: true }).first().click()
     await expect(page.locator('.ant-drawer-open')).toBeVisible({ timeout: 15_000 })

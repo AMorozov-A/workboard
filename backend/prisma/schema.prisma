@@ -15,6 +15,19 @@ enum ProjectStatus {
   done
 }
 
+enum ProjectPriority {
+  low
+  medium
+  high
+  critical
+}
+
+enum ProjectHealth {
+  on_track
+  at_risk
+  off_track
+}
+
 enum TaskStatus {
   todo
   in_progress
@@ -37,6 +50,7 @@ model User {
   updatedAt    DateTime  @updatedAt
   projects     Project[]
   comments     Comment[]
+  tags         Tag[]
 }
 
 model Project {
@@ -47,11 +61,14 @@ model Project {
   description String?
   client      String?
   status      ProjectStatus  @default(active)
+  priority    ProjectPriority @default(medium)
+  health      ProjectHealth   @default(on_track)
   budget      Float?
   deadline    DateTime?
   userId      String
   user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   tasks       Task[]
+  tags        Tag[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
@@ -71,10 +88,39 @@ model Task {
   project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   comments    Comment[]
   notes       TaskNote[]
+  checklist   ChecklistItem[]
+  tags        Tag[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
   @@unique([projectId, key])
+}
+
+model ChecklistItem {
+  id        String   @id @default(uuid())
+  text      String
+  done      Boolean  @default(false)
+  position  Int      @default(0)
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String
+  color     String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks     Task[]
+  projects  Project[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name])
 }
 
 model Comment {

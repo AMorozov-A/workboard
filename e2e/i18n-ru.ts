@@ -6,3 +6,4 @@ export const ruLayout = ru.layout
 export const ruProjects = ru.projects
 export const ruProjectDetails = ru.projectDetails
 export const ruTasks = ru.tasks
+export const ruTags = ru.tags

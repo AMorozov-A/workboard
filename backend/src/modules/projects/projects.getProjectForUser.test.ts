@@ -13,6 +13,8 @@ const projectRow = {
 describe('getProjectForUser', () => {
   beforeEach(() => {
     vi.spyOn(prisma.project, 'findFirst');
+    vi.spyOn(prisma.task, 'count');
+    vi.mocked(prisma.task.count).mockResolvedValue(0 as never);
   });
 
   afterEach(() => {
@@ -22,9 +24,15 @@ describe('getProjectForUser', () => {
   it('finds by uuid when ref is a UUID', async () => {
     vi.mocked(prisma.project.findFirst).mockResolvedValueOnce(projectRow as never);
     const p = await getProjectForUser(projectRow.id, userId);
-    expect(p).toEqual(projectRow);
+    expect(p).toMatchObject({
+      ...projectRow,
+      tasksCount: 0,
+      tasksDoneCount: 0,
+      progress: 0,
+    });
     expect(prisma.project.findFirst).toHaveBeenCalledWith({
       where: { id: projectRow.id, userId },
+      include: { tags: true },
     });
   });
 
@@ -40,9 +48,15 @@ describe('getProjectForUser', () => {
   it('finds by key when ref is not a UUID', async () => {
     vi.mocked(prisma.project.findFirst).mockResolvedValueOnce(projectRow as never);
     const p = await getProjectForUser('proj-1', userId);
-    expect(p).toEqual(projectRow);
+    expect(p).toMatchObject({
+      ...projectRow,
+      tasksCount: 0,
+      tasksDoneCount: 0,
+      progress: 0,
+    });
     expect(prisma.project.findFirst).toHaveBeenCalledWith({
       where: { key: 'proj-1', userId },
+      include: { tags: true },
     });
   });
 

@@ -7,11 +7,11 @@ import {
 import {
   formatTaskDate,
   getTaskDateInputFormat,
-  getTaskLabelOptions,
   getTaskPriorityOptions,
   getTaskStatusOptions,
 } from '@entities/task/lib/presentation'
 import type { Task, TaskPriority, TaskStatus } from '@entities/task/model/types'
+import { TagPicker } from '@entities/tag'
 import { DeleteTaskButton } from '@features/task/delete'
 import { formatLocaleDateTime } from '@shared/lib/i18n'
 import { notifyError, notifySuccess } from '@shared/ui'
@@ -20,6 +20,7 @@ import { Button, DatePicker, Select, Tag } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ChecklistSection } from './ChecklistSection'
 
 import {
   CloseIconButton,
@@ -96,6 +97,7 @@ const buildEmptyDraft = (projectId: string): Task => ({
   priority: 'medium',
   dueDate: undefined,
   labels: undefined,
+  tagIds: [],
   projectId,
   createdBy: 'freelancer',
   createdAt: undefined,
@@ -181,7 +183,6 @@ export const TaskModalWidget = ({
 
   const statusOptions = getTaskStatusOptions()
   const priorityOptions = getTaskPriorityOptions()
-  const labelOptions = getTaskLabelOptions()
 
   const isSaveDisabled = !draft.title?.trim() || isSubmitting
 
@@ -554,18 +555,14 @@ export const TaskModalWidget = ({
       </MetaField>
 
       <MetaField>
-        <MetaFieldLabel id="task-labels-label">{t('tasks.form.labels')}</MetaFieldLabel>
+        <MetaFieldLabel id="task-tags-label">{t('tasks.form.tags')}</MetaFieldLabel>
         <LabelsRow>
-          <Select
-            mode="multiple"
-            aria-labelledby="task-labels-label"
-            value={draft.labels ?? []}
-            onChange={(values: string[]) =>
-              setDraft((prev) => ({ ...prev, labels: values }))
-            }
-            options={labelOptions}
-            placeholder={t('tasks.form.labelsPlaceholder')}
-            style={{ width: '100%' }}
+          <TagPicker
+            ariaLabelledBy="task-tags-label"
+            value={draft.tagIds ?? []}
+            onChange={(tagIds) => setDraft((prev) => ({ ...prev, tagIds }))}
+            placeholder={t('tasks.form.tagsPlaceholder')}
+            disabled={isSubmitting}
           />
         </LabelsRow>
       </MetaField>
@@ -641,6 +638,12 @@ export const TaskModalWidget = ({
                   bordered={false}
                 />
               </Section>
+
+              {mode === 'edit' && taskIdForQueries ? (
+                <Section>
+                  <ChecklistSection taskId={taskIdForQueries} />
+                </Section>
+              ) : null}
 
               {renderNotesSection()}
             </MainColumn>

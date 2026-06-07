@@ -177,6 +177,10 @@ export const ProfilePage = () => {
                     {t('layout.logout')}
                   </Button>
                 </div>
+
+                <div style={{ display: 'flex' }}>
+                  <Button onClick={() => navigate(routes.tags)}>{t('tags.actions.manage')}</Button>
+                </div>
               </Space>
             </Space>
           </div>
